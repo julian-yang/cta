@@ -1,0 +1,39 @@
+true
+true
+true
+false
+true
+true
+false
+true
+true
+false
+true
+false
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+false
+true
+true
+false
+true
+true
+true
+true
+Finished writing file:
+	/Users/julianyang/Projects/cta/災難來臨_2003.12.7(1)_unknown_cta_anki.csv
+Python script output:
+---------------------
+
+End python script output
