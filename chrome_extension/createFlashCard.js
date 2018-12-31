@@ -30,21 +30,50 @@ chrome.runtime.onMessage.addListener(request => {
       $("#cta-dialog input[type=submit]").button();
       $("#cta-dialog .ui-button.submit").click(event => {
         event.preventDefault();
-        $.ajax({
-          url: 'http://localhost:8765',
-          type: 'GET',
-          dataType: 'text',
-          success: function(data) {
-            alert('Data: '+data);
-          },
-          error: function(request, error) {
-            
-            alert('Request: '+JSON.stringify(request)+' error: ' + JSON.stringify(error));
-          }
-        });
+        // callAnkiConnect('GET', null, 'text');
+        var addNoteRequestData = buildAddNoteRequestData("testWord", "testSentence {{c1::testWord}}", "testPinyin", "testMeanings");
+        callAnkiConnect('POST', JSON.stringify(addNoteRequestData), 'json');
       });
 
       $("#cta-dialog").dialog();
     });
   }
 });
+
+function buildAddNoteRequestData(word, sentence, pinyin, meanings) {
+  return {
+    action: "addNotes",
+    version: 6,
+    params: {
+      notes: [
+        {
+          deckName: "test_deck",
+          modelName: "CTA-vocab-2",
+          fields: {
+            word: "testWord",
+            sentence: "testSentence {{c1::testWord}}",
+            pinyin: "testPinyin",
+            meanings: "testMeanings"
+          },
+          tags: ["testNote"],
+        }
+      ]
+    }
+  };
+}
+
+function callAnkiConnect(requestType, data, dataType) {
+  $.ajax({
+    url: 'http://localhost:8765',
+    type: requestType,
+    data: data,
+    dataType: dataType,
+    success: function(data) {
+      alert('Data: '+JSON.stringify(data));
+    },
+    error: function(request, error) {
+      
+      alert('Request: '+JSON.stringify(request)+' error: ' + JSON.stringify(error));
+    }
+  });
+}
