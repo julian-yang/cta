@@ -4,6 +4,10 @@
 
 'use strict';
 
+chrome.storage.sync.set({cedictUrl: chrome.extension.getURL('cedict/cedict_ts.u8')}, function() {
+  console.log('set cedictUrl');
+});
+
 chrome.runtime.onInstalled.addListener(function() {
   chrome.storage.sync.set({color: '#3aa757'}, function() {
     console.log("The color is green.");

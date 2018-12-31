@@ -1,5 +1,14 @@
+'use strict';
+
+// import {Cedict} from 'cedict';
+// var ceDict = require():w
+var traditionalCedict;
+
 chrome.runtime.onMessage.addListener(request => {
   if (request.type === 'flashCardCreator') {
+    if (!traditionalCedict) { 
+      loadCedict();
+    }
     // document.body.innerHTML +=`<dialog style="height:40%"> <iframe id="flashCardCreator"style="height:100%"></iframe>
     //         <div style="position:absolute; top:0px; left:5px;">  
     //             <button>x</button>
@@ -16,6 +25,7 @@ chrome.runtime.onMessage.addListener(request => {
     // });
     document.body.innerHTML += `
       <div id="cta-dialog" title="Create new Anki flashcard">
+        
         <p> Basic dialog here </p>
         <p class="sentence"></p>
         <input class="submit ui-button ui-widget ui-corner-all" type="submit" value="Create">
@@ -37,8 +47,29 @@ chrome.runtime.onMessage.addListener(request => {
 
       $("#cta-dialog").dialog();
     });
+
+
+
   }
 });
+
+function loadCedict() {
+  chrome.storage.sync.get(['cedictUrl'], function(result) {
+    console.log('extract cedictUrl: ' + JSON.stringify(result));
+    $.ajax({
+      url: result.cedictUrl,
+      type: 'GET',
+      dataType: 'text',
+      success: function(data) {
+        traditionalCedict = loadTraditional(data);
+        console.log(JSON.stringify(traditionalCedict.getMatch("臺灣")));
+      },
+      error: function(request, error) {
+        alert('Could not load Cedict!\nRequest: '+JSON.stringify(request)+'\nerror: ' + JSON.stringify(error));
+      }
+    });
+  });
+}
 
 function buildAddNoteRequestData(word, sentence, pinyin, meanings) {
   return {

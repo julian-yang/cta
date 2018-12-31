@@ -5,13 +5,13 @@
   "permissions": ["contextMenus", "storage", "tabs"],
   "content_scripts": [{
     "css": ["jquery-ui-1.12.1/jquery-ui.css", "jquery-ui-1.12.1/jquery-ui.structure.css", "jquery-ui-1.12.1/jquery-ui.theme.css"],
-    "js": ["jquery-3.3.1.js", "jquery-ui-1.12.1/jquery-ui.js", "createFlashCard.js"],
+    "js": ["jquery-3.3.1.js", "jquery-ui-1.12.1/jquery-ui.js", "cedict/cedict.js", "createFlashCard.js"],
     "matches": [ "<all_urls>"]
   }],
   "background": {
     "scripts": ["background.js"],
     "persistent": false    
   },
-  "web_accessible_resources": ["*.html", "loadAngularDart.js", "jquery-ui-1.12.1/images/*.png"],
+  "web_accessible_resources": ["*.html", "loadAngularDart.js", "jquery-ui-1.12.1/images/*.png", "cedict/cedict_ts.u8"],
   "manifest_version": 2
 }
