@@ -18,6 +18,7 @@ chrome.runtime.onMessage.addListener(request => {
       <div id="cta-dialog" title="Create new Anki flashcard">
         <p> Basic dialog here </p>
         <p class="sentence"></p>
+        <input class="submit ui-button ui-widget ui-corner-all" type="submit" value="Create">
       </div>
     `;
 
@@ -25,7 +26,23 @@ chrome.runtime.onMessage.addListener(request => {
       chrome.storage.sync.get(['selectionInfo'], function(result) {
         console.log('Value of selectionInfo is ' + JSON.stringify(result));
         $("#cta-dialog .sentence").append(result.selectionInfo.selectionText);
-      })
+      });
+      $("#cta-dialog input[type=submit]").button();
+      $("#cta-dialog .ui-button.submit").click(event => {
+        event.preventDefault();
+        $.ajax({
+          url: 'http://localhost:8765',
+          type: 'GET',
+          dataType: 'text',
+          success: function(data) {
+            alert('Data: '+data);
+          },
+          error: function(request, error) {
+            
+            alert('Request: '+JSON.stringify(request)+' error: ' + JSON.stringify(error));
+          }
+        });
+      });
 
       $("#cta-dialog").dialog();
     });
