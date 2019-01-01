@@ -29,24 +29,11 @@ chrome.runtime.onMessage.addListener(request => {
       $("#cta-dialog .ui-button.submit").click(event => {
         event.preventDefault();
         // callAnkiConnect('GET', null, 'text');
-        var addNoteRequestData = buildAddNoteRequestData("testWord", "testSentence {{c1::testWord}}", "testPinyin", "testMeanings");
+        var addNoteRequestData = buildAddNoteRequestData("新年快樂", "testSentence {{c1::testWord}}", "testPinyin", "testMeanings");
         callAnkiConnect('POST', JSON.stringify(addNoteRequestData), 'json');
       });
 
       $("#cta-dialog").dialog();
-
-      // Test fetching from other domains.
-      // $.ajax({
-      //   url: 'https://www.github.com',
-      //   type: 'GET',
-      //   dataType: 'html',
-      //   success: function(data) {
-      //     console.log(data);
-      //   },
-      //   error: function(request, error) {
-      //     alert('Could not load Cedict!\nRequest: '+JSON.stringify(request)+'\nerror: ' + JSON.stringify(error));
-      //   }
-      // });
     });
   }
 });
@@ -70,6 +57,8 @@ function loadCedict() {
 }
 
 function buildAddNoteRequestData(word, sentence, pinyin, meanings) {
+  let filename = `cta2_${pinyin}.mp3`
+  let url = `http://localhost:5000/gtts?phrase=${word}&filename=${filename}&lang=zh-tw`
   return {
     action: "addNotes",
     version: 6,
@@ -79,12 +68,17 @@ function buildAddNoteRequestData(word, sentence, pinyin, meanings) {
           deckName: "test_deck",
           modelName: "CTA-vocab-2",
           fields: {
-            word: "testWord",
-            sentence: "testSentence {{c1::testWord}}",
-            pinyin: "testPinyin",
-            meanings: "testMeanings"
+            word: word,
+            sentence: sentence,
+            pinyin: pinyin,
+            meanings: meanings
           },
           tags: ["testNote"],
+          audio: {
+            url: url,
+            filename: filename,
+            fields: ["audio"]
+          }
         }
       ]
     }
@@ -92,6 +86,7 @@ function buildAddNoteRequestData(word, sentence, pinyin, meanings) {
 }
 
 function callAnkiConnect(requestType, data, dataType) {
+  console.log('data:\n' + data);
   $.ajax({
     url: 'http://localhost:8765',
     type: requestType,
