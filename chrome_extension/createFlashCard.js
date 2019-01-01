@@ -1,7 +1,5 @@
 'use strict';
 
-// import {Cedict} from 'cedict';
-// var ceDict = require():w
 var traditionalCedict;
 
 chrome.runtime.onMessage.addListener(request => {
@@ -53,7 +51,7 @@ chrome.runtime.onMessage.addListener(request => {
         let matches = traditionalCedict.getMatch(wordInput.value);
         for (var i = 0; i < matches.length; i++) {
           let match = matches[i];
-          let pinyin = match.pinyin;
+          let pinyin = addtones(match.pinyin);
           let definition = match.english.split('/').join('; ');
           $("#cta-dialog select[name='suggestions']").append($('<option>', {
             value: `${pinyin}${sentinel}${definition}`,
@@ -81,7 +79,11 @@ chrome.runtime.onMessage.addListener(request => {
         event.preventDefault();
         // callAnkiConnect('GET', null, 'text');
         // TODO(juliany): generate cloze sentence.
-        var addNoteRequestData = buildAddNoteRequestData(wordInput.value, "testSentence {{c1::testWord}}", pinyinInput.value, definitionInput.value);
+        var addNoteRequestData = buildAddNoteRequestData(
+          wordInput.value, 
+          "testSentence {{c1::testWord}}", 
+          addtones(pinyinInput.value), 
+          definitionInput.value);
         callAnkiConnect('POST', JSON.stringify(addNoteRequestData), 'json');
       });
 
