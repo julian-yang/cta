@@ -12,9 +12,23 @@ chrome.runtime.onMessage.addListener(request => {
 
     document.body.innerHTML += `
       <div id="cta-dialog" title="Create new Anki flashcard">
-        
-        <p> Basic dialog here </p>
-        <p class="sentence"></p>
+        <div class="sentence-container">
+          Sentence: <div class="sentence"></div>
+        </div>
+        <div class="word-container">
+          Word: <input class="word" name="word" type="text">
+        </div>
+        <fieldset>
+          <legend>Pinyin/Definition:</legend>
+          <div class="suggestions-container">
+            Suggestions: 
+            <select name="suggestions">
+            </select>
+          </div>
+          Pinyin: <input name="pinyin" type="text">
+          Definition: <input name="definition" type="text">
+        </fieldset>
+        <input class="lookup ui-button ui-widget ui-corner-all" type="submit" value="Lookup">
         <input class="submit ui-button ui-widget ui-corner-all" type="submit" value="Create">
       </div>
     `;
@@ -25,7 +39,48 @@ chrome.runtime.onMessage.addListener(request => {
         console.log('Value of selectionInfo is ' + JSON.stringify(result));
         $("#cta-dialog .sentence").append(result.selectionInfo.selectionText);
       });
-      $("#cta-dialog input[type=submit]").button();
+      $("#cta-dialog input[name=submit]").button();
+
+      let pinyinInput = $("#cta-dialog input[name='pinyin']")[0];
+      let definitionInput = $("#cta-dialog input[name='definition']")[0];
+      let sentinel = '$';
+      // Setup LOOKUP
+      $("#cta-dialog .ui-button.lookup").click(event=> {
+        event.preventDefault();
+        let word = $("#cta-dialog input[name='word']")[0].value;
+        // figure out how to do await here, but for now just assume we've already loaded the dictionary
+        let matches = traditionalCedict.getMatch(word);
+        for (var i = 0; i < matches.length; i++) {
+          let match = matches[i];
+          let pinyin = match.pinyin;
+          let definition = match.english.split('/').join('; ');
+          let suggestion = `${pinyin}: ${definition}`;
+          $("#cta-dialog select[name='suggestions']").append($('<option>', {
+            value: `${pinyin}${sentinel}${definition}`,
+            text: suggestion
+          }));
+          if (i ==0) {
+            pinyinInput.value = pinyin;
+            definitionInput.value = definition;
+          }
+        }
+        // $("#cta-dialog .suggestions-container").css('visibility', 'visible');
+        // for definitions, need to split '/' and replace with '; '
+
+        // (".Deposit").css('visibility','visible');
+      });
+
+      // Setup apply suggestion
+      $("#cta-dialog select[name='suggestions']").change(function() {
+
+        $("#cta-dialog select[name='suggestions'] option:selected").each(function() {
+          let selection = $(this)[0].value.split(sentinel);
+          pinyinInput.value = selection[0];
+          definitionInput.value = selection[1];
+        });
+      });
+
+      // Setup CREATE
       $("#cta-dialog .ui-button.submit").click(event => {
         event.preventDefault();
         // callAnkiConnect('GET', null, 'text');
@@ -47,7 +102,7 @@ function loadCedict() {
       dataType: 'text',
       success: function(data) {
         traditionalCedict = loadTraditional(data);
-        console.log(JSON.stringify(traditionalCedict.getMatch("臺灣")));
+        console.log(JSON.stringify(traditionalCedict.getMatch("判")));
       },
       error: function(request, error) {
         alert('Could not load Cedict!\nRequest: '+JSON.stringify(request)+'\nerror: ' + JSON.stringify(error));
