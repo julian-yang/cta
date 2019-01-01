@@ -41,38 +41,34 @@ chrome.runtime.onMessage.addListener(request => {
       });
       $("#cta-dialog input[name=submit]").button();
 
+      let wordInput = $("#cta-dialog input[name='word']")[0];
       let pinyinInput = $("#cta-dialog input[name='pinyin']")[0];
       let definitionInput = $("#cta-dialog input[name='definition']")[0];
+      // '$' is probably not the best sentinel value, but it doesn't exist in Cedict. ¯\_(ツ)_/¯
       let sentinel = '$';
       // Setup LOOKUP
       $("#cta-dialog .ui-button.lookup").click(event=> {
         event.preventDefault();
-        let word = $("#cta-dialog input[name='word']")[0].value;
-        // figure out how to do await here, but for now just assume we've already loaded the dictionary
-        let matches = traditionalCedict.getMatch(word);
+        // TODO(juliany): figure out how to do await here, but for now just assume we've already loaded the dictionary
+        let matches = traditionalCedict.getMatch(wordInput.value);
         for (var i = 0; i < matches.length; i++) {
           let match = matches[i];
           let pinyin = match.pinyin;
           let definition = match.english.split('/').join('; ');
-          let suggestion = `${pinyin}: ${definition}`;
           $("#cta-dialog select[name='suggestions']").append($('<option>', {
             value: `${pinyin}${sentinel}${definition}`,
-            text: suggestion
+            // TODO(juliany): Figure out how to format this better.
+            text: `${pinyin}: ${definition}`
           }));
           if (i ==0) {
             pinyinInput.value = pinyin;
             definitionInput.value = definition;
           }
         }
-        // $("#cta-dialog .suggestions-container").css('visibility', 'visible');
-        // for definitions, need to split '/' and replace with '; '
-
-        // (".Deposit").css('visibility','visible');
       });
 
       // Setup apply suggestion
       $("#cta-dialog select[name='suggestions']").change(function() {
-
         $("#cta-dialog select[name='suggestions'] option:selected").each(function() {
           let selection = $(this)[0].value.split(sentinel);
           pinyinInput.value = selection[0];
@@ -84,7 +80,8 @@ chrome.runtime.onMessage.addListener(request => {
       $("#cta-dialog .ui-button.submit").click(event => {
         event.preventDefault();
         // callAnkiConnect('GET', null, 'text');
-        var addNoteRequestData = buildAddNoteRequestData("新年快樂", "testSentence {{c1::testWord}}", "testPinyin", "testMeanings");
+        // TODO(juliany): generate cloze sentence.
+        var addNoteRequestData = buildAddNoteRequestData(wordInput.value, "testSentence {{c1::testWord}}", pinyinInput.value, definitionInput.value);
         callAnkiConnect('POST', JSON.stringify(addNoteRequestData), 'json');
       });
 
