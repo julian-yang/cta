@@ -12,6 +12,6 @@
     "scripts": ["background.js"],
     "persistent": false    
   },
-  "web_accessible_resources": ["*.html", "loadAngularDart.js", "jquery-ui-1.12.1/images/*.png", "cedict/cedict_ts.u8"],
+  "web_accessible_resources": ["*.html", "jquery-ui-1.12.1/images/*.png", "cedict/cedict_ts.u8"],
   "manifest_version": 2
 }
