@@ -77,6 +77,8 @@ function buildAddNoteRequestData(word, sentence, pinyin, meanings) {
           audio: {
             url: url,
             filename: filename,
+            // fields must not be empty otherwise AnkiConnect will skip processing the audio part.
+            // All fields listed here will have "[sound:<filename>]" appended to it in the note.
             fields: ["audio"]
           }
         }
