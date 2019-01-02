@@ -5,9 +5,6 @@ import ssl
 
 app = Flask(__name__)
 
-context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-context.load_cert_chain('yourserver.crt', 'yourserver.key')
-
 @app.route("/")
 def index():
   return """ 

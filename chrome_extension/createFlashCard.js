@@ -10,24 +10,32 @@ chrome.runtime.onMessage.addListener(request => {
 
     document.body.innerHTML += `
       <div id="cta-dialog" title="Create new Anki flashcard">
-        <div class="sentence-container">
-          Sentence: <div class="sentence"></div>
-        </div>
-        <div class="word-container">
-          Word: <input class="word" name="word" type="text">
-        </div>
-        <fieldset>
-          <legend>Pinyin/Definition:</legend>
-          <div class="suggestions-container">
-            Suggestions: 
-            <select name="suggestions">
-            </select>
+        <div class="inputs">
+          <div class="sentence-container">
+            Sentence: <div class="sentence"></div>
           </div>
-          Pinyin: <input name="pinyin" type="text">
-          Definition: <input name="definition" type="text">
-        </fieldset>
-        <input class="lookup ui-button ui-widget ui-corner-all" type="submit" value="Lookup">
-        <input class="submit ui-button ui-widget ui-corner-all" type="submit" value="Create">
+          <div class="word-container">
+            Word: <input class="word" name="word" type="text">
+          </div>
+          <fieldset>
+            <legend>Pinyin/Definition:</legend>
+            <div class="suggestions-container">
+              Suggestions: 
+              <select name="suggestions">
+              </select>
+            </div>
+            Pinyin: <input name="pinyin" type="text">
+            Definition: <input name="definition" type="text">
+          </fieldset>
+          <input class="lookup ui-button ui-widget ui-corner-all" type="submit" value="Lookup">
+          <input class="create ui-button ui-widget ui-corner-all" type="submit" value="Create">
+        </div>
+          <div class="confirmation" style="display:none">
+            <pre class="preview"></pre>
+            <input class="back ui-button ui-widget ui-corner-all" type="submit" value="Back">
+            <input class="confirm ui-button ui-widget ui-corner-all" type="submit" value="Confirm">
+          </div>
+        </div> 
       </div>
     `;
 
@@ -38,22 +46,29 @@ chrome.runtime.onMessage.addListener(request => {
         $("#cta-dialog .sentence").append(result.selectionInfo.selectionText);
       });
       $("#cta-dialog input[name=submit]").button();
-
+      let sentence = $("#cta-dialog .sentence")[0];       
       let wordInput = $("#cta-dialog input[name='word']")[0];
       let pinyinInput = $("#cta-dialog input[name='pinyin']")[0];
       let definitionInput = $("#cta-dialog input[name='definition']")[0];
+      let preview = $("#cta-dialog .preview");
+      let inputsContainer = $("#cta-dialog .inputs");
+      let confirmationContainer = $("#cta-dialog .confirmation");
+
       // '$' is probably not the best sentinel value, but it doesn't exist in Cedict. ¯\_(ツ)_/¯
       let sentinel = '$';
+
       // Setup LOOKUP
       $("#cta-dialog .ui-button.lookup").click(event=> {
         event.preventDefault();
+        let suggestionsContainer = $("#cta-dialog select[name='suggestions']");
+        suggestionsContainer.empty();
         // TODO(juliany): figure out how to do await here, but for now just assume we've already loaded the dictionary
         let matches = traditionalCedict.getMatch(wordInput.value);
         for (var i = 0; i < matches.length; i++) {
           let match = matches[i];
           let pinyin = addtones(match.pinyin);
           let definition = match.english.split('/').join('; ');
-          $("#cta-dialog select[name='suggestions']").append($('<option>', {
+          suggestionsContainer.append($('<option>', {
             value: `${pinyin}${sentinel}${definition}`,
             // TODO(juliany): Figure out how to format this better.
             text: `${pinyin}: ${definition}`
@@ -65,6 +80,8 @@ chrome.runtime.onMessage.addListener(request => {
         }
       });
 
+      // TODO(Julian): Add ability to edit sentence.
+
       // Setup apply suggestion
       $("#cta-dialog select[name='suggestions']").change(function() {
         $("#cta-dialog select[name='suggestions'] option:selected").each(function() {
@@ -74,17 +91,34 @@ chrome.runtime.onMessage.addListener(request => {
         });
       });
 
+      // Setup BACK
+      $("#cta-dialog .ui-button.back").click(event => {
+        event.preventDefault();
+        inputsContainer.show();
+        confirmationContainer.hide();
+      });
+
       // Setup CREATE
-      $("#cta-dialog .ui-button.submit").click(event => {
+      $("#cta-dialog .ui-button.create").click(event => {
         event.preventDefault();
         // callAnkiConnect('GET', null, 'text');
         // TODO(juliany): generate cloze sentence.
-        var addNoteRequestData = buildAddNoteRequestData(
+        let addNoteRequestData = buildAddNoteRequestData(
           wordInput.value, 
-          "testSentence {{c1::testWord}}", 
+          buildClozeSentence(wordInput.value, sentence.innerText), 
           addtones(pinyinInput.value), 
           definitionInput.value);
-        callAnkiConnect('POST', JSON.stringify(addNoteRequestData), 'json');
+        preview.text(JSON.stringify(addNoteRequestData, null, 2));
+        inputsContainer.hide();
+        confirmationContainer.show();
+        // callAnkiConnect('POST', JSON.stringify(addNoteRequestData), 'json');
+      });
+
+      // Setup Confirm
+      $("#cta-dialog .ui-button.confirm").click(event => {
+        event.preventDefault();
+        let addNoteRequestData = preview.text();
+        callAnkiConnect('POST', addNoteRequestData, 'json');
       });
 
       $("#cta-dialog").dialog();
@@ -92,26 +126,34 @@ chrome.runtime.onMessage.addListener(request => {
   }
 });
 
+function buildClozeSentence(word, sentence) {
+  if (!sentence.includes(word)) {
+    // TODO(julian): add confirmation box if you want to proceed.
+    alert(`Sentence '${sentence}' does not contain '${word}'!`);
+  }
+  return sentence.replace(new RegExp(word, 'g'), `{{c1::${word}}}`);
+}
+
 function loadCedict() {
   chrome.storage.sync.get(['cedictUrl'], function(result) {
-    console.log('extract cedictUrl: ' + JSON.stringify(result));
+    console.log('extract cedictUrl: ' + JSON.stringify(result, null, 2));
     $.ajax({
       url: result.cedictUrl,
       type: 'GET',
       dataType: 'text',
       success: function(data) {
         traditionalCedict = loadTraditional(data);
-        console.log(JSON.stringify(traditionalCedict.getMatch("判")));
+        console.log(JSON.stringify(traditionalCedict.getMatch("判"), null, 2));
       },
       error: function(request, error) {
-        alert('Could not load Cedict!\nRequest: '+JSON.stringify(request)+'\nerror: ' + JSON.stringify(error));
+        alert('Could not load Cedict!\nRequest: '+JSON.stringify(request, null, 2)+'\nerror: ' + JSON.stringify(error, null, 2));
       }
     });
   });
 }
 
 function buildAddNoteRequestData(word, sentence, pinyin, meanings) {
-  let filename = `cta2_${pinyin}.mp3`
+  let filename = `cta2_${pinyin.replace(new RegExp(' ', 'g'), '_')}.mp3`
   let url = `http://localhost:5000/gtts?phrase=${word}&filename=${filename}&lang=zh-tw`
   return {
     action: "addNotes",
@@ -149,11 +191,10 @@ function callAnkiConnect(requestType, data, dataType) {
     data: data,
     dataType: dataType,
     success: function(data) {
-      alert('Data: '+JSON.stringify(data));
+      alert('Data: '+JSON.stringify(data, null, 2));
     },
     error: function(request, error) {
-      
-      alert('Request: '+JSON.stringify(request)+' error: ' + JSON.stringify(error));
+      alert('Request: '+JSON.stringify(request, null, 2)+' error: ' + JSON.stringify(error, null, 2));
     }
   });
 }
