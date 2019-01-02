@@ -1,16 +1,21 @@
 {
-  "name": "Getting Started Example",
+  "name": "Anki Chinese Flashcard Helper",
   "version": "1.0",
-  "description": "Build an Extension!",
+  "description": "Create Chinese flashcards for Anki",
   "permissions": ["contextMenus", "storage", "tabs"],
   "content_scripts": [{
-    "css": ["jquery-ui-1.12.1/jquery-ui.css", "jquery-ui-1.12.1/jquery-ui.structure.css", "jquery-ui-1.12.1/jquery-ui.theme.css"],
+    "css": ["jquery-ui-1.12.1/jquery-ui.css", "jquery-ui-1.12.1/jquery-ui.structure.css", "jquery-ui-1.12.1/jquery-ui.theme.css", "styles.css"],
     "js": ["jquery-3.3.1.js", "jquery-ui-1.12.1/jquery-ui.js", "cedict/cedict.js", "tonetool.js", "createFlashCard.js"],
     "matches": [ "<all_urls>"]
   }],
   "background": {
     "scripts": ["background.js"],
     "persistent": false    
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
   },
   "web_accessible_resources": ["*.html", "jquery-ui-1.12.1/images/*.png", "cedict/cedict_ts.u8"],
   "manifest_version": 2
