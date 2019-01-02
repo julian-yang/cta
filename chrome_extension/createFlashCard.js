@@ -12,7 +12,7 @@ chrome.runtime.onMessage.addListener(request => {
       <div id="cta-dialog" title="Create new Anki flashcard">
         <div class="inputs">
           <div class="sentence-container">
-            Sentence: <div class="sentence"></div>
+            Sentence: <input class="sentence" name="sentence" type="text"></input>
           </div>
           <div class="word-container">
             Word: <input class="word" name="word" type="text">
@@ -24,8 +24,8 @@ chrome.runtime.onMessage.addListener(request => {
               <select name="suggestions">
               </select>
             </div>
-            Pinyin: <input name="pinyin" type="text">
-            Definition: <input name="definition" type="text">
+            <div>Pinyin: <input name="pinyin" type="text"></div>
+            <div>Definition: <input name="definition" type="text"></div>
           </fieldset>
           <input class="lookup ui-button ui-widget ui-corner-all" type="submit" value="Lookup">
           <input class="create ui-button ui-widget ui-corner-all" type="submit" value="Create">
@@ -41,18 +41,20 @@ chrome.runtime.onMessage.addListener(request => {
 
     // setup JQuery stuff.
     $( function() {
-      chrome.storage.sync.get(['selectionInfo'], function(result) {
-        console.log('Value of selectionInfo is ' + JSON.stringify(result));
-        $("#cta-dialog .sentence").append(result.selectionInfo.selectionText);
-      });
-      $("#cta-dialog input[name=submit]").button();
-      let sentence = $("#cta-dialog .sentence")[0];       
+      let sentence = $("#cta-dialog input[name='sentence']")[0];       
       let wordInput = $("#cta-dialog input[name='word']")[0];
       let pinyinInput = $("#cta-dialog input[name='pinyin']")[0];
       let definitionInput = $("#cta-dialog input[name='definition']")[0];
       let preview = $("#cta-dialog .preview");
       let inputsContainer = $("#cta-dialog .inputs");
       let confirmationContainer = $("#cta-dialog .confirmation");
+
+      chrome.storage.sync.get(['selectionInfo'], function(result) {
+        console.log('Value of selectionInfo is ' + JSON.stringify(result));
+        sentence.value = result.selectionInfo.selectionText;
+      });
+      $("#cta-dialog input[name=submit]").button();
+
 
       // '$' is probably not the best sentinel value, but it doesn't exist in Cedict. ¯\_(ツ)_/¯
       let sentinel = '$';
@@ -80,8 +82,6 @@ chrome.runtime.onMessage.addListener(request => {
         }
       });
 
-      // TODO(Julian): Add ability to edit sentence.
-
       // Setup apply suggestion
       $("#cta-dialog select[name='suggestions']").change(function() {
         $("#cta-dialog select[name='suggestions'] option:selected").each(function() {
@@ -101,17 +101,14 @@ chrome.runtime.onMessage.addListener(request => {
       // Setup CREATE
       $("#cta-dialog .ui-button.create").click(event => {
         event.preventDefault();
-        // callAnkiConnect('GET', null, 'text');
-        // TODO(juliany): generate cloze sentence.
         let addNoteRequestData = buildAddNoteRequestData(
           wordInput.value, 
-          buildClozeSentence(wordInput.value, sentence.innerText), 
+          buildClozeSentence(wordInput.value, sentence.value), 
           addtones(pinyinInput.value), 
           definitionInput.value);
         preview.text(JSON.stringify(addNoteRequestData, null, 2));
         inputsContainer.hide();
         confirmationContainer.show();
-        // callAnkiConnect('POST', JSON.stringify(addNoteRequestData), 'json');
       });
 
       // Setup Confirm
@@ -128,7 +125,6 @@ chrome.runtime.onMessage.addListener(request => {
 
 function buildClozeSentence(word, sentence) {
   if (!sentence.includes(word)) {
-    // TODO(julian): add confirmation box if you want to proceed.
     alert(`Sentence '${sentence}' does not contain '${word}'!`);
   }
   return sentence.replace(new RegExp(word, 'g'), `{{c1::${word}}}`);
