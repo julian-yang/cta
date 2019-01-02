@@ -4,124 +4,175 @@ var traditionalCedict;
 
 chrome.runtime.onMessage.addListener(request => {
   if (request.type === 'flashCardCreator') {
-    if (!traditionalCedict) { 
-      loadCedict();
-    }
-
-    document.body.innerHTML += `
-      <div id="cta-dialog" title="Create new Anki flashcard">
-        <div class="inputs">
-          <div class="sentence-container">
-            Sentence: <input class="sentence" name="sentence" type="text"></input>
-          </div>
-          <div class="word-container">
-            Word: <input class="word" name="word" type="text">
-          </div>
-          <fieldset>
-            <legend>Pinyin/Definition:</legend>
-            <div class="suggestions-container">
-              Suggestions: 
-              <select name="suggestions">
-              </select>
-            </div>
-            <div>Pinyin: <input name="pinyin" type="text"></div>
-            <div>Definition: <input name="definition" type="text"></div>
-          </fieldset>
-          <input class="lookup ui-button ui-widget ui-corner-all" type="submit" value="Lookup">
-          <input class="create ui-button ui-widget ui-corner-all" type="submit" value="Create">
-        </div>
-          <div class="confirmation" style="display:none">
-            <pre class="preview"></pre>
-            <input class="back ui-button ui-widget ui-corner-all" type="submit" value="Back">
-            <input class="confirm ui-button ui-widget ui-corner-all" type="submit" value="Confirm">
-          </div>
-        </div> 
-      </div>
-    `;
-
-    // setup JQuery stuff.
-    $( function() {
-      let sentence = $("#cta-dialog input[name='sentence']")[0];       
-      let wordInput = $("#cta-dialog input[name='word']")[0];
-      let pinyinInput = $("#cta-dialog input[name='pinyin']")[0];
-      let definitionInput = $("#cta-dialog input[name='definition']")[0];
-      let preview = $("#cta-dialog .preview");
-      let inputsContainer = $("#cta-dialog .inputs");
-      let confirmationContainer = $("#cta-dialog .confirmation");
-
-      chrome.storage.sync.get(['selectionInfo'], function(result) {
-        console.log('Value of selectionInfo is ' + JSON.stringify(result));
-        sentence.value = result.selectionInfo.selectionText;
-      });
-      $("#cta-dialog input[name=submit]").button();
-
-
-      // '$' is probably not the best sentinel value, but it doesn't exist in Cedict. ¯\_(ツ)_/¯
-      let sentinel = '$';
-
-      // Setup LOOKUP
-      $("#cta-dialog .ui-button.lookup").click(event=> {
-        event.preventDefault();
-        let suggestionsContainer = $("#cta-dialog select[name='suggestions']");
-        suggestionsContainer.empty();
-        // TODO(juliany): figure out how to do await here, but for now just assume we've already loaded the dictionary
-        let matches = traditionalCedict.getMatch(wordInput.value);
-        for (var i = 0; i < matches.length; i++) {
-          let match = matches[i];
-          let pinyin = addtones(match.pinyin);
-          let definition = match.english.split('/').join('; ');
-          suggestionsContainer.append($('<option>', {
-            value: `${pinyin}${sentinel}${definition}`,
-            // TODO(juliany): Figure out how to format this better.
-            text: `${pinyin}: ${definition}`
-          }));
-          if (i ==0) {
-            pinyinInput.value = pinyin;
-            definitionInput.value = definition;
-          }
-        }
-      });
-
-      // Setup apply suggestion
-      $("#cta-dialog select[name='suggestions']").change(function() {
-        $("#cta-dialog select[name='suggestions'] option:selected").each(function() {
-          let selection = $(this)[0].value.split(sentinel);
-          pinyinInput.value = selection[0];
-          definitionInput.value = selection[1];
-        });
-      });
-
-      // Setup BACK
-      $("#cta-dialog .ui-button.back").click(event => {
-        event.preventDefault();
-        inputsContainer.show();
-        confirmationContainer.hide();
-      });
-
-      // Setup CREATE
-      $("#cta-dialog .ui-button.create").click(event => {
-        event.preventDefault();
-        let addNoteRequestData = buildAddNoteRequestData(
-          wordInput.value, 
-          buildClozeSentence(wordInput.value, sentence.value), 
-          addtones(pinyinInput.value), 
-          definitionInput.value);
-        preview.text(JSON.stringify(addNoteRequestData, null, 2));
-        inputsContainer.hide();
-        confirmationContainer.show();
-      });
-
-      // Setup Confirm
-      $("#cta-dialog .ui-button.confirm").click(event => {
-        event.preventDefault();
-        let addNoteRequestData = preview.text();
-        callAnkiConnect('POST', addNoteRequestData, 'json');
-      });
-
-      $("#cta-dialog").dialog();
+    $(function(){
+      if ($("#cta-dialog").length > 0) {
+        resetDialog();
+        initCtaDialogWrapper();
+      } else {
+        setupCta();
+      }
     });
   }
 });
+
+function initCtaDialogWrapper() {
+  $("#cta-dialog").dialog({
+    minWidth: 500
+  });
+
+  let ctaDialogWrapper = $("#cta-dialog").parent().first();
+  ctaDialogWrapper.addClass("cta-dialog-wrapper");
+  ctaDialogWrapper.css({
+    "min-width": "500px",
+    "max-width": "700px",
+    "width": "auto",
+  });
+}
+
+function resetDialog() {
+  // TODO(julian): refactor this to some common extractor function.
+  let sentence = $("#cta-dialog input[name='sentence']")[0];       
+  let wordInput = $("#cta-dialog input[name='word']")[0];
+  let pinyinInput = $("#cta-dialog input[name='pinyin']")[0];
+  let definitionInput = $("#cta-dialog input[name='definition']")[0];
+  let suggestionsContainer = $("#cta-dialog select[name='suggestions']");
+  let preview = $("#cta-dialog .preview");
+  let inputsContainer = $("#cta-dialog .inputs");
+  let confirmationContainer = $("#cta-dialog .confirmation");
+  chrome.storage.sync.get(['selectionInfo'], function(result) {
+    console.log('Value of selectionInfo is ' + JSON.stringify(result));
+    sentence.value = result.selectionInfo.selectionText;
+  });
+  wordInput.value = '';
+  pinyinInput.value = '';
+  definitionInput.value = '';
+  suggestionsContainer.empty();
+  preview.empty();
+  inputsContainer.show();
+  confirmationContainer.hide();
+}
+
+function setupCta() {
+  if (!traditionalCedict) { 
+    loadCedict();
+  }
+
+  document.body.innerHTML += `
+    <div id="cta-dialog" title="Create new Anki flashcard">
+      <div class="inputs">
+        <fieldset>
+          <legend>Sentence/Word:</legend>
+          <div class="container">
+            <label>Sentence:</label>
+            <input class="sentence" name="sentence" type="text"></input>
+          </div>
+          <div class="container">
+            <label>Word:</label> <input class="word" name="word" type="text">
+          </div>
+        </fieldset>
+        <fieldset class="pinyin-definition-fieldset">
+          <legend>Pinyin/Definition:</legend>
+          <div class="container">
+            <label>Suggestions:</label>
+            <select name="suggestions">
+            </select>
+          </div>
+          <div class="container">
+            <label>Pinyin:</label>
+            <input name="pinyin" type="text">
+          </div>
+          <div class="container">
+            <label>Definition:</label>
+            <input name="definition" type="text">
+          </div>
+        </fieldset>
+        <input class="lookup ui-button ui-widget ui-corner-all" type="submit" value="Lookup">
+        <input class="create ui-button ui-widget ui-corner-all" type="submit" value="Create">
+      </div>
+        <div class="confirmation" style="display:none">
+          <pre class="preview"></pre>
+          <input class="back ui-button ui-widget ui-corner-all" type="submit" value="Back">
+          <input class="confirm ui-button ui-widget ui-corner-all" type="submit" value="Confirm">
+        </div>
+      </div> 
+    </div>
+  `;
+
+  $("#cta-dialog input[name=submit]").button();
+  // setup JQuery stuff.
+  let sentence = $("#cta-dialog input[name='sentence']")[0];       
+  let wordInput = $("#cta-dialog input[name='word']")[0];
+  let pinyinInput = $("#cta-dialog input[name='pinyin']")[0];
+  let definitionInput = $("#cta-dialog input[name='definition']")[0];
+  let preview = $("#cta-dialog .preview");
+  let inputsContainer = $("#cta-dialog .inputs");
+  let confirmationContainer = $("#cta-dialog .confirmation");
+  // '$' is probably not the best sentinel value, but it doesn't exist in Cedict. ¯\_(ツ)_/¯
+  let sentinel = '$';
+
+  resetDialog();
+
+  // Setup LOOKUP
+  $("#cta-dialog .ui-button.lookup").click(event=> {
+    event.preventDefault();
+    let suggestionsContainer = $("#cta-dialog select[name='suggestions']");
+    suggestionsContainer.empty();
+    // TODO(juliany): figure out how to do await here, but for now just assume we've already loaded the dictionary
+    let matches = traditionalCedict.getMatch(wordInput.value);
+    for (var i = 0; i < matches.length; i++) {
+      let match = matches[i];
+      let pinyin = addtones(match.pinyin);
+      let definition = match.english.split('/').join('; ');
+      suggestionsContainer.append($('<option>', {
+        value: `${pinyin}${sentinel}${definition}`,
+        // TODO(juliany): Figure out how to format this better.
+        text: `${pinyin}: ${definition}`
+      }));
+      if (i ==0) {
+        pinyinInput.value = pinyin;
+        definitionInput.value = definition;
+      }
+    }
+  });
+
+  // Setup apply suggestion
+  $("#cta-dialog select[name='suggestions']").change(function() {
+    $("#cta-dialog select[name='suggestions'] option:selected").each(function() {
+      let selection = $(this)[0].value.split(sentinel);
+      pinyinInput.value = selection[0];
+      definitionInput.value = selection[1];
+    });
+  });
+
+  // Setup BACK
+  $("#cta-dialog .ui-button.back").click(event => {
+    event.preventDefault();
+    inputsContainer.show();
+    confirmationContainer.hide();
+  });
+
+  // Setup CREATE
+  $("#cta-dialog .ui-button.create").click(event => {
+    event.preventDefault();
+    let addNoteRequestData = buildAddNoteRequestData(
+      wordInput.value, 
+      buildClozeSentence(wordInput.value, sentence.value), 
+      addtones(pinyinInput.value), 
+      definitionInput.value);
+    preview.text(JSON.stringify(addNoteRequestData, null, 2));
+    inputsContainer.hide();
+    confirmationContainer.show();
+  });
+
+  // Setup Confirm
+  $("#cta-dialog .ui-button.confirm").click(event => {
+    event.preventDefault();
+    let addNoteRequestData = preview.text();
+    callAnkiConnect('POST', addNoteRequestData, 'json');
+  });
+
+  initCtaDialogWrapper();
+}
 
 function buildClozeSentence(word, sentence) {
   if (!sentence.includes(word)) {
