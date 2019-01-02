@@ -17,11 +17,14 @@ function onClick(info, tab) {
   });
 }
 
-var parent = chrome.contextMenus.create({
-  "id": "createChineseAnki",
-  "title": "Create Chinese Anki flashcard using \"%s\"",
-  "contexts": ["selection"],
-});
+chrome.runtime.onInstalled.addListener(function() {
+  var parent = chrome.contextMenus.create({
+    "id": "createChineseAnki",
+    "title": "Create Chinese Anki flashcard using \"%s\"",
+    "contexts": ["selection"],
+  });
+})
+
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   console.log(info);
