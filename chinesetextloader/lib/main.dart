@@ -4,9 +4,6 @@ import 'package:english_words/english_words.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:platform/platform.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:android_intent/android_intent.dart';
-
 
 void main() => runApp(new MyApp());
 
@@ -41,33 +38,21 @@ class RandomWordsState extends State<RandomWords> {
             String text = await rootBundle.loadString('assets/test.txt');
             Clipboard.setData(new ClipboardData(text: text));
             Fluttertoast.showToast(
-              msg: 'Copied text to clipboard',
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM,
-              backgroundColor: Colors.black38,
-              textColor: Colors.white
-            );
-            const url = 'plecoapi://x-callback-url/clipboard';
-//            const url = 'intent://x-callback-url/clipboard;scheme=plecoapi;package=com.pleco.chinesesystem;end';
-//            const url = 'plecoapi://x-callback-url/s?q=你好嗎我很好你呢我們去學校';
-//            const url = 'http://flutter.io';
-//            if (LocalPlatform().isAndroid) {
-//              AndroidIntent intent = new AndroidIntent(
-//                action: 'action_view',
-//                data: url,
-//              );
-//              await intent.launch();
-
-            if (await canLaunch(url)) {
-              await launch(url);
-            } else {
+                msg: 'Copied text to clipboard',
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                backgroundColor: Colors.black38,
+                textColor: Colors.white);
+            if (LocalPlatform().isAndroid) {
+              MethodChannel('chinesetextloader')
+                  .invokeMethod('openPlecoClipboard');
+           } else {
               Fluttertoast.showToast(
                   msg: 'Could not launch',
                   toastLength: Toast.LENGTH_SHORT,
                   gravity: ToastGravity.BOTTOM,
                   backgroundColor: Colors.black38,
-                  textColor: Colors.white
-              );
+                  textColor: Colors.white);
             }
           },
           tooltip: 'Copy chinese text',
