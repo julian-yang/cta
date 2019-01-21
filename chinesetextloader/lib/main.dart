@@ -3,8 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:platform/platform.dart';
+import 'article_toolbar.dart';
 import 'utils.dart';
 import 'article_viewer.dart';
 import 'article.dart';
@@ -36,14 +35,15 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: new AppBar(
         title: const Text('Chinese Text Loader'),
       ),
-      body: _buildBody(context),
+      body: _buildBody(context)
+      /*,
       floatingActionButton: FloatingActionButton(
           onPressed: () async {
             String text = await rootBundle.loadString('assets/test.txt');
             copyToClipBoard(text);
           },
           tooltip: 'Copy chinese text',
-          child: Icon(Icons.content_copy)),
+          child: Icon(Icons.content_copy)),*/
     );
   }
 
@@ -82,25 +82,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   ListTile(
-                      leading: Icon(Icons.description),
+//                      leading: Icon(Icons.description),
                       title: Text(article.chineseTitle),
                       subtitle: Text(article.englishTitle)),
-                  ButtonTheme.bar(
-                      child: ButtonBar(children: <Widget>[
-                    FlatButton(
-                        child: Column(children: <Widget>[
-                          Icon(Icons.assignment),
-                          const Text('Copy to Pleco')
-                        ]),
-                        onPressed: () => copyToClipBoard(article.chineseBody)),
-                    FlatButton(
-                      child: Column(children: <Widget>[
-                        Icon(Icons.open_in_browser),
-                        const Text('Open in URL')
-                      ]),
-                      onPressed: () => openUrl(article.url),
-                    )
-                  ]))
+                  ArticleToolbar(article: article)
                 ],
               ),
             )));
