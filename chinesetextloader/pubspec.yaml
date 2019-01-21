@@ -1,4 +1,4 @@
-name: firstflutter
+name: chineseTextLoader
 description: A new Flutter project.
 
 # The following defines the version and build number for your application.
@@ -21,6 +21,7 @@ dependencies:
   cloud_firestore: ^0.8.2
   cupertino_icons: ^0.1.2
   english_words: ^3.1.0
+  flutter_launcher_icons: "^0.7.0"
   fluttertoast: ^2.2.3
   url_launcher: ^4.0.3
   platform: ^2.2.0
@@ -30,6 +31,11 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/noodles.png"
 
 
 # For information on the generic Dart part of this file, see the
