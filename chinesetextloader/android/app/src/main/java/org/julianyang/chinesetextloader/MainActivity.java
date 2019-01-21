@@ -1,4 +1,4 @@
-package com.example.firstflutter;
+package org.julianyang.chinesetextloader;
 
 import android.content.Context;
 import android.content.Intent;
