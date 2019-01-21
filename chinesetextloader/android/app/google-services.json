@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "584935283123",
+    "firebase_url": "https://chinesetextloader.firebaseio.com",
+    "project_id": "chinesetextloader",
+    "storage_bucket": "chinesetextloader.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:584935283123:android:b6668ee22e2dcdd5",
+        "android_client_info": {
+          "package_name": "org.julianyang.chinesetextloader"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "584935283123-2ka0a5ma82bs21hts20v6c12ssibsouv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.julianyang.chinesetextloader",
+            "certificate_hash": "76ff8a89189152726c8454385e59106f63ff2da2"
+          }
+        },
+        {
+          "client_id": "584935283123-qv99i4atmsglul7bhp5nk0dbp2cuhau8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACNYW832ujRBydlQKUq6BoVcHDfsLTE5E"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "584935283123-qv99i4atmsglul7bhp5nk0dbp2cuhau8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
