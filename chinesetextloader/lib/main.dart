@@ -5,7 +5,8 @@ import 'package:english_words/english_words.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:platform/platform.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'utils.dart';
+import 'article_viewer.dart';
 import 'article.dart';
 
 void main() => runApp(new MyApp());
@@ -39,24 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
           onPressed: () async {
             String text = await rootBundle.loadString('assets/test.txt');
-            Clipboard.setData(new ClipboardData(text: text));
-            Fluttertoast.showToast(
-                msg: 'Copied text to clipboard',
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM,
-                backgroundColor: Colors.black38,
-                textColor: Colors.white);
-            if (LocalPlatform().isAndroid) {
-              MethodChannel('chinesetextloader')
-                  .invokeMethod('openPlecoClipboard');
-            } else {
-              Fluttertoast.showToast(
-                  msg: 'Could not launch',
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.BOTTOM,
-                  backgroundColor: Colors.black38,
-                  textColor: Colors.white);
-            }
+            copyToClipBoard(text);
           },
           tooltip: 'Copy chinese text',
           child: Icon(Icons.content_copy)),
@@ -86,74 +70,44 @@ class _MyHomePageState extends State<MyHomePage> {
     return Padding(
         key: ValueKey(article.englishTitle),
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Card(
-            child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ListTile(
-                leading: Icon(Icons.description),
-                title: Text(article.chineseTitle),
-                subtitle: Text(article.englishTitle)),
-            ButtonTheme.bar(
-                child: ButtonBar(children: <Widget>[
-              FlatButton(
-                  child: Column(children: <Widget>[
-                    Icon(Icons.assignment),
-                    const Text('Copy to Pleco')
-                  ]),
-                  onPressed: () => copyToClipBoard(article.chineseBody)
+        child: InkWell(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ArticleViewer(article: article)));
+            },
+            child: Card(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  ListTile(
+                      leading: Icon(Icons.description),
+                      title: Text(article.chineseTitle),
+                      subtitle: Text(article.englishTitle)),
+                  ButtonTheme.bar(
+                      child: ButtonBar(children: <Widget>[
+                    FlatButton(
+                        child: Column(children: <Widget>[
+                          Icon(Icons.assignment),
+                          const Text('Copy to Pleco')
+                        ]),
+                        onPressed: () => copyToClipBoard(article.chineseBody)),
+                    FlatButton(
+                      child: Column(children: <Widget>[
+                        Icon(Icons.open_in_browser),
+                        const Text('Open in URL')
+                      ]),
+                      onPressed: () => openUrl(article.url),
+                    )
+                  ]))
+                ],
               ),
-              FlatButton(
-                  child: Column(children: <Widget>[
-                    Icon(Icons.open_in_browser),
-                    const Text('Open in URL')
-                  ]),
-                onPressed: () => openUrl(article.url),
-                  )
-            ]))
-          ],
-        )));
+            )));
   }
 }
 
 
-
-void openUrl(String url) async {
-  if (await canLaunch(url)) {
-    await launch(url);
-  } else {
-    throw 'Could not launch $url';
-  }
-}
-
-void copyToClipBoard(String text) async {
-  Clipboard.setData(new ClipboardData(text: text));
-  Fluttertoast.showToast(
-      msg: 'Copied text to clipboard',
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.black38,
-      textColor: Colors.white);
-  if (LocalPlatform().isAndroid) {
-    MethodChannel('chinesetextloader').invokeMethod('openPlecoClipboard');
-  } else {
-    Fluttertoast.showToast(
-        msg: 'Could not launch',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.black38,
-        textColor: Colors.white);
-  }
-}
-
-void commit(article) {
-  Firestore.instance.runTransaction((transaction) async {
-    final freshSnapshot = await transaction.get(article.reference);
-    final freshRecord = Record.fromSnapshot(freshSnapshot);
-    await transaction
-        .update(article.reference, {'votes': freshRecord.votes + 1});
-  });
-}
 
 class Record {
   final String name;
