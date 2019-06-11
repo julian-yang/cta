@@ -7,6 +7,7 @@ import 'article_toolbar.dart';
 import 'utils.dart';
 import 'article_viewer.dart';
 import 'article.dart';
+import 'add_article_form.dart';
 
 void main() => runApp(new MyApp());
 
@@ -65,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   static Widget _buildAddArticle(BuildContext context) {
-    return Text('Add articles here');
+    return AddArticleForm();
   }
 
   static Widget _buildArticleList(BuildContext context) {
