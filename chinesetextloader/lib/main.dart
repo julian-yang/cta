@@ -19,15 +19,28 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
 class MyHomePage extends StatefulWidget {
   @override
   _MyHomePageState createState() => new _MyHomePageState();
 }
 
+typedef Widget ContextToWidget(BuildContext context);
+
 class _MyHomePageState extends State<MyHomePage> {
   final List<WordPair> _suggestions = <WordPair>[];
   final TextStyle _biggerFont = const TextStyle(fontSize: 18.0);
+  int _selectedIndex = 0;
+
+  static const List<ContextToWidget> _tabs = <ContextToWidget>[
+    _MyHomePageState._buildArticleList,
+    _MyHomePageState._buildAddArticle
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,19 +48,27 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: new AppBar(
         title: const Text('Chinese Text Loader'),
       ),
-      body: _buildBody(context)
-      /*,
-      floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            String text = await rootBundle.loadString('assets/test.txt');
-            copyToClipBoard(text);
-          },
-          tooltip: 'Copy chinese text',
-          child: Icon(Icons.content_copy)),*/
+      body: _tabs.elementAt(_selectedIndex)(context),
+      bottomNavigationBar: BottomNavigationBar(items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Icons.library_books),
+          title: Text('Articles')
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.library_add),
+          title: Text('Add Article')
+        )],
+      currentIndex: _selectedIndex,
+          selectedItemColor: Colors.amber[800],
+      onTap: _onItemTapped),
     );
   }
 
-  Widget _buildBody(BuildContext context) {
+  static Widget _buildAddArticle(BuildContext context) {
+    return Text('Add articles here');
+  }
+
+  static Widget _buildArticleList(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: Firestore.instance.collection('articles').snapshots(),
       builder: (context, snapshot) {
@@ -57,14 +78,14 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
+  static Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
     return ListView(
       padding: const EdgeInsets.only(top: 20.0),
       children: snapshot.map((data) => _buildListItem(context, data)).toList(),
     );
   }
 
-  Widget _buildListItem(BuildContext context, DocumentSnapshot data) {
+  static Widget _buildListItem(BuildContext context, DocumentSnapshot data) {
     final article = Article.fromSnapshot(data);
 
     return Padding(
