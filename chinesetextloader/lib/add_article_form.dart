@@ -37,6 +37,8 @@ class AddArticleFormState extends State<AddArticleForm> {
                   }),
               TextFormField(
                   controller: _chineseBodyController,
+                  minLines: 1,
+                  maxLines: 10,
                   decoration: const InputDecoration(
                     hintText: 'The content of the article in Chinese.',
                     labelText: 'Chinese article content',
@@ -59,6 +61,8 @@ class AddArticleFormState extends State<AddArticleForm> {
                   }),
               TextFormField(
                   controller: _englishBodyController,
+                  minLines: 1,
+                  maxLines: 10,
                   decoration: const InputDecoration(
                     hintText: 'The content of the article in English.',
                     labelText: 'English article content',
