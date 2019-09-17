@@ -7,6 +7,7 @@ class Article {
   final String englishBody;
   final String url;
   final DocumentReference reference;
+  final DateTime addDate;
 
   Article.fromMap(Map<String, dynamic> map, {this.reference})
       : assert(map['chineseTitle'] != null),
@@ -14,11 +15,13 @@ class Article {
         assert(map['englishTitle'] != null),
         assert(map['englishBody'] != null),
         assert(map['url'] != null),
+        assert(map['addDate'] != null),
         chineseTitle = map['chineseTitle'],
         chineseBody = map['chineseBody'],
         englishTitle = map['englishTitle'],
         englishBody = map['englishBody'],
-        url = map['url'];
+        url = map['url'],
+        addDate = map['addDate'];
 
   Article.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data, reference: snapshot.reference);

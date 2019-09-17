@@ -1,10 +1,7 @@
 // Create an infinite scrolling lazily loaded list
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
-import 'package:flutter/services.dart';
 import 'article_toolbar.dart';
-import 'utils.dart';
 import 'article_viewer.dart';
 import 'article.dart';
 import 'add_article_form.dart';
@@ -20,6 +17,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 class MyHomePage extends StatefulWidget {
   @override
   _MyHomePageState createState() => new _MyHomePageState();
@@ -28,8 +26,6 @@ class MyHomePage extends StatefulWidget {
 typedef Widget ContextToWidget(BuildContext context);
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<WordPair> _suggestions = <WordPair>[];
-  final TextStyle _biggerFont = const TextStyle(fontSize: 18.0);
   int _selectedIndex = 0;
 
   static const List<ContextToWidget> _tabs = <ContextToWidget>[
@@ -50,18 +46,16 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Chinese Text Loader'),
       ),
       body: _tabs.elementAt(_selectedIndex)(context),
-      bottomNavigationBar: BottomNavigationBar(items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.library_books),
-          title: Text('Articles')
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.library_add),
-          title: Text('Add Article')
-        )],
-      currentIndex: _selectedIndex,
+      bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+                icon: Icon(Icons.library_books), title: Text('Articles')),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.library_add), title: Text('Add Article'))
+          ],
+          currentIndex: _selectedIndex,
           selectedItemColor: Colors.amber[800],
-      onTap: _onItemTapped),
+          onTap: _onItemTapped),
     );
   }
 
@@ -79,16 +73,20 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  static Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
+  static Widget _buildList(
+      BuildContext context, List<DocumentSnapshot> snapshot) {
+    List<Article> articles = snapshot
+        .map((data) => Article.fromSnapshot(data))
+        .toList()
+          ..sort((a, b) => a.addDate.compareTo(b.addDate));
     return ListView(
       padding: const EdgeInsets.only(top: 20.0),
-      children: snapshot.map((data) => _buildListItem(context, data)).toList(),
+      children: articles.reversed.map((data) => _buildListItem(context, data))
+          .toList(),
     );
   }
 
-  static Widget _buildListItem(BuildContext context, DocumentSnapshot data) {
-    final article = Article.fromSnapshot(data);
-
+  static Widget _buildListItem(BuildContext context, Article article) {
     return Padding(
         key: ValueKey(article.englishTitle),
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -113,8 +111,6 @@ class _MyHomePageState extends State<MyHomePage> {
             )));
   }
 }
-
-
 
 class Record {
   final String name;

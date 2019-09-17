@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class AddArticleForm extends StatefulWidget {
   @override
@@ -10,11 +11,31 @@ class AddArticleForm extends StatefulWidget {
 
 class AddArticleFormState extends State<AddArticleForm> {
   final _formKey = GlobalKey<FormState>();
+  final _dateFormat = new DateFormat.yMMMd();
   var _chineseTitleController = TextEditingController();
   var _chineseBodyController = TextEditingController();
   var _englishTitleController = TextEditingController();
   var _englishBodyController = TextEditingController();
   var _urlController = TextEditingController();
+  var selectedDate = stripOutTime(DateTime.now());
+
+  static DateTime stripOutTime(DateTime dateTime) {
+    return DateTime(dateTime.year, dateTime.month, dateTime.day);
+  }
+
+  Future<Null> _selectDate(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2010, 1),
+      lastDate: DateTime(2100, 12, 31));
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = stripOutTime(picked);
+      }
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +104,18 @@ class AddArticleFormState extends State<AddArticleForm> {
                         ? 'Article url must not be empty.'
                         : null;
                   }),
+              Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+
+                      children: <Widget>[
+                        Text(_dateFormat.format(selectedDate)),
+                        RaisedButton(
+                          onPressed: () => _selectDate(context),
+                          child: Text('Select submitted date'),
+                        )
+                      ])),
               Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: RaisedButton(
