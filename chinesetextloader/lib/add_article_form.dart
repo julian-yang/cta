@@ -17,7 +17,7 @@ class AddArticleFormState extends State<AddArticleForm> {
   var _englishTitleController = TextEditingController();
   var _englishBodyController = TextEditingController();
   var _urlController = TextEditingController();
-  var selectedDate = stripOutTime(DateTime.now());
+  var _selectedDate = stripOutTime(DateTime.now());
 
   static DateTime stripOutTime(DateTime dateTime) {
     return DateTime(dateTime.year, dateTime.month, dateTime.day);
@@ -26,12 +26,12 @@ class AddArticleFormState extends State<AddArticleForm> {
   Future<Null> _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate,
+      initialDate: _selectedDate,
       firstDate: DateTime(2010, 1),
       lastDate: DateTime(2100, 12, 31));
-    if (picked != null && picked != selectedDate) {
+    if (picked != null && picked != _selectedDate) {
       setState(() {
-        selectedDate = stripOutTime(picked);
+        _selectedDate = stripOutTime(picked);
       }
       );
     }
@@ -110,7 +110,7 @@ class AddArticleFormState extends State<AddArticleForm> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
 
                       children: <Widget>[
-                        Text(_dateFormat.format(selectedDate)),
+                        Text(_dateFormat.format(_selectedDate)),
                         RaisedButton(
                           onPressed: () => _selectDate(context),
                           child: Text('Select submitted date'),
@@ -132,7 +132,8 @@ class AddArticleFormState extends State<AddArticleForm> {
                             'chineseTitle': _chineseTitleController.text,
                             'englishBody': _englishBodyController.text,
                             'englishTitle': _englishTitleController.text,
-                            'url': _urlController.text
+                            'url': _urlController.text,
+                            'addDate': _selectedDate,
                           }).then((docRef) => Scaffold.of(context).showSnackBar(
                               SnackBar(
                                   content: Text(
