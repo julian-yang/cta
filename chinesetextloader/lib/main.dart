@@ -6,7 +6,6 @@ import 'article_viewer.dart';
 import 'article.dart';
 import 'add_article_form.dart';
 import 'add_article_wizard.dart';
-import 'fab.dart';
 
 void main() => runApp(new MyApp());
 
@@ -53,8 +52,6 @@ class _MyHomePageState extends State<MyHomePage> {
             onPressed: () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => AddArticleWizard()));
-//              Scaffold.of(context)
-//                  .showSnackBar(SnackBar(content: Text('Clicked fab!')));
             },
             child: Icon(Icons.add),
             backgroundColor: Colors.amber[800])

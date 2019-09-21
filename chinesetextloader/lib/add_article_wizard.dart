@@ -68,7 +68,6 @@ class ArticleLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-//        key: ValueKey(article.englishTitle),
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
         child: InkWell(
             onTap: () {},
@@ -80,10 +79,6 @@ class ArticleLink extends StatelessWidget {
                   child: ListTile(
                       title: Text(chineseTitle),
                       subtitle: Text(articleUri.toString()))),
-//          Expanded(child:
-//          Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-//            Text(chineseTitle),
-//            Text(articleUri.toString()),
             ]))));
   }
 }
