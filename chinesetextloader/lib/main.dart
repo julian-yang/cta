@@ -5,6 +5,8 @@ import 'article_toolbar.dart';
 import 'article_viewer.dart';
 import 'article.dart';
 import 'add_article_form.dart';
+import 'add_article_wizard.dart';
+import 'fab.dart';
 
 void main() => runApp(new MyApp());
 
@@ -46,6 +48,17 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Chinese Text Loader'),
       ),
       body: _tabs.elementAt(_selectedIndex)(context),
+      floatingActionButton: Builder(builder: (context) =>
+        FloatingActionButton(
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => AddArticleWizard()));
+//              Scaffold.of(context)
+//                  .showSnackBar(SnackBar(content: Text('Clicked fab!')));
+            },
+            child: Icon(Icons.add),
+            backgroundColor: Colors.amber[800])
+      ),
       bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
@@ -81,7 +94,8 @@ class _MyHomePageState extends State<MyHomePage> {
           ..sort((a, b) => a.addDate.compareTo(b.addDate));
     return ListView(
       padding: const EdgeInsets.only(top: 20.0),
-      children: articles.reversed.map((data) => _buildListItem(context, data))
+      children: articles.reversed
+          .map((data) => _buildListItem(context, data))
           .toList(),
     );
   }

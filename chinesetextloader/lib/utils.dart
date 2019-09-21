@@ -33,6 +33,10 @@ void copyToClipBoard(String text) async {
   }
 }
 
+Uri toFullMdnUri(String path) {
+  return Uri.parse("https://mdnkids.com/youth/$path");
+}
+
 //void commit(article) {
 //  Firestore.instance.runTransaction((transaction) async {
 //    final freshSnapshot = await transaction.get(article.reference);
