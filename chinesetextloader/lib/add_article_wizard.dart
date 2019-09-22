@@ -6,7 +6,6 @@ import 'package:html/dom.dart' as dom;
 import 'dart:convert';
 import 'utils.dart';
 import 'add_article_form.dart';
-import 'add_single_article.dart';
 
 class AddArticleWizard extends StatefulWidget {
   @override
@@ -52,19 +51,29 @@ class _AddArticleWizardState extends State<AddArticleWizard> {
             },
             child: Column(children: [
               ArticleList(_articleLinks),
-              Text('${_selectedArticles.length} articles selected'),
-              RaisedButton(
-                  child: Text('Generate'),
-                  onPressed: _selectedArticles.isNotEmpty
-                      ? () {
-                          navigateGenerateArticle();
-                        }
-                      : null),
-              RaisedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('Cancel')),
+              Divider(
+                color: Colors.amber[700],
+                height: 0,
+                thickness: 5,
+              ),
+              ButtonBar(children: [
+                Padding(
+                    padding: EdgeInsets.only(right: 20),
+                    child:
+                        Text('${_selectedArticles.length} articles selected')),
+                RaisedButton(
+                    child: Text('Generate'),
+                    onPressed: _selectedArticles.isNotEmpty
+                        ? () {
+                            navigateGenerateArticle();
+                          }
+                        : null),
+                RaisedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('Cancel')),
+              ])
             ])));
   }
 
