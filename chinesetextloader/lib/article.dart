@@ -9,6 +9,15 @@ class Article {
   final DocumentReference reference;
   final DateTime addDate;
 
+  Article.empty()
+      : chineseTitle = '',
+        chineseBody = '',
+        englishTitle = '',
+        englishBody = '',
+        url = '',
+        addDate = DateTime.now(),
+        reference = null;
+
   Article.fromMap(Map<String, dynamic> map, {this.reference})
       : assert(map['chineseTitle'] != null),
         assert(map['chineseBody'] != null),

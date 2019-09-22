@@ -5,6 +5,7 @@ import 'package:html/parser.dart';
 import 'package:html/dom.dart' as dom;
 import 'dart:convert';
 import 'utils.dart';
+import 'add_article_form.dart';
 import 'add_single_article.dart';
 
 class AddArticleWizard extends StatefulWidget {
@@ -19,16 +20,18 @@ class _AddArticleWizardState extends State<AddArticleWizard> {
   @override
   void initState() {
     super.initState();
-    _articleLinks = fetchPost();
+    _articleLinks = fetchArticleLinks();
   }
 
   void navigateGenerateArticle() {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => AddSingleArticle(
-                data: AddSingleArticleData(
-                    (_selectedArticles.toList()..sort()).reversed.first))));
+            builder: (context) => Scaffold(
+                appBar: AppBar(title: Text('ArticleAdder')),
+                body: AddArticleForm(
+                    inputUri:
+                        (_selectedArticles.toList()..sort()).reversed.first))));
   }
 
   @override
@@ -65,7 +68,7 @@ class _AddArticleWizardState extends State<AddArticleWizard> {
             ])));
   }
 
-  Future<List<ArticleLink>> fetchPost() async {
+  Future<List<ArticleLink>> fetchArticleLinks() async {
     http.Response response = await http
         .get('https://mdnkids.com/youth/default.asp#more_browsing_bg');
     final document = parse(utf8.decode(response.bodyBytes));
