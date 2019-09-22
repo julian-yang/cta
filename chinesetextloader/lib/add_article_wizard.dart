@@ -13,6 +13,7 @@ class AddArticleWizard extends StatefulWidget {
 
 class _AddArticleWizardState extends State<AddArticleWizard> {
   Future<List<ArticleLink>> _articleLinks;
+  Set<Uri> _selectedArticles = {};
 
   @override
   void initState() {
@@ -24,14 +25,27 @@ class _AddArticleWizardState extends State<AddArticleWizard> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: Text('Add new article')),
-        body: Column(children: [
-          ArticleList(_articleLinks),
-          RaisedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cancel')),
-        ]));
+        body: NotificationListener<ArticleSelectionNotification>(
+            onNotification: (notification) {
+              setState(() {
+                if (notification.selected) {
+                  _selectedArticles.add(notification.articleUri);
+                } else {
+                  _selectedArticles.remove(notification.articleUri);
+                }
+              });
+              // cancel notification bubbling
+              return true;
+            },
+            child: Column(children: [
+              ArticleList(_articleLinks),
+              Text('${_selectedArticles.length} articles selected'),
+              RaisedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cancel')),
+            ])));
   }
 
   Future<List<ArticleLink>> fetchPost() async {
@@ -40,11 +54,18 @@ class _AddArticleWizardState extends State<AddArticleWizard> {
     final document = parse(utf8.decode(response.bodyBytes));
     List<dom.Element> rawArticleLinks = document.querySelectorAll('div.box');
     return rawArticleLinks.map((element) {
-      final chineseTitle = element.querySelector('div.box_title').text.trim();
+      final chineseTitle = element
+          .querySelector('div.box_title')
+          .text
+          .trim();
       final imgUri = toFullMdnUri(
-          element.querySelector('div.box_img > img').attributes['src']);
+          element
+              .querySelector('div.box_img > img')
+              .attributes['src']);
       final articleUri =
-          toFullMdnUri(element.querySelector('a').attributes['href']);
+      toFullMdnUri(element
+          .querySelector('a')
+          .attributes['href']);
       return ArticleLink(chineseTitle, imgUri, articleUri);
     }).toList();
   }
@@ -71,8 +92,7 @@ class ArticleListState extends State<ArticleList> {
         builder: (context, articleLinksSnapshot) {
           if (articleLinksSnapshot.hasData) {
             return Expanded(
-                child: ListView(
-                    children: articleLinksSnapshot.data));
+                child: ListView(children: articleLinksSnapshot.data));
           } else if (articleLinksSnapshot.hasError) {
             return Text("${articleLinksSnapshot.error}");
           }
@@ -94,17 +114,21 @@ class ArticleLink extends StatefulWidget {
 }
 
 class ArticleLinkState extends State<ArticleLink> {
+  static final selectedBorder = RoundedRectangleBorder(
+      side: BorderSide(color: Colors.amber[500], width: 3),
+      borderRadius: BorderRadius.all(Radius.circular(4)));
   final String chineseTitle;
   final Uri imageUri;
   final Uri articleUri;
   final Stream<QuerySnapshot> _querySnapshot;
   bool uriExistsInFirestore = false;
+  bool selected = false;
 
   ArticleLinkState(this.chineseTitle, this.imageUri, this.articleUri)
       : _querySnapshot = firestoreArticles
-            .where('url', isEqualTo: articleUri.toString())
-            .limit(1)
-            .snapshots();
+      .where('url', isEqualTo: articleUri.toString())
+      .limit(1)
+      .snapshots();
 
   @override
   Widget build(BuildContext context) {
@@ -115,10 +139,15 @@ class ArticleLinkState extends State<ArticleLink> {
               snapshot.data?.documents?.isNotEmpty ?? false;
           return Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+              const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
               child: InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    setState(() => selected = !selected);
+                    ArticleSelectionNotification(articleUri, selected)
+                        .dispatch(context);
+                  },
                   child: Card(
+                      shape: selected ? selectedBorder : null,
                       color: uriExistsInFirestore ? Colors.amber[200] : null,
                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -131,4 +160,11 @@ class ArticleLinkState extends State<ArticleLink> {
                           ]))));
         });
   }
+}
+
+class ArticleSelectionNotification extends Notification {
+  final Uri articleUri;
+  final bool selected;
+
+  const ArticleSelectionNotification(this.articleUri, this.selected);
 }
