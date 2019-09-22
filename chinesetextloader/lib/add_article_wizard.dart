@@ -5,6 +5,7 @@ import 'package:html/parser.dart';
 import 'package:html/dom.dart' as dom;
 import 'dart:convert';
 import 'utils.dart';
+import 'add_single_article.dart';
 
 class AddArticleWizard extends StatefulWidget {
   @override
@@ -19,6 +20,15 @@ class _AddArticleWizardState extends State<AddArticleWizard> {
   void initState() {
     super.initState();
     _articleLinks = fetchPost();
+  }
+
+  void navigateGenerateArticle() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => AddSingleArticle(
+                data: AddSingleArticleData(
+                    (_selectedArticles.toList()..sort()).reversed.first))));
   }
 
   @override
@@ -41,6 +51,13 @@ class _AddArticleWizardState extends State<AddArticleWizard> {
               ArticleList(_articleLinks),
               Text('${_selectedArticles.length} articles selected'),
               RaisedButton(
+                  child: Text('Generate'),
+                  onPressed: _selectedArticles.isNotEmpty
+                      ? () {
+                          navigateGenerateArticle();
+                        }
+                      : null),
+              RaisedButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
@@ -54,18 +71,11 @@ class _AddArticleWizardState extends State<AddArticleWizard> {
     final document = parse(utf8.decode(response.bodyBytes));
     List<dom.Element> rawArticleLinks = document.querySelectorAll('div.box');
     return rawArticleLinks.map((element) {
-      final chineseTitle = element
-          .querySelector('div.box_title')
-          .text
-          .trim();
+      final chineseTitle = element.querySelector('div.box_title').text.trim();
       final imgUri = toFullMdnUri(
-          element
-              .querySelector('div.box_img > img')
-              .attributes['src']);
+          element.querySelector('div.box_img > img').attributes['src']);
       final articleUri =
-      toFullMdnUri(element
-          .querySelector('a')
-          .attributes['href']);
+          toFullMdnUri(element.querySelector('a').attributes['href']);
       return ArticleLink(chineseTitle, imgUri, articleUri);
     }).toList();
   }
@@ -126,9 +136,9 @@ class ArticleLinkState extends State<ArticleLink> {
 
   ArticleLinkState(this.chineseTitle, this.imageUri, this.articleUri)
       : _querySnapshot = firestoreArticles
-      .where('url', isEqualTo: articleUri.toString())
-      .limit(1)
-      .snapshots();
+            .where('url', isEqualTo: articleUri.toString())
+            .limit(1)
+            .snapshots();
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +149,7 @@ class ArticleLinkState extends State<ArticleLink> {
               snapshot.data?.documents?.isNotEmpty ?? false;
           return Padding(
               padding:
-              const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
               child: InkWell(
                   onTap: () {
                     setState(() => selected = !selected);
