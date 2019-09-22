@@ -59,8 +59,7 @@ class AddArticleFormState extends State<AddArticleForm> {
     _article = _inputUri != null
         ? fetchArticle(_inputUri)
         : Future.value(Article.empty());
-    _article.then((article) =>
-        setState(() {
+    _article.then((article) => setState(() {
           _chineseTitleController.text = article.chineseTitle;
           _chineseBodyController.text = article.chineseBody;
           _englishTitleController.text = article.englishTitle;
@@ -98,9 +97,7 @@ class AddArticleFormState extends State<AddArticleForm> {
               ),
               onSaved: (value) => setState,
               validator: (String value) {
-                return value
-                    .trim()
-                    .isEmpty
+                return value.trim().isEmpty
                     ? 'Chinese title must not be empty.'
                     : null;
               }),
@@ -114,9 +111,7 @@ class AddArticleFormState extends State<AddArticleForm> {
               ),
               onSaved: (value) => setState,
               validator: (String value) {
-                return value
-                    .trim()
-                    .isEmpty
+                return value.trim().isEmpty
                     ? 'Chinese article content must not be empty.'
                     : null;
               }),
@@ -132,27 +127,32 @@ class AddArticleFormState extends State<AddArticleForm> {
                     ),
                     onSaved: (value) => setState,
                     validator: (String value) {
-                      return value
-                          .trim()
-                          .isEmpty
+                      return value.trim().isEmpty
                           ? 'English title must not be empty.'
                           : null;
                     })),
             Padding(
                 padding: const EdgeInsets.only(top: 10),
-                child: IconButton(
-                  icon: Icon(Icons.cached),
-//                  icon: Icon(TranslateIcon.g_translate),
+                child: Ink(
+                    child: IconButton(
+                  iconSize: 36,
+                  color: Colors.blue,
+                  splashColor: Colors.blue[300],
+                  icon: Icon(MdiIcons.googleTranslate),
                   onPressed: () {
-                    _translator.translate(
-                        _chineseTitleController.text, from: 'zh-tw', to: 'en')
+                    if (_chineseTitleController?.text?.isEmpty ?? true) {
+                      return;
+                    }
+                    _translator
+                        .translate(_chineseTitleController.text,
+                            from: 'zh-tw', to: 'en')
                         .then((engTitle) {
                       setState(() {
                         _englishTitleController.text = engTitle;
                       });
                     });
                   },
-                ))
+                )))
           ]),
           TextFormField(
               controller: _englishBodyController,
@@ -164,9 +164,7 @@ class AddArticleFormState extends State<AddArticleForm> {
               ),
               onSaved: (value) => setState,
               validator: (String value) {
-                return value
-                    .trim()
-                    .isEmpty
+                return value.trim().isEmpty
                     ? 'English article content must not be empty.'
                     : null;
               }),
@@ -178,9 +176,7 @@ class AddArticleFormState extends State<AddArticleForm> {
               ),
               onSaved: (value) => setState,
               validator: (String value) {
-                return value
-                    .trim()
-                    .isEmpty
+                return value.trim().isEmpty
                     ? 'Article url must not be empty.'
                     : null;
               }),
@@ -219,16 +215,15 @@ class AddArticleFormState extends State<AddArticleForm> {
                           scaffoldState.removeCurrentSnackBar();
                           scaffoldState.showSnackBar(SnackBar(
                               content: Text(
-                                  'Added article! DocRef: ${docRef
-                                      .documentID}')));
+                                  'Added article! DocRef: ${docRef.documentID}')));
 
                           Future.delayed(const Duration(milliseconds: 1000),
-                                  () {
-                                if (_inputUri != null) {
-                                  Navigator.of(context)
-                                      .popUntil((route) => route.isFirst);
-                                }
-                              });
+                              () {
+                            if (_inputUri != null) {
+                              Navigator.of(context)
+                                  .popUntil((route) => route.isFirst);
+                            }
+                          });
                         });
                       });
                     }
@@ -243,10 +238,7 @@ class AddArticleFormState extends State<AddArticleForm> {
     final articleBodies = document.querySelectorAll('div.col-xs-12 > p');
     final englishBody = articleBodies[0];
     final chineseBody = articleBodies[1];
-    final chineseTitle = document
-        .querySelector('div.news_tit')
-        .text
-        .trim();
+    final chineseTitle = document.querySelector('div.news_tit').text.trim();
     final extractedDate = RegExp(r"\d+").firstMatch(uri.toString())[0] ?? "";
     return Article.fromMap({
       'chineseTitle': chineseTitle,
