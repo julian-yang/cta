@@ -118,7 +118,7 @@ class ArticleListState extends State<ArticleList> {
           } else if (articleLinksSnapshot.hasError) {
             return Text("${articleLinksSnapshot.error}");
           }
-          return Center(child: CircularProgressIndicator());
+          return Expanded(child: Center(child: CircularProgressIndicator()));
         });
   }
 }
