@@ -1,0 +1,3 @@
+[submodule "article-suggester2"]
+	path = article-suggester2
+	url = https://github.com/julian-yang/article-suggester2

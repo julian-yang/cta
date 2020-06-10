@@ -1,0 +1,22 @@
+syntax = "proto2";
+import "google/protobuf/timestamp.proto";
+
+package cta;
+
+message Article {
+    optional google.protobuf.Timestamp add_date = 1;
+    optional string chinese_body = 2;
+    optional string chinese_title = 3;
+    optional string url = 4;
+    optional google.protobuf.Timestamp publish_date = 5;
+    optional string author = 6;
+    optional int32 word_count = 7;
+    optional double average_word_difficulty = 8;
+    repeated string unique_words = 9;
+    optional Stats stats = 10;
+}
+
+message Stats {
+    optional int32 known_word_count = 1;
+    optional double known_ratio = 2;
+}
