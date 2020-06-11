@@ -20,11 +20,43 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto2',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rarticle.proto\x12\x03\x63ta\x1a\x1fgoogle/protobuf/timestamp.proto\"\x99\x02\n\x07\x41rticle\x12,\n\x08\x61\x64\x64_date\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x14\n\x0c\x63hinese_body\x18\x02 \x01(\t\x12\x15\n\rchinese_title\x18\x03 \x01(\t\x12\x0b\n\x03url\x18\x04 \x01(\t\x12\x30\n\x0cpublish_date\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0e\n\x06\x61uthor\x18\x06 \x01(\t\x12\x12\n\nword_count\x18\x07 \x01(\x05\x12\x1f\n\x17\x61verage_word_difficulty\x18\x08 \x01(\x01\x12\x14\n\x0cunique_words\x18\t \x03(\t\x12\x19\n\x05stats\x18\n \x01(\x0b\x32\n.cta.Stats\"6\n\x05Stats\x12\x18\n\x10known_word_count\x18\x01 \x01(\x05\x12\x13\n\x0bknown_ratio\x18\x02 \x01(\x01'
+  serialized_pb=b'\n\rarticle.proto\x12\x03\x63ta\x1a\x1fgoogle/protobuf/timestamp.proto\"*\n\x08\x41rticles\x12\x1e\n\x08\x61rticles\x18\x01 \x03(\x0b\x32\x0c.cta.Article\"\x99\x02\n\x07\x41rticle\x12,\n\x08\x61\x64\x64_date\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x14\n\x0c\x63hinese_body\x18\x02 \x01(\t\x12\x15\n\rchinese_title\x18\x03 \x01(\t\x12\x0b\n\x03url\x18\x04 \x01(\t\x12\x30\n\x0cpublish_date\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0e\n\x06\x61uthor\x18\x06 \x01(\t\x12\x12\n\nword_count\x18\x07 \x01(\x05\x12\x1f\n\x17\x61verage_word_difficulty\x18\x08 \x01(\x01\x12\x14\n\x0cunique_words\x18\t \x03(\t\x12\x19\n\x05stats\x18\n \x01(\x0b\x32\n.cta.Stats\"6\n\x05Stats\x12\x18\n\x10known_word_count\x18\x01 \x01(\x05\x12\x13\n\x0bknown_ratio\x18\x02 \x01(\x01'
   ,
   dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
 
+
+
+_ARTICLES = _descriptor.Descriptor(
+  name='Articles',
+  full_name='cta.Articles',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='articles', full_name='cta.Articles.articles', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=55,
+  serialized_end=97,
+)
 
 
 _ARTICLE = _descriptor.Descriptor(
@@ -117,8 +149,8 @@ _ARTICLE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=56,
-  serialized_end=337,
+  serialized_start=100,
+  serialized_end=381,
 )
 
 
@@ -156,16 +188,25 @@ _STATS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=339,
-  serialized_end=393,
+  serialized_start=383,
+  serialized_end=437,
 )
 
+_ARTICLES.fields_by_name['articles'].message_type = _ARTICLE
 _ARTICLE.fields_by_name['add_date'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 _ARTICLE.fields_by_name['publish_date'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 _ARTICLE.fields_by_name['stats'].message_type = _STATS
+DESCRIPTOR.message_types_by_name['Articles'] = _ARTICLES
 DESCRIPTOR.message_types_by_name['Article'] = _ARTICLE
 DESCRIPTOR.message_types_by_name['Stats'] = _STATS
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+Articles = _reflection.GeneratedProtocolMessageType('Articles', (_message.Message,), {
+  'DESCRIPTOR' : _ARTICLES,
+  '__module__' : 'article_pb2'
+  # @@protoc_insertion_point(class_scope:cta.Articles)
+  })
+_sym_db.RegisterMessage(Articles)
 
 Article = _reflection.GeneratedProtocolMessageType('Article', (_message.Message,), {
   'DESCRIPTOR' : _ARTICLE,

@@ -11,6 +11,31 @@ import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'google/protobuf/timestamp.pb.dart' as $0;
 
+class Articles extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Articles', package: const $pb.PackageName('cta'), createEmptyInstance: create)
+    ..pc<Article>(1, 'articles', $pb.PbFieldType.PM, subBuilder: Article.create)
+    ..hasRequiredFields = false
+  ;
+
+  Articles._() : super();
+  factory Articles() => create();
+  factory Articles.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Articles.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  Articles clone() => Articles()..mergeFromMessage(this);
+  Articles copyWith(void Function(Articles) updates) => super.copyWith((message) => updates(message as Articles));
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Articles create() => Articles._();
+  Articles createEmptyInstance() => create();
+  static $pb.PbList<Articles> createRepeated() => $pb.PbList<Articles>();
+  @$core.pragma('dart2js:noInline')
+  static Articles getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Articles>(create);
+  static Articles _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<Article> get articles => $_getList(0);
+}
+
 class Article extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('Article', package: const $pb.PackageName('cta'), createEmptyInstance: create)
     ..aOM<$0.Timestamp>(1, 'addDate', subBuilder: $0.Timestamp.create)

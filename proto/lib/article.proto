@@ -3,6 +3,10 @@ import "google/protobuf/timestamp.proto";
 
 package cta;
 
+message Articles {
+    repeated Article articles = 1;
+}
+
 message Article {
     optional google.protobuf.Timestamp add_date = 1;
     optional string chinese_body = 2;
