@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:platform/platform.dart';
+import 'package:proto/article.pb.dart';
 
 void openUrl(String url) async {
   if (await canLaunch(url)) {

@@ -75,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   static Widget _buildArticleList(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance.collection('articles').snapshots(),
+      stream: Firestore.instance.collection('scraped_articles').snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return LinearProgressIndicator();
         return _buildList(context, snapshot.data.documents);

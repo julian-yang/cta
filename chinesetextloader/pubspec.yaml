@@ -18,19 +18,22 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cloud_firestore: ^0.8.2
+  cloud_firestore: ^0.13.6
   cupertino_icons: ^0.1.2
   english_words: ^3.1.0
   flutter_launcher_icons: "^0.7.0"
   fluttertoast: ^2.2.3
   url_launcher: ^4.0.3
   platform: ^2.2.0
-  android_intent: ^0.2.1
+  android_intent: '>=0.3.7+2 <2.0.0'
   intl: ^0.16.0
   http: ^0.12.0+2
   html: ^0.14.0+2
   translator: ^0.1.2
   material_design_icons_flutter: ^3.2.4096
+  protobuf: ^1.0.1
+  proto:
+    path: ../proto
 
 
 dev_dependencies:
