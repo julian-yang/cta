@@ -1,7 +1,8 @@
 // Create an infinite scrolling lazily loaded list
+import 'package:chineseTextLoader/article_wrapper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'article_toolbar.dart';
+import 'article_card.dart';
 import 'article_viewer.dart';
 import 'article.dart';
 import 'add_article_form.dart';
@@ -85,6 +86,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   static Widget _buildList(
       BuildContext context, List<DocumentSnapshot> snapshot) {
+    List<ArticleWrapper> articleWrappers = snapshot
+        .map((data) => ArticleWrapper.fromSnapshot(data))
+        .toList();
     List<Article> articles = snapshot
         .map((data) => Article.fromSnapshot(data))
         .toList()
@@ -108,18 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(
                       builder: (context) => ArticleViewer(article: article)));
             },
-            child: Card(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  ListTile(
-//                      leading: Icon(Icons.description),
-                      title: Text(article.chineseTitle),
-                      subtitle: Text(article.englishTitle)),
-                  ArticleToolbar(article: article)
-                ],
-              ),
-            )));
+            child: ArticleCard(article)));
   }
 }
 

@@ -40,6 +40,10 @@ Uri toFullMdnUri(String path) {
 
 final CollectionReference firestoreArticles = Firestore.instance.collection('articles');
 
+Article convertFromDocument(DocumentSnapshot document) {
+
+}
+
 //void commit(article) {
 //  Firestore.instance.runTransaction((transaction) async {
 //    final freshSnapshot = await transaction.get(article.reference);
