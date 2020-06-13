@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'article_card.dart';
 import 'article_viewer.dart';
 import 'article.dart';
+import 'article_table.dart';
 import 'add_article_form.dart';
 import 'add_article_wizard.dart';
 
@@ -32,6 +33,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   static const List<ContextToWidget> _tabs = <ContextToWidget>[
     _MyHomePageState._buildArticleList,
+    _MyHomePageState._buildArticleTable,
     _MyHomePageState._buildAddArticle
   ];
 
@@ -63,6 +65,8 @@ class _MyHomePageState extends State<MyHomePage> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.library_books), title: Text('Articles')),
             BottomNavigationBarItem(
+                icon: Icon(Icons.library_music), title: Text('Table')),
+            BottomNavigationBarItem(
                 icon: Icon(Icons.library_add), title: Text('Add Article'))
           ],
           currentIndex: _selectedIndex,
@@ -81,6 +85,21 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) return LinearProgressIndicator();
         return _buildList(context, snapshot.data.documents);
+      },
+    );
+  }
+
+  static Widget _buildArticleTable(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: Firestore.instance.collection('scraped_articles').snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return LinearProgressIndicator();
+        List<ArticleWrapper> articles = snapshot.data.documents
+            .map((documentSnapshot) => ArticleWrapper.fromSnapshot(documentSnapshot))
+            .toList()
+          ..sort(ArticleWrapper.compareAddDate);
+//        ArticleTableSource tableSource = ArticleTableSource(articles);
+        return ArticleTable(articles);
       },
     );
   }

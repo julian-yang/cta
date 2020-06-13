@@ -53,6 +53,9 @@ DateTime convertTimestamp(Timestamp timestamp) {
   return DateTime.fromMicrosecondsSinceEpoch(microseconds.toInt());
 }
 
+int unknownWordCount(Article article) =>
+    article.uniqueWords.length - article.stats.knownWordCount;
+
 //void commit(article) {
 //  Firestore.instance.runTransaction((transaction) async {
 //    final freshSnapshot = await transaction.get(article.reference);
