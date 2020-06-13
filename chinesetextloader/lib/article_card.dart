@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:proto/article.pb.dart';
-import 'article_toolbar.dart';
 import 'package:flutter/material.dart';
+import 'package:proto/article.pb.dart';
+
+import 'article_toolbar.dart';
 import 'utils.dart';
 
 class ArticleCard extends StatelessWidget {

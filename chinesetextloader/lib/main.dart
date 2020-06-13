@@ -32,7 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
   static const List<ContextToWidget> _tabs = <ContextToWidget>[
-    _MyHomePageState._buildArticleList,
+    _MyHomePageState._buildFavoritesList,
     _MyHomePageState._buildArticleTable,
     _MyHomePageState._buildAddArticle
   ];
@@ -63,9 +63,9 @@ class _MyHomePageState extends State<MyHomePage> {
       bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-                icon: Icon(Icons.library_books), title: Text('Articles')),
+                icon: Icon(Icons.favorite), title: Text('Favorites')),
             BottomNavigationBarItem(
-                icon: Icon(Icons.library_music), title: Text('Table')),
+                icon: Icon(Icons.library_books), title: Text('Articles')),
             BottomNavigationBarItem(
                 icon: Icon(Icons.library_add), title: Text('Add Article'))
           ],
@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return AddArticleForm();
   }
 
-  static Widget _buildArticleList(BuildContext context) {
+  static Widget _buildFavoritesList(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: Firestore.instance.collection('scraped_articles').snapshots(),
       builder: (context, snapshot) {

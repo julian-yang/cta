@@ -46,6 +46,15 @@ class ArticleWrapper {
 
   String get key => article.url;
 
+  String get totalWords => article.wordCount.toString();
+
+  String get averageWordDifficulty => article.averageWordDifficulty.toStringAsFixed(2);
+  String get unknownCount => unknownWordCount(article).toString();
+  String get ratio => knownRatioAsPercentage(article);
+
+  static String knownRatioAsPercentage(Article article) =>
+      '${(article.stats.knownRatio * 100).toStringAsFixed(1)}%';
+
 //  DateTime addDate() =>
 //  DateTime.fromMicrosecondsSinceEpoch();
 
