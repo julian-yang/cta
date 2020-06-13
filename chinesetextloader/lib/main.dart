@@ -48,15 +48,16 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Chinese Text Loader'),
       ),
       body: _tabs.elementAt(_selectedIndex)(context),
-      floatingActionButton: Builder(builder: (context) =>
-        FloatingActionButton(
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => AddArticleWizard()));
-            },
-            child: Icon(Icons.add),
-            backgroundColor: Colors.amber[800])
-      ),
+      floatingActionButton: Builder(
+          builder: (context) => FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => AddArticleWizard()));
+              },
+              child: Icon(Icons.add),
+              backgroundColor: Colors.amber[800])),
       bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
@@ -86,33 +87,36 @@ class _MyHomePageState extends State<MyHomePage> {
 
   static Widget _buildList(
       BuildContext context, List<DocumentSnapshot> snapshot) {
-    List<ArticleWrapper> articleWrappers = snapshot
+    List<ArticleWrapper> articles = snapshot
         .map((data) => ArticleWrapper.fromSnapshot(data))
-        .toList();
-    List<Article> articles = snapshot
+        .toList()
+          ..sort(ArticleWrapper.compareAddDate);
+    List<Article> oldArticles = snapshot
         .map((data) => Article.fromSnapshot(data))
         .toList()
           ..sort((a, b) => a.addDate.compareTo(b.addDate));
     return ListView(
       padding: const EdgeInsets.only(top: 20.0),
       children: articles.reversed
-          .map((data) => _buildListItem(context, data))
+          .map((article) => _buildListItem(context, article))
           .toList(),
     );
   }
 
-  static Widget _buildListItem(BuildContext context, Article article) {
+  static Widget _buildListItem(
+      BuildContext context, ArticleWrapper articleWrapper) {
     return Padding(
-        key: ValueKey(article.englishTitle),
+        key: ValueKey(articleWrapper.key),
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: InkWell(
             onTap: () {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => ArticleViewer(article: article)));
+                      builder: (context) =>
+                          ArticleViewer(article: articleWrapper.article)));
             },
-            child: ArticleCard(article)));
+            child: ArticleCard(articleWrapper.article)));
   }
 }
 

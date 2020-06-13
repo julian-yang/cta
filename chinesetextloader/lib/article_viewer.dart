@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'article.dart';
+import 'package:proto/article.pb.dart';
 import 'article_toolbar.dart';
 import 'utils.dart';
 

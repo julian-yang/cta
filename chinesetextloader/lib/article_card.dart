@@ -1,4 +1,4 @@
-import 'article.dart';
+import 'package:proto/article.pb.dart';
 import 'article_toolbar.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +20,7 @@ class ArticleCard extends StatelessWidget {
               subtitle: Row(
                 children: <Widget>[
 //                  Text(_)
-                  Text(_article.englishTitle),
+                  Text(_article.averageWordDifficulty.toString()),
                 ],
               )),
           ArticleToolbar(article: _article)

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'article.dart';
+import 'package:proto/article.pb.dart';
 import 'utils.dart';
 
 class ArticleToolbar extends StatelessWidget {
@@ -17,7 +17,7 @@ class ArticleToolbar extends StatelessWidget {
             children: <Widget>[
           Padding(
               padding: EdgeInsets.only(left: 20.0),
-              child: Text(_dateFormat.format(article.addDate))),
+              child: Text(_dateFormat.format(convertTimestamp(article.addDate)))),
           ButtonBar(children: <Widget>[
             RaisedButton(
                 child: Padding(

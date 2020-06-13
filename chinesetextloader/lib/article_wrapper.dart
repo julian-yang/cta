@@ -1,5 +1,4 @@
-import 'dart:convert';
-
+import 'utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:proto/article.pb.dart';
 
@@ -33,11 +32,6 @@ class ArticleWrapper {
           : MapEntry(key, value)
       );
 
-  static DateTime convertTimestamp(Timestamp timestamp) {
-    return DateTime.fromMicrosecondsSinceEpoch(
-        timestamp.microsecondsSinceEpoch);
-  }
-
   static dynamic customEncoder(dynamic value) {
     if (value is Timestamp) {
       return {'seconds': value.seconds, 'nanoseconds': value.nanoseconds};
@@ -45,6 +39,12 @@ class ArticleWrapper {
       return value;
     }
   }
+
+  static int compareAddDate(ArticleWrapper a, ArticleWrapper b) =>
+      convertTimestamp(a.article.addDate).compareTo(
+          convertTimestamp(b.article.addDate));
+
+  String get key => article.url;
 
 //  DateTime addDate() =>
 //  DateTime.fromMicrosecondsSinceEpoch();
