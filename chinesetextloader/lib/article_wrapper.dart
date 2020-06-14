@@ -7,8 +7,8 @@ class ArticleWrapper {
   final DocumentReference reference;
 
   ArticleWrapper.fromSnapshot(DocumentSnapshot snapshot)
-      : article = snapshotToArticle(snapshot), reference = snapshot.reference;
-
+      : article = snapshotToArticle(snapshot),
+        reference = snapshot.reference;
 
   @override
   String toString() => 'ArticleWrapper<$article:$reference>';
@@ -19,18 +19,17 @@ class ArticleWrapper {
     return article;
   }
 
-  static MapEntry<String, dynamic> maybeConvertTimestamp(String key, dynamic value) =>
+  static MapEntry<String, dynamic> maybeConvertTimestamp(
+          String key, dynamic value) =>
       (value is Timestamp)
           ? MapEntry(key, value.toDate().toUtc().toIso8601String())
           : MapEntry(key, value);
 
   static Map<String, dynamic> convertTimestampEntry(
-      Map<String, dynamic> data) =>
-      data.map((key, value) =>
-      (value is Timestamp)
+          Map<String, dynamic> data) =>
+      data.map((key, value) => (value is Timestamp)
           ? MapEntry(key, value.toDate().toUtc().toIso8601String())
-          : MapEntry(key, value)
-      );
+          : MapEntry(key, value));
 
   static dynamic customEncoder(dynamic value) {
     if (value is Timestamp) {
@@ -41,16 +40,23 @@ class ArticleWrapper {
   }
 
   static int compareAddDate(ArticleWrapper a, ArticleWrapper b) =>
-      convertTimestamp(a.article.addDate).compareTo(
-          convertTimestamp(b.article.addDate));
+      convertTimestamp(a.article.addDate)
+          .compareTo(convertTimestamp(b.article.addDate));
 
-  String get key => article.url;
+  ArticleProperty get key => ArticleProperty(article.url, article.url);
 
-  String get totalWords => article.wordCount.toString();
+  ArticleProperty get totalWords =>
+      ArticleProperty(article.wordCount, article.wordCount.toString());
 
-  String get averageWordDifficulty => article.averageWordDifficulty.toStringAsFixed(2);
-  String get unknownCount => unknownWordCount(article).toString();
-  String get ratio => knownRatioAsPercentage(article);
+  ArticleProperty get averageWordDifficulty => ArticleProperty(
+      article.averageWordDifficulty,
+      article.averageWordDifficulty.toStringAsFixed(2));
+
+  ArticleProperty get unknownCount => ArticleProperty(
+      unknownWordCount(article), unknownWordCount(article).toString());
+
+  ArticleProperty get ratio => ArticleProperty(
+      article.stats.knownRatio, knownRatioAsPercentage(article));
 
   static String knownRatioAsPercentage(Article article) =>
       '${(article.stats.knownRatio * 100).toStringAsFixed(1)}%';
@@ -58,4 +64,12 @@ class ArticleWrapper {
 //  DateTime addDate() =>
 //  DateTime.fromMicrosecondsSinceEpoch();
 
+}
+
+class ArticleProperty {
+  final String display;
+  final dynamic value;
+
+//  ArticleProperty(this.value) : this.display = value.toString();
+  ArticleProperty(this.value, this.display);
 }

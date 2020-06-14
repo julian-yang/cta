@@ -21,12 +21,9 @@ class _ArticleTableState extends State<ArticleTable> {
           List<ArticleWrapper> articles = snapshot.data.documents
               .map((documentSnapshot) =>
                   ArticleWrapper.fromSnapshot(documentSnapshot))
-          .take(2)
-              .toList()
-                ;
+              .toList();
           ArticleComparator comparator = createComparator();
           articles.sort(comparator);
-//                ..sort(ArticleWrapper.compareAddDate);
           return buildTable(context, articles);
         });
   }
@@ -34,10 +31,11 @@ class _ArticleTableState extends State<ArticleTable> {
   int Function(ArticleWrapper a, ArticleWrapper b) createComparator() {
     return (ArticleWrapper a, ArticleWrapper b) {
       for (DataColumnConfig config in tableColumnConfig) {
-        if (config.sortable == null) continue;
+        if (config.sortAscending == null) continue;
+        // sorts by ascending
         int result = config.comparator.call(a, b);
         if (result != 0) {
-          return result;
+          return config.sortAscending ? result : -result;
         }
       }
       return ArticleWrapper.compareAddDate(a, b);
@@ -45,12 +43,12 @@ class _ArticleTableState extends State<ArticleTable> {
   }
 
   Stream<QuerySnapshot> getSortedSnapshot() {
-    SortState ratioSortable = tableColumnConfig
-        .firstWhere((config) => config.name == 'Ratio')
-        .sortable;
-    SortState difficultySortable = tableColumnConfig
-        .firstWhere((config) => config.name == 'Diff')
-        .sortable;
+//    SortState ratioSortable = tableColumnConfig
+//        .firstWhere((config) => config.name == 'Ratio')
+//        .sortable;
+//    SortState difficultySortable = tableColumnConfig
+//        .firstWhere((config) => config.name == 'Diff')
+//        .sortable;
     return Firestore.instance
         .collection('scraped_articles')
 //        .orderBy('stats.known_ratio',
@@ -98,7 +96,7 @@ class _ArticleTableState extends State<ArticleTable> {
                 .map((config) => Container(
                     width: config.width,
                     alignment: config.alignment,
-                    child: config.sortable != null
+                    child: config.sortAscending != null
                         ? sortableHeader(config)
                         : Text(config.name)))
                 .toList()),
@@ -106,18 +104,15 @@ class _ArticleTableState extends State<ArticleTable> {
 
   Widget sortableHeader(DataColumnConfig config) {
     return ActionChip(
-        avatar: Icon(config.sortable == SortState.ASCENDING
-            ? Icons.arrow_upward
-            : Icons.arrow_downward),
+        avatar: Icon(
+            config.sortAscending ? Icons.arrow_upward : Icons.arrow_downward),
         label: Text(config.name),
         onPressed: () {
           setState(() {
             String name = config.name;
             DataColumnConfig columnConfig =
                 tableColumnConfig.firstWhere((config) => config.name == name);
-            columnConfig.sortable = columnConfig.sortable == SortState.ASCENDING
-                ? SortState.DESCENDING
-                : SortState.ASCENDING;
+            columnConfig.sortAscending = !columnConfig.sortAscending;
           });
         });
   }
@@ -125,34 +120,34 @@ class _ArticleTableState extends State<ArticleTable> {
   static final List<DataColumnConfig> defaultColumnConfig = [
     DataColumnConfig(
         name: 'Title',
-        propertyExtractor: (a) => a.article.chineseTitle,
+        propertyExtractor: (a) =>
+            ArticleProperty(a.article.chineseTitle, a.article.chineseTitle),
         alignment: Alignment.centerLeft,
-        width: 125,
-        sortable: null),
+        width: 125),
     DataColumnConfig(
         name: 'Total',
         propertyExtractor: (a) => a.totalWords,
         alignment: Alignment.center,
         width: 80,
-        sortable: SortState.DESCENDING),
+        sortAscending: true),
     DataColumnConfig(
         name: 'Unknown',
         propertyExtractor: (a) => a.unknownCount,
         alignment: Alignment.center,
         width: 120,
-        sortable: SortState.DESCENDING),
+        sortAscending: true),
     DataColumnConfig(
         name: 'Ratio',
         propertyExtractor: (a) => a.ratio,
         alignment: Alignment.center,
         width: 90,
-        sortable: SortState.DESCENDING),
+        sortAscending: false),
     DataColumnConfig(
-        name: 'Diff',
+        name: 'Difficulty',
         propertyExtractor: (a) => a.averageWordDifficulty,
         alignment: Alignment.center,
-        width: 80,
-        sortable: SortState.ASCENDING),
+        width: 120,
+        sortAscending: true),
   ];
 }
 
@@ -160,7 +155,9 @@ enum SortState { ASCENDING, DESCENDING }
 
 typedef CellCreator = Widget Function(BuildContext context,
     ArticleWrapper articleWrapper, DataColumnConfig config);
-typedef PropertyExtractor = String Function(ArticleWrapper articleWrapper);
+typedef PropertyExtractor = ArticleProperty Function(
+    ArticleWrapper articleWrapper);
+typedef ValueExtractor = dynamic Function(ArticleWrapper articleWrapper);
 typedef ArticleComparator = int Function(ArticleWrapper a, ArticleWrapper b);
 
 class DataColumnConfig {
@@ -168,14 +165,15 @@ class DataColumnConfig {
   final String name;
   final PropertyExtractor propertyExtractor;
   final AlignmentGeometry alignment;
-  SortState sortable;
+  bool sortAscending;
 
-  DataColumnConfig(
-      {@required this.name,
-      @required this.propertyExtractor,
-      @required this.alignment,
-      @required this.width,
-      @required this.sortable});
+  DataColumnConfig({
+    @required this.name,
+    @required this.propertyExtractor,
+    @required this.alignment,
+    @required this.width,
+    this.sortAscending,
+  });
 
   CellCreator get valueCreator => propertyCell(propertyExtractor);
 
@@ -185,9 +183,10 @@ class DataColumnConfig {
       (context, articleWrapper, config) => Container(
           width: config.width,
           alignment: config.alignment,
-          child: Text(extractor.call(articleWrapper)));
+          child: Text(extractor.call(articleWrapper).display));
 
+  // Sorts ascending.
   static ArticleComparator createComparator(PropertyExtractor extractor) =>
       (ArticleWrapper a, ArticleWrapper b) =>
-          extractor.call(a).compareTo(extractor.call(b));
+          extractor.call(a).value.compareTo(extractor.call(b).value);
 }
