@@ -1,4 +1,5 @@
 import 'package:proto/article.pb.dart';
+import 'package:vector_math/vector_math.dart' hide Colors;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'article_wrapper.dart';
@@ -118,18 +119,24 @@ class _ArticleTableState extends State<ArticleTable> {
       );
 
   Widget draggableHeaderSpace(DataColumnConfig config, int index) {
+    Widget headerChip = sortableHeader(config);
     return Column(
 //      alignment: Alignment.center,
       children: <Widget>[
         HeaderDragTarget(index),
         Draggable<DataColumnConfig>(
-            child: sortableHeader(config),
-            feedback: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  shape: BoxShape.rectangle,
-                ),
-                child: Text('f')),
+            child: headerChip,
+            feedback: Material(
+              child: DecoratedBox(
+                  decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.all(Radius.circular(16.0))),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(config.name, style: TextStyle(fontSize: 16)),
+                  )),
+            ),
             childWhenDragging: Opacity(
               opacity: .5,
               child: DecoratedBox(
