@@ -110,10 +110,6 @@ class _MyHomePageState extends State<MyHomePage> {
         .map((data) => ArticleWrapper.fromSnapshot(data))
         .toList()
           ..sort(ArticleWrapper.compareAddDate);
-    List<Article> oldArticles = snapshot
-        .map((data) => Article.fromSnapshot(data))
-        .toList()
-          ..sort((a, b) => a.addDate.compareTo(b.addDate));
     return ListView(
       padding: const EdgeInsets.only(top: 20.0),
       children: articles.reversed

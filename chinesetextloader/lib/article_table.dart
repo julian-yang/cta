@@ -1,7 +1,9 @@
+import 'package:flutter/services.dart';
 import 'package:proto/article.pb.dart';
 import 'article_toolbar.dart';
 import 'package:flutter/material.dart';
 import 'article_wrapper.dart';
+import 'article_viewer.dart';
 import 'utils.dart';
 
 class ArticleTable extends StatelessWidget {
@@ -14,13 +16,11 @@ class ArticleTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return wrap2DScrollbar(DataTable(
-      // seems like an ok height for now, mainly due to article title.
-      dataRowHeight: 80,
-      columnSpacing: 30,
-      columns: columnConfig.map((config) => config.column).toList(),
-      rows: _articleSource.map(fromArticle).toList(),
-    ));
+    return wrap2DScrollbar(Column(
+        children: <Widget>[createHeaderRow(columnConfig)] +
+            _articleSource
+                .map((article) => fromArticle(context, article))
+                .toList()));
   }
 
   static Widget wrap2DScrollbar(Widget child) => Scrollbar(
@@ -28,71 +28,82 @@ class ArticleTable extends StatelessWidget {
           child: SingleChildScrollView(
               scrollDirection: Axis.horizontal, child: child)));
 
-  static DataRow fromArticle(ArticleWrapper articleWrapper) {
-    return DataRow(
-        cells: columnConfig
-            .map((config) => config.valueCreator.call(articleWrapper))
-            .toList());
+  static Widget fromArticle(
+      BuildContext context, ArticleWrapper articleWrapper) {
+    return Card(
+      color: articleWrapper.article.wordCount < 1000 ? Colors.pink[200] : null,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+            children: columnConfig
+                .map((config) =>
+                    config.valueCreator.call(context, articleWrapper, config))
+                .toList()),
+      ),
+    );
   }
+
+  static Widget createHeaderRow(List<DataColumnConfig> configs) => Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+            children: configs
+                .map((config) => Container(
+                    width: config.width,
+                    alignment: config.alignment,
+                    child: Text(config.title)))
+                .toList()),
+      );
 
   static final List<DataColumnConfig> columnConfig = [
     DataColumnConfig(
-        DataColumn(label: Text('Title')), DataColumnConfig.titleCell),
-    DataColumnConfig(DataColumn(label: Text('Total'), numeric: true),
-        DataColumnConfig.propertyCell((a) => a.totalWords)),
-    DataColumnConfig(DataColumn(label: Text('Unknown'), numeric: true),
-        DataColumnConfig.propertyCell((a) => a.unknownCount)),
-    DataColumnConfig(DataColumn(label: Text('Ratio'), numeric: true),
-        DataColumnConfig.propertyCell((a) => a.ratio)),
-    DataColumnConfig(DataColumn(label: Text('Diff'), numeric: true),
-        DataColumnConfig.propertyCell((a) => a.averageWordDifficulty)),
+        title: 'Title',
+        valueCreator:
+            DataColumnConfig.propertyCell((a) => a.article.chineseTitle),
+        alignment: Alignment.centerLeft,
+        width: 125),
+    DataColumnConfig(
+        title: 'Total',
+        valueCreator: DataColumnConfig.propertyCell((a) => a.totalWords),
+        alignment: Alignment.centerRight,
+        width: 60),
+    DataColumnConfig(
+        title: 'Unknown',
+        valueCreator: DataColumnConfig.propertyCell((a) => a.unknownCount),
+        alignment: Alignment.centerRight,
+        width: 80),
+    DataColumnConfig(
+        title: 'Ratio',
+        valueCreator: DataColumnConfig.propertyCell((a) => a.ratio),
+        alignment: Alignment.centerRight,
+        width: 60),
+    DataColumnConfig(
+        title: 'Diff',
+        valueCreator:
+            DataColumnConfig.propertyCell((a) => a.averageWordDifficulty),
+        alignment: Alignment.centerRight,
+        width: 60),
   ];
 }
 
-typedef CellCreator = DataCell Function(ArticleWrapper articleWrapper);
+typedef CellCreator = /*DataCell*/ Widget Function(BuildContext context,
+    ArticleWrapper articleWrapper, DataColumnConfig config);
 typedef PropertyExtractor = String Function(ArticleWrapper articleWrapper);
 
 class DataColumnConfig {
-  final DataColumn column;
+  final double width;
+  final String title;
   final CellCreator valueCreator;
+  final AlignmentGeometry alignment;
 
-  DataColumnConfig(this.column, this.valueCreator);
-
-  static DataCell titleCell(ArticleWrapper articleWrapper) => DataCell(
-      Container(width: 125, child: Text(articleWrapper.article.chineseTitle)));
+  DataColumnConfig(
+      {@required this.title,
+      @required this.valueCreator,
+      @required this.alignment,
+      @required this.width});
 
   static CellCreator propertyCell(PropertyExtractor extractor) =>
-      (articleWrapper) => DataCell(Container(
-          width: 40,
-          alignment: Alignment.centerRight,
-          child: Text(extractor.call(articleWrapper))));
-}
-
-class ArticleTableSource extends DataTableSource {
-  final List<ArticleWrapper> _articleWrappers;
-
-  ArticleTableSource(this._articleWrappers);
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get selectedRowCount {
-    return 0;
-  }
-
-  @override
-  int get rowCount {
-    return _articleWrappers.length;
-  }
-
-  @override
-  DataRow getRow(int index) {
-    return fromArticle(_articleWrappers[index]);
-  }
-
-  static DataRow fromArticle(ArticleWrapper articleWrapper) {
-    return DataRow(
-        cells: <DataCell>[DataCell(Text(articleWrapper.article.chineseTitle))]);
-  }
+      (context, articleWrapper, config) => Container(
+          width: config.width,
+          alignment: config.alignment,
+          child: Text(extractor.call(articleWrapper)));
 }

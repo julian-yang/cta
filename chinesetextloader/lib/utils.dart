@@ -7,6 +7,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:platform/platform.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:proto/article.pb.dart';
+import 'article_wrapper.dart';
+import 'article_viewer.dart';
 
 void openUrl(String url) async {
   if (await canLaunch(url)) {
@@ -55,6 +57,14 @@ DateTime convertTimestamp(Timestamp timestamp) {
 
 int unknownWordCount(Article article) =>
     article.uniqueWords.length - article.stats.knownWordCount;
+
+void openArticleViewer(BuildContext context, ArticleWrapper articleWrapper) {
+  Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              ArticleViewer(article: articleWrapper.article)));
+}
 
 //void commit(article) {
 //  Firestore.instance.runTransaction((transaction) async {
