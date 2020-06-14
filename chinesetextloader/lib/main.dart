@@ -2,7 +2,7 @@
 import 'package:chineseTextLoader/favorites_viewer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'article_table.dart';
+import 'article_table/article_table.dart';
 import 'add_article_form.dart';
 import 'add_article_wizard.dart';
 

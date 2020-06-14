@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'article_wrapper.dart';
+import '../article_wrapper.dart';
 
 typedef CellCreator = Widget Function(BuildContext context,
     ArticleWrapper articleWrapper, DataColumnConfig config);
@@ -32,6 +32,15 @@ class DataColumnConfigModel extends ChangeNotifier {
       _columns.insert(index, temp);
     }
     notifyListeners();
+  }
+
+  void updateSort(String name, bool sortAscending) {
+    _columns.firstWhere((c) =>c.name == name)?.sortAscending = sortAscending;
+    notifyListeners();
+  }
+
+  DataColumnConfig get(String name) {
+    return _columns.firstWhere((c) => c.name == name);
   }
 }
 

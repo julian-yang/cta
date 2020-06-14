@@ -2,8 +2,9 @@ import 'package:proto/article.pb.dart';
 import 'package:vector_math/vector_math.dart' hide Colors;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'article_wrapper.dart';
-import 'utils.dart';
+import '../article_wrapper.dart';
+import '../utils.dart';
+import 'header_draggable_chip.dart';
 import 'data_column_config.dart';
 import 'header_drag_target.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +19,6 @@ class _ArticleTableState extends State<ArticleTable> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
         create: (context) => DataColumnConfigModel(defaultColumnConfig),
-        // TODO: pipe Consumer here so we can use the model's ordering for comparators
         child: Consumer<DataColumnConfigModel>(
             builder: (context, configModel, child) =>
                 StreamBuilder<QuerySnapshot>(
@@ -72,7 +72,7 @@ class _ArticleTableState extends State<ArticleTable> {
         builder: (context, configModel, child) => Column(
             children: <Widget>[createHeaderRow(configModel.columns)] +
                 articles
-                    .map((article) => fromArticle(context, article))
+                    .map((article) => buildArticleRow(context, article))
                     .toList())));
   }
 
@@ -81,7 +81,7 @@ class _ArticleTableState extends State<ArticleTable> {
           child: SingleChildScrollView(
               scrollDirection: Axis.horizontal, child: child)));
 
-  Widget fromArticle(BuildContext context, ArticleWrapper articleWrapper) {
+  Widget buildArticleRow(BuildContext context, ArticleWrapper articleWrapper) {
     return Card(
       color: articleWrapper.article.favorite ? Colors.pink[200] : null,
       child: InkWell(
@@ -118,34 +118,21 @@ class _ArticleTableState extends State<ArticleTable> {
         }).toList()),
       );
 
+  List<Widget> buildHeaderChipsAndTargets() {
+
+  }
+
   Widget draggableHeaderSpace(DataColumnConfig config, int index) {
-    Widget headerChip = sortableHeader(config);
     return Column(
 //      alignment: Alignment.center,
       children: <Widget>[
         HeaderDragTarget(index),
-        Draggable<DataColumnConfig>(
-            child: headerChip,
-            feedback: FakeChip(config.name),
-            childWhenDragging:
-                Opacity(opacity: .5, child: FakeChip(config.name)),
-            data: config),
+        HeaderDraggableChip(configName: config.name),
       ],
     );
   }
 
-  Widget sortableHeader(DataColumnConfig config) {
-    return ActionChip(
-        avatar: Icon(
-            config.sortAscending ? Icons.arrow_upward : Icons.arrow_downward),
-        label: Text(config.name),
-        onPressed: () {
-          setState(() {
-            // TODO: maybe this will break in the future? May need to use consumer instead.
-            config.sortAscending = !config.sortAscending;
-          });
-        });
-  }
+
 
   static final List<DataColumnConfig> defaultColumnConfig = [
     DataColumnConfig(
@@ -181,26 +168,8 @@ class _ArticleTableState extends State<ArticleTable> {
   ];
 }
 
-class FakeChip extends StatelessWidget {
-  final String _text;
 
-  const FakeChip(
-    this._text, {
-    Key key,
-  }) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      child: DecoratedBox(
-          decoration: BoxDecoration(
-              color: Colors.grey[300],
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.all(Radius.circular(16.0))),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(_text, style: TextStyle(fontSize: 16)),
-          )),
-    );
-  }
-}
+
+
+
