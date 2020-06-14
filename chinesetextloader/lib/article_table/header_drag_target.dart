@@ -18,7 +18,7 @@ class _HeaderDragTargetState extends State<HeaderDragTarget> {
   @override
   Widget build(BuildContext context) {
     return Consumer<DataColumnConfigModel>(
-        builder: (context, configModel, child) => DragTarget<String>(
+        builder: (context, configModel, child) => DragTarget<DataColumnConfig>(
             builder: (context, candidates, rejects) => DecoratedBox(
                 decoration: BoxDecoration(
                   color: candidates.isNotEmpty ? Colors.red : Colors.orange,
@@ -28,9 +28,9 @@ class _HeaderDragTargetState extends State<HeaderDragTarget> {
                   padding: const EdgeInsets.all(20.0),
                   child: Text('target'),
                 )),
-            onWillAccept: (data) => data is String
-                ? data != configModel.columns[widget.index].name
-                : false,
+            onWillAccept: (data) =>
+                data != configModel.columns[widget.index]
+                ,
             onAccept: (data) {
               configModel.rearrange(data, widget.index);
 //              showDialog(context: context, child: Text('Accepted!'));

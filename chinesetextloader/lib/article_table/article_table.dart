@@ -8,6 +8,7 @@ import 'header_draggable_chip.dart';
 import 'data_column_config.dart';
 import 'header_drag_target.dart';
 import 'package:provider/provider.dart';
+import 'dart:collection';
 
 class ArticleTable extends StatefulWidget {
   @override
@@ -30,21 +31,22 @@ class _ArticleTableState extends State<ArticleTable> {
                               ArticleWrapper.fromSnapshot(documentSnapshot))
                           .toList();
                       ArticleComparator comparator =
-                          createComparator(configModel.columns);
+                          createComparator(configModel);
                       articles.sort(comparator);
                       return buildTable(context, articles);
                     })));
   }
 
   int Function(ArticleWrapper a, ArticleWrapper b) createComparator(
-      List<DataColumnConfig> columns) {
+      DataColumnConfigModel model) {
     return (ArticleWrapper a, ArticleWrapper b) {
-      for (DataColumnConfig config in columns) {
-        if (config.sortAscending == null) continue;
+      for (DataColumnConfig config in model.columns) {
+        SortState sortState = model.getSortState(config);
+        if (!sortState.sortable) continue;
         // sorts by ascending
         int result = config.comparator.call(a, b);
         if (result != 0) {
-          return config.sortAscending ? result : -result;
+          return sortState == SortState.ASCENDING ? result : -result;
         }
       }
       return ArticleWrapper.compareAddDate(a, b);
@@ -70,7 +72,7 @@ class _ArticleTableState extends State<ArticleTable> {
   Widget buildTable(BuildContext context, List<ArticleWrapper> articles) {
     return wrap2DScrollbar(Consumer<DataColumnConfigModel>(
         builder: (context, configModel, child) => Column(
-            children: <Widget>[createHeaderRow(configModel.columns)] +
+            children: <Widget>[createHeaderRow(configModel)] +
                 articles
                     .map((article) => buildArticleRow(context, article))
                     .toList())));
@@ -102,16 +104,16 @@ class _ArticleTableState extends State<ArticleTable> {
     );
   }
 
-  Widget createHeaderRow(List<DataColumnConfig> configs) => Padding(
+  Widget createHeaderRow(DataColumnConfigModel model) => Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
             children:
-                new List<int>.generate(configs.length, (i) => i).map((index) {
-          DataColumnConfig config = configs[index];
+                new List<int>.generate(model.columns.length, (i) => i).map((index) {
+          DataColumnConfig config = model.columns[index];
           return Container(
               width: config.width,
               alignment: config.alignment,
-              child: config.sortAscending != null
+              child: model.getSortState(config).sortable
 //                        ? sortableHeader(config)
                   ? draggableHeaderSpace(config, index)
                   : Text(config.name));
@@ -127,45 +129,19 @@ class _ArticleTableState extends State<ArticleTable> {
 //      alignment: Alignment.center,
       children: <Widget>[
         HeaderDragTarget(index),
-        HeaderDraggableChip(configName: config.name),
+        HeaderDraggableChip(config: config),
       ],
     );
   }
 
-
-
-  static final List<DataColumnConfig> defaultColumnConfig = [
-    DataColumnConfig(
-        name: 'Title',
-        propertyExtractor: (a) =>
-            ArticleProperty(a.article.chineseTitle, a.article.chineseTitle),
-        alignment: Alignment.centerLeft,
-        width: 125),
-    DataColumnConfig(
-        name: 'Total',
-        propertyExtractor: (a) => a.totalWords,
-        alignment: Alignment.center,
-        width: 80,
-        sortAscending: true),
-    DataColumnConfig(
-        name: 'Unknown',
-        propertyExtractor: (a) => a.unknownCount,
-        alignment: Alignment.center,
-        width: 120,
-        sortAscending: true),
-    DataColumnConfig(
-        name: 'Ratio',
-        propertyExtractor: (a) => a.ratio,
-        alignment: Alignment.center,
-        width: 90,
-        sortAscending: false),
-    DataColumnConfig(
-        name: 'Difficulty',
-        propertyExtractor: (a) => a.averageWordDifficulty,
-        alignment: Alignment.center,
-        width: 120,
-        sortAscending: true),
-  ];
+  // ColumnConfig to SortAscending
+  static final Map<DataColumnConfig, SortState> defaultColumnConfig = {
+    DataColumnConfig.TITLE: SortState.NONE, // This one is not sortable
+    DataColumnConfig.TOTAL_WORDS: SortState.ASCENDING,
+    DataColumnConfig.UNKNOWN_WORDS: SortState.ASCENDING,
+    DataColumnConfig.KNOWN_RATIO: SortState.DESCENDING,
+    DataColumnConfig.DIFFICULTY: SortState.ASCENDING,
+  };
 }
 
 

@@ -7,31 +7,29 @@ import 'data_column_config.dart';
 class HeaderDraggableChip extends StatelessWidget {
   const HeaderDraggableChip({
     Key key,
-    @required this.configName,
+    @required this.config,
   }) : super(key: key);
 
-  final String configName;
+  final DataColumnConfig config;
 
   @override
   Widget build(BuildContext context) {
-    return Draggable<String>(
-        child: sortableHeader(configName),
-        feedback: FakeChip(configName),
-        childWhenDragging: Opacity(opacity: .5, child: FakeChip(configName)),
-        data: configName);
+    return Draggable<DataColumnConfig>(
+        child: sortableHeader(config),
+        feedback: FakeChip(config.name),
+        childWhenDragging: Opacity(opacity: .5, child: FakeChip(config.name)),
+        data: config);
   }
 
-  Widget sortableHeader(String configName) {
+  Widget sortableHeader(DataColumnConfig config) {
     return Consumer<DataColumnConfigModel>(builder: (context, model, child) {
-      DataColumnConfig config = model.get(configName);
       return ActionChip(
-          avatar: Icon(
-              config.sortAscending ? Icons.arrow_upward : Icons.arrow_downward),
+          avatar: Icon(model.getSortState(config) == SortState.ASCENDING
+              ? Icons.arrow_upward
+              : Icons.arrow_downward),
           label: Text(config.name),
           onPressed: () {
-            model.updateSort(configName, !config.sortAscending);
-            // TODO: maybe this will break in the future? May need to use consumer instead.
-//            config.sortAscending = !config.sortAscending;
+            model.toggleSort(config);
           });
     });
   }

@@ -45,21 +45,21 @@ class ArticleWrapper {
 
   ArticleProperty get key => ArticleProperty(article.url, article.url);
 
-  ArticleProperty get totalWords =>
-      ArticleProperty(article.wordCount, article.wordCount.toString());
+  static String getArticleTitle(ArticleWrapper a) => a.article.chineseTitle;
+  static int getTotalWords(ArticleWrapper a) => a.article.wordCount;
 
-  ArticleProperty get averageWordDifficulty => ArticleProperty(
-      article.averageWordDifficulty,
-      article.averageWordDifficulty.toStringAsFixed(2));
+  static int getUnknownWords(ArticleWrapper a) => unknownWordCount(a.article);
 
-  ArticleProperty get unknownCount => ArticleProperty(
-      unknownWordCount(article), unknownWordCount(article).toString());
+  static double getKnownRatio(ArticleWrapper a) => a.article.stats.knownRatio;
 
-  ArticleProperty get ratio => ArticleProperty(
-      article.stats.knownRatio, knownRatioAsPercentage(article));
+  static String getKnownRatioAsPercentage(ArticleWrapper a) =>
+      '${(a.article.stats.knownRatio * 100).toStringAsFixed(1)}%';
 
-  static String knownRatioAsPercentage(Article article) =>
-      '${(article.stats.knownRatio * 100).toStringAsFixed(1)}%';
+  static double getAverageWordDifficulty(ArticleWrapper a) =>
+      a.article.averageWordDifficulty;
+
+  static String getAverageWordDifficultyStr(ArticleWrapper a) =>
+      a.article.averageWordDifficulty.toStringAsFixed(2);
 
 //  DateTime addDate() =>
 //  DateTime.fromMicrosecondsSinceEpoch();

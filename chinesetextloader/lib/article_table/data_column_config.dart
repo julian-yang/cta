@@ -5,21 +5,22 @@ import '../article_wrapper.dart';
 
 typedef CellCreator = Widget Function(BuildContext context,
     ArticleWrapper articleWrapper, DataColumnConfig config);
-typedef PropertyExtractor = ArticleProperty Function(
-    ArticleWrapper articleWrapper);
+typedef PropertyExtractor = dynamic Function(ArticleWrapper articleWrapper);
 typedef ArticleComparator = int Function(ArticleWrapper a, ArticleWrapper b);
 
 class DataColumnConfigModel extends ChangeNotifier {
   final List<DataColumnConfig> _columns;
+  final Map<DataColumnConfig, SortState> _columnSortAscending;
 
-  DataColumnConfigModel(this._columns);
+  DataColumnConfigModel(this._columnSortAscending)
+      : _columns = List.from(_columnSortAscending.keys) {}
 
   UnmodifiableListView<DataColumnConfig> get columns =>
       UnmodifiableListView(_columns);
 
-  void rearrange(String columnName, int index) {
+  void rearrange(DataColumnConfig config, int index) {
     int curIndex = 0;
-    while (_columns[curIndex].name != columnName) {
+    while (_columns[curIndex] != config) {
       curIndex++;
     }
     if (curIndex < index) {
@@ -34,43 +35,108 @@ class DataColumnConfigModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateSort(String name, bool sortAscending) {
-    _columns.firstWhere((c) =>c.name == name)?.sortAscending = sortAscending;
+  void toggleSort(DataColumnConfig config) {
+    _columnSortAscending[config] = _columnSortAscending[config].toggle;
     notifyListeners();
   }
 
-  DataColumnConfig get(String name) {
-    return _columns.firstWhere((c) => c.name == name);
+  SortState getSortState(DataColumnConfig config) {
+    return _columnSortAscending[config];
   }
 }
 
 class DataColumnConfig {
   final double width;
   final String name;
-  final PropertyExtractor propertyExtractor;
+  final PropertyExtractor displayValueExtractor;
+  final PropertyExtractor compareValueExtractor;
   final AlignmentGeometry alignment;
-  bool sortAscending;
 
-  DataColumnConfig({
+  const DataColumnConfig({
     @required this.name,
-    @required this.propertyExtractor,
+    @required this.displayValueExtractor,
+    @required this.compareValueExtractor,
     @required this.alignment,
     @required this.width,
-    this.sortAscending,
   });
 
-  CellCreator get valueCreator => propertyCell(propertyExtractor);
+  CellCreator get valueCreator => propertyCell(displayValueExtractor);
 
-  ArticleComparator get comparator => createComparator(propertyExtractor);
+  ArticleComparator get comparator => createComparator(compareValueExtractor);
 
   static CellCreator propertyCell(PropertyExtractor extractor) =>
       (context, articleWrapper, config) => Container(
           width: config.width,
           alignment: config.alignment,
-          child: Text(extractor.call(articleWrapper).display));
+          child: Text('${extractor.call(articleWrapper)}'));
 
   // Sorts ascending.
   static ArticleComparator createComparator(PropertyExtractor extractor) =>
       (ArticleWrapper a, ArticleWrapper b) =>
-          extractor.call(a).value.compareTo(extractor.call(b).value);
+          extractor.call(a).compareTo(extractor.call(b));
+
+  static ArticleProperty extractTitle(ArticleWrapper a) =>
+      ArticleProperty(a.article.chineseTitle, a.article.chineseTitle);
+
+  static const TITLE = DataColumnConfig(
+    name: 'Title',
+    displayValueExtractor: ArticleWrapper.getArticleTitle,
+    compareValueExtractor: ArticleWrapper.getArticleTitle,
+    alignment: Alignment.centerLeft,
+    width: 125,
+  );
+  static const TOTAL_WORDS = DataColumnConfig(
+    name: 'Total',
+    displayValueExtractor: ArticleWrapper.getTotalWords,
+    compareValueExtractor: ArticleWrapper.getTotalWords,
+    alignment: Alignment.center,
+    width: 80,
+  );
+  static const UNKNOWN_WORDS = DataColumnConfig(
+    name: 'Unknown',
+    displayValueExtractor: ArticleWrapper.getUnknownWords,
+    compareValueExtractor: ArticleWrapper.getUnknownWords,
+    alignment: Alignment.center,
+    width: 120,
+  );
+  static const KNOWN_RATIO = DataColumnConfig(
+    name: 'Ratio',
+    displayValueExtractor: ArticleWrapper.getKnownRatioAsPercentage,
+    compareValueExtractor: ArticleWrapper.getKnownRatio,
+    alignment: Alignment.center,
+    width: 90,
+  );
+  static const DIFFICULTY = DataColumnConfig(
+    name: 'Difficulty',
+    displayValueExtractor: ArticleWrapper.getAverageWordDifficultyStr,
+    compareValueExtractor: ArticleWrapper.getAverageWordDifficulty,
+    alignment: Alignment.center,
+    width: 120,
+  );
+}
+
+enum SortState { NONE, ASCENDING, DESCENDING }
+
+extension Sort on SortState {
+  bool get sortable {
+    switch (this) {
+      case SortState.NONE:
+        return false;
+      case SortState.ASCENDING:
+      case SortState.DESCENDING:
+        return true;
+    }
+  }
+
+  SortState get toggle {
+    switch (this) {
+      case SortState.NONE:
+        return SortState.NONE;
+      case SortState.ASCENDING:
+        return SortState.DESCENDING;
+      case SortState.DESCENDING:
+        return SortState.ASCENDING;
+    }
+  }
+
 }
