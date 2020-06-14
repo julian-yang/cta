@@ -1,21 +1,36 @@
 import 'package:proto/article.pb.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'article_wrapper.dart';
 import 'utils.dart';
 
-class ArticleTable extends StatelessWidget {
-  final List<ArticleWrapper> _articleSource;
+class ArticleTable extends StatefulWidget {
+  @override
+  _ArticleTableState createState() => new _ArticleTableState();
+}
 
-  ArticleTable(
-    this._articleSource, {
-    Key key,
-  }) : super(key: key);
+class _ArticleTableState extends State<ArticleTable> {
+  List<DataColumnConfig> columnConfig = List.from(defaultColumnConfig);
 
   @override
   Widget build(BuildContext context) {
+    return StreamBuilder <QuerySnapshot>(
+        stream: Firestore.instance.collection('scraped_articles').snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return LinearProgressIndicator();
+          List<ArticleWrapper> articles = snapshot.data.documents
+              .map((documentSnapshot) =>
+              ArticleWrapper.fromSnapshot(documentSnapshot))
+              .toList()
+            ..sort(ArticleWrapper.compareAddDate);
+          return buildTable(context, articles);
+        });
+  }
+
+  Widget buildTable(BuildContext context, List<ArticleWrapper> articles) {
     return wrap2DScrollbar(Column(
         children: <Widget>[createHeaderRow(columnConfig)] +
-            _articleSource
+            articles
                 .map((article) => fromArticle(context, article))
                 .toList()));
   }
@@ -25,7 +40,7 @@ class ArticleTable extends StatelessWidget {
           child: SingleChildScrollView(
               scrollDirection: Axis.horizontal, child: child)));
 
-  static Widget fromArticle(
+  Widget fromArticle(
       BuildContext context, ArticleWrapper articleWrapper) {
     return Card(
       color: articleWrapper.article.favorite ? Colors.pink[200] : null,
@@ -65,7 +80,7 @@ class ArticleTable extends StatelessWidget {
         onPressed: () {});
   }
 
-  static final List<DataColumnConfig> columnConfig = [
+  static final List<DataColumnConfig> defaultColumnConfig = [
     DataColumnConfig(
         name: 'Title',
         valueCreator:
@@ -112,7 +127,7 @@ class DataColumnConfig {
   final AlignmentGeometry alignment;
   final bool sortable;
 
-  DataColumnConfig(
+  const DataColumnConfig(
       {@required this.name,
       @required this.valueCreator,
       @required this.alignment,
