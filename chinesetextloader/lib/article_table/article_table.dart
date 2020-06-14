@@ -8,6 +8,7 @@ import 'header_draggable_chip.dart';
 import 'column_config.dart';
 import 'header_drag_target.dart';
 import 'package:provider/provider.dart';
+import 'drag_state_model.dart';
 import 'dart:collection';
 
 class ArticleTable extends StatefulWidget {
@@ -18,8 +19,12 @@ class ArticleTable extends StatefulWidget {
 class _ArticleTableState extends State<ArticleTable> {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-        create: (context) => ColumnConfigModel(defaultColumnConfig),
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+              create: (context) => ColumnConfigModel(defaultColumnConfig)),
+          ChangeNotifierProvider(create: (context) => DragStateModel())
+        ],
         child: Consumer<ColumnConfigModel>(
             builder: (context, configModel, child) =>
                 StreamBuilder<QuerySnapshot>(
@@ -107,29 +112,26 @@ class _ArticleTableState extends State<ArticleTable> {
   Widget createHeaderRow(ColumnConfigModel model) => Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
-            children:
-                new List<int>.generate(model.columns.length, (i) => i).map((index) {
+            children: new List<int>.generate(model.columns.length, (i) => i)
+                .map((index) {
           ColumnConfig config = model.columns[index];
           return Container(
               width: config.width,
               alignment: config.alignment,
               child: model.getSortState(config).sortable
-//                        ? sortableHeader(config)
                   ? draggableHeaderSpace(config, index)
                   : Text(config.name));
         }).toList()),
       );
 
-  List<Widget> buildHeaderChipsAndTargets() {
-
-  }
+  List<Widget> buildHeaderChipsAndTargets() {}
 
   Widget draggableHeaderSpace(ColumnConfig config, int index) {
     return Column(
 //      alignment: Alignment.center,
       children: <Widget>[
         HeaderDragTarget(index),
-        HeaderDraggableChip(config: config),
+        HeaderDraggableChip(config),
       ],
     );
   }
@@ -143,9 +145,3 @@ class _ArticleTableState extends State<ArticleTable> {
     ColumnConfig.DIFFICULTY: SortState.ASCENDING,
   };
 }
-
-
-
-
-
-

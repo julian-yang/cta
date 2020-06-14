@@ -2,23 +2,41 @@ import 'package:flutter/material.dart';
 import '../utils.dart';
 import 'fake_chip.dart';
 import 'package:provider/provider.dart';
+import 'drag_state_model.dart';
 import 'column_config.dart';
 
 class HeaderDraggableChip extends StatelessWidget {
-  const HeaderDraggableChip({
+  const HeaderDraggableChip(
+    this._config, {
     Key key,
-    @required this.config,
   }) : super(key: key);
 
-  final ColumnConfig config;
+  final ColumnConfig _config;
 
   @override
   Widget build(BuildContext context) {
-    return Draggable<ColumnConfig>(
-        child: sortableHeader(config),
-        feedback: FakeChip(config.name),
-        childWhenDragging: Opacity(opacity: .5, child: FakeChip(config.name)),
-        data: config);
+    return Consumer<DragStateModel>(builder: (context, dragStateModel, child) {
+      return Draggable<ColumnConfig>(
+        child: showActionChip(dragStateModel)
+            ? sortableHeader(_config)
+            : FakeChip(_config.name),
+        feedback: FakeChip(_config.name),
+        childWhenDragging: Opacity(opacity: .5, child: FakeChip(_config.name)),
+        data: _config,
+        onDragStarted: () => dragStateModel.draggedColumn = _config,
+        onDraggableCanceled: (velocity, offset) =>
+            clearDragState(dragStateModel),
+        onDragEnd: (draggableDetails) => clearDragState(dragStateModel),
+        onDragCompleted: () => clearDragState(dragStateModel),
+      );
+    });
+  }
+
+  void clearDragState(DragStateModel model) => model.draggedColumn = null;
+
+  bool showActionChip(DragStateModel dragStateModel) {
+    return dragStateModel.draggedColumn == null ||
+        dragStateModel.draggedColumn == _config;
   }
 
   Widget sortableHeader(ColumnConfig config) {
