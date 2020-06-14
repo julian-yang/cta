@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../article_wrapper.dart';
 import '../utils.dart';
 import 'header_draggable_chip.dart';
-import 'data_column_config.dart';
+import 'column_config.dart';
 import 'header_drag_target.dart';
 import 'package:provider/provider.dart';
 import 'dart:collection';
@@ -19,8 +19,8 @@ class _ArticleTableState extends State<ArticleTable> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        create: (context) => DataColumnConfigModel(defaultColumnConfig),
-        child: Consumer<DataColumnConfigModel>(
+        create: (context) => ColumnConfigModel(defaultColumnConfig),
+        child: Consumer<ColumnConfigModel>(
             builder: (context, configModel, child) =>
                 StreamBuilder<QuerySnapshot>(
                     stream: getSortedSnapshot(),
@@ -38,9 +38,9 @@ class _ArticleTableState extends State<ArticleTable> {
   }
 
   int Function(ArticleWrapper a, ArticleWrapper b) createComparator(
-      DataColumnConfigModel model) {
+      ColumnConfigModel model) {
     return (ArticleWrapper a, ArticleWrapper b) {
-      for (DataColumnConfig config in model.columns) {
+      for (ColumnConfig config in model.columns) {
         SortState sortState = model.getSortState(config);
         if (!sortState.sortable) continue;
         // sorts by ascending
@@ -70,7 +70,7 @@ class _ArticleTableState extends State<ArticleTable> {
   }
 
   Widget buildTable(BuildContext context, List<ArticleWrapper> articles) {
-    return wrap2DScrollbar(Consumer<DataColumnConfigModel>(
+    return wrap2DScrollbar(Consumer<ColumnConfigModel>(
         builder: (context, configModel, child) => Column(
             children: <Widget>[createHeaderRow(configModel)] +
                 articles
@@ -93,7 +93,7 @@ class _ArticleTableState extends State<ArticleTable> {
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Consumer<DataColumnConfigModel>(
+          child: Consumer<ColumnConfigModel>(
               builder: (context, configModel, child) => Row(
                   children: configModel.columns
                       .map((config) => config.valueCreator
@@ -104,12 +104,12 @@ class _ArticleTableState extends State<ArticleTable> {
     );
   }
 
-  Widget createHeaderRow(DataColumnConfigModel model) => Padding(
+  Widget createHeaderRow(ColumnConfigModel model) => Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
             children:
                 new List<int>.generate(model.columns.length, (i) => i).map((index) {
-          DataColumnConfig config = model.columns[index];
+          ColumnConfig config = model.columns[index];
           return Container(
               width: config.width,
               alignment: config.alignment,
@@ -124,7 +124,7 @@ class _ArticleTableState extends State<ArticleTable> {
 
   }
 
-  Widget draggableHeaderSpace(DataColumnConfig config, int index) {
+  Widget draggableHeaderSpace(ColumnConfig config, int index) {
     return Column(
 //      alignment: Alignment.center,
       children: <Widget>[
@@ -135,12 +135,12 @@ class _ArticleTableState extends State<ArticleTable> {
   }
 
   // ColumnConfig to SortAscending
-  static final Map<DataColumnConfig, SortState> defaultColumnConfig = {
-    DataColumnConfig.TITLE: SortState.NONE, // This one is not sortable
-    DataColumnConfig.TOTAL_WORDS: SortState.ASCENDING,
-    DataColumnConfig.UNKNOWN_WORDS: SortState.ASCENDING,
-    DataColumnConfig.KNOWN_RATIO: SortState.DESCENDING,
-    DataColumnConfig.DIFFICULTY: SortState.ASCENDING,
+  static final Map<ColumnConfig, SortState> defaultColumnConfig = {
+    ColumnConfig.TITLE: SortState.NONE, // This one is not sortable
+    ColumnConfig.TOTAL_WORDS: SortState.ASCENDING,
+    ColumnConfig.UNKNOWN_WORDS: SortState.ASCENDING,
+    ColumnConfig.KNOWN_RATIO: SortState.DESCENDING,
+    ColumnConfig.DIFFICULTY: SortState.ASCENDING,
   };
 }
 

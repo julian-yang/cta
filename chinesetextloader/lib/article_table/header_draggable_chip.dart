@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../utils.dart';
 import 'fake_chip.dart';
 import 'package:provider/provider.dart';
-import 'data_column_config.dart';
+import 'column_config.dart';
 
 class HeaderDraggableChip extends StatelessWidget {
   const HeaderDraggableChip({
@@ -10,19 +10,19 @@ class HeaderDraggableChip extends StatelessWidget {
     @required this.config,
   }) : super(key: key);
 
-  final DataColumnConfig config;
+  final ColumnConfig config;
 
   @override
   Widget build(BuildContext context) {
-    return Draggable<DataColumnConfig>(
+    return Draggable<ColumnConfig>(
         child: sortableHeader(config),
         feedback: FakeChip(config.name),
         childWhenDragging: Opacity(opacity: .5, child: FakeChip(config.name)),
         data: config);
   }
 
-  Widget sortableHeader(DataColumnConfig config) {
-    return Consumer<DataColumnConfigModel>(builder: (context, model, child) {
+  Widget sortableHeader(ColumnConfig config) {
+    return Consumer<ColumnConfigModel>(builder: (context, model, child) {
       return ActionChip(
           avatar: Icon(model.getSortState(config) == SortState.ASCENDING
               ? Icons.arrow_upward

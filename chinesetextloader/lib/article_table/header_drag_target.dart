@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../article_wrapper.dart';
 import '../utils.dart';
 import 'package:provider/provider.dart';
-import 'data_column_config.dart';
+import 'column_config.dart';
 
 class HeaderDragTarget extends StatefulWidget {
   final int index;
@@ -17,8 +17,8 @@ class HeaderDragTarget extends StatefulWidget {
 class _HeaderDragTargetState extends State<HeaderDragTarget> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<DataColumnConfigModel>(
-        builder: (context, configModel, child) => DragTarget<DataColumnConfig>(
+    return Consumer<ColumnConfigModel>(
+        builder: (context, configModel, child) => DragTarget<ColumnConfig>(
             builder: (context, candidates, rejects) => DecoratedBox(
                 decoration: BoxDecoration(
                   color: candidates.isNotEmpty ? Colors.red : Colors.orange,
