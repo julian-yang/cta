@@ -25,6 +25,7 @@ const Article$json = const {
     const {'1': 'average_word_difficulty', '3': 8, '4': 1, '5': 1, '10': 'averageWordDifficulty'},
     const {'1': 'unique_words', '3': 9, '4': 3, '5': 9, '10': 'uniqueWords'},
     const {'1': 'stats', '3': 10, '4': 1, '5': 11, '6': '.cta.Stats', '10': 'stats'},
+    const {'1': 'favorite', '3': 11, '4': 1, '5': 8, '10': 'favorite'},
   ],
 };
 

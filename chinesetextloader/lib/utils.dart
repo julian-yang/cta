@@ -1,6 +1,6 @@
-import 'package:proto/google/protobuf/timestamp.pb.dart';
+import 'package:proto/google/protobuf/timestamp.pb.dart' as timestampPb;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:cloud_firestore/cloud_firestore.dart' as firestore_lib;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -42,10 +42,10 @@ Uri toFullMdnUri(String path) {
   return Uri.parse("https://mdnkids.com/youth/$path");
 }
 
-final firestore_lib.CollectionReference firestoreArticles =
-    firestore_lib.Firestore.instance.collection('articles');
+final CollectionReference firestoreArticles =
+    Firestore.instance.collection('articles');
 
-DateTime convertTimestamp(Timestamp timestamp) {
+DateTime convertTimestamp(timestampPb.Timestamp timestamp) {
   Int64 microseconds =
       Int64(Duration.microsecondsPerSecond) * timestamp.seconds.toInt() +
           // There are 1000 nanoseconds in a microsecond
@@ -64,6 +64,14 @@ void openArticleViewer(BuildContext context, ArticleWrapper articleWrapper) {
       MaterialPageRoute(
           builder: (context) =>
               ArticleViewer(article: articleWrapper.article)));
+}
+
+void updateFavorite(ArticleWrapper article, bool isFavorite) {
+  Firestore.instance.runTransaction((transaction) async {
+//    final freshSnapshot = await transaction.get(article.reference);
+    await transaction
+        .update(article.reference, {'favorite': isFavorite});
+  });
 }
 
 //void commit(article) {

@@ -48,6 +48,7 @@ class Article extends $pb.GeneratedMessage {
     ..a<$core.double>(8, 'averageWordDifficulty', $pb.PbFieldType.OD)
     ..pPS(9, 'uniqueWords')
     ..aOM<Stats>(10, 'stats', subBuilder: Stats.create)
+    ..aOB(11, 'favorite')
     ..hasRequiredFields = false
   ;
 
@@ -155,6 +156,15 @@ class Article extends $pb.GeneratedMessage {
   void clearStats() => clearField(10);
   @$pb.TagNumber(10)
   Stats ensureStats() => $_ensure(9);
+
+  @$pb.TagNumber(11)
+  $core.bool get favorite => $_getBF(10);
+  @$pb.TagNumber(11)
+  set favorite($core.bool v) { $_setBool(10, v); }
+  @$pb.TagNumber(11)
+  $core.bool hasFavorite() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearFavorite() => clearField(11);
 }
 
 class Stats extends $pb.GeneratedMessage {

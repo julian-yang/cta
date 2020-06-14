@@ -81,7 +81,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   static Widget _buildFavoritesList(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance.collection('scraped_articles').snapshots(),
+      stream: Firestore.instance
+          .collection('scraped_articles')
+          .where('favorite', isEqualTo: true)
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return LinearProgressIndicator();
         return _buildList(context, snapshot.data.documents);
@@ -98,7 +101,6 @@ class _MyHomePageState extends State<MyHomePage> {
             .map((documentSnapshot) => ArticleWrapper.fromSnapshot(documentSnapshot))
             .toList()
           ..sort(ArticleWrapper.compareAddDate);
-//        ArticleTableSource tableSource = ArticleTableSource(articles);
         return ArticleTable(articles);
       },
     );

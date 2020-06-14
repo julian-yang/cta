@@ -18,6 +18,7 @@ message Article {
     double average_word_difficulty = 8;
     repeated string unique_words = 9;
     Stats stats = 10;
+    bool favorite = 11;
 }
 
 message Stats {

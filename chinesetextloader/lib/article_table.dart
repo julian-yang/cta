@@ -1,9 +1,6 @@
-import 'package:flutter/services.dart';
 import 'package:proto/article.pb.dart';
-import 'article_toolbar.dart';
 import 'package:flutter/material.dart';
 import 'article_wrapper.dart';
-import 'article_viewer.dart';
 import 'utils.dart';
 
 class ArticleTable extends StatelessWidget {
@@ -30,16 +27,22 @@ class ArticleTable extends StatelessWidget {
 
   static Widget fromArticle(
       BuildContext context, ArticleWrapper articleWrapper) {
-    return Card(
-      color: articleWrapper.article.wordCount < 1000 ? Colors.pink[200] : null,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-            children: columnConfig
-                .map((config) =>
-                    config.valueCreator.call(context, articleWrapper, config))
-                .toList()),
-      ),
+    return  Card(
+        color: articleWrapper.article.favorite ? Colors.pink[200] : null,
+        child: InkWell(
+          onTap: () => openArticleViewer(context, articleWrapper),
+          onLongPress: () {
+            updateFavorite(articleWrapper, !articleWrapper.article.favorite);
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+                children: columnConfig
+                    .map((config) =>
+                        config.valueCreator.call(context, articleWrapper, config))
+                    .toList()),
+          ),
+        ),
     );
   }
 
@@ -85,7 +88,7 @@ class ArticleTable extends StatelessWidget {
   ];
 }
 
-typedef CellCreator = /*DataCell*/ Widget Function(BuildContext context,
+typedef CellCreator = Widget Function(BuildContext context,
     ArticleWrapper articleWrapper, DataColumnConfig config);
 typedef PropertyExtractor = String Function(ArticleWrapper articleWrapper);
 

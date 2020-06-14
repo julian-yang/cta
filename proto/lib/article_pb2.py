@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rarticle.proto\x12\x03\x63ta\x1a\x1fgoogle/protobuf/timestamp.proto\"*\n\x08\x41rticles\x12\x1e\n\x08\x61rticles\x18\x01 \x03(\x0b\x32\x0c.cta.Article\"\x99\x02\n\x07\x41rticle\x12,\n\x08\x61\x64\x64_date\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x14\n\x0c\x63hinese_body\x18\x02 \x01(\t\x12\x15\n\rchinese_title\x18\x03 \x01(\t\x12\x0b\n\x03url\x18\x04 \x01(\t\x12\x30\n\x0cpublish_date\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0e\n\x06\x61uthor\x18\x06 \x01(\t\x12\x12\n\nword_count\x18\x07 \x01(\x05\x12\x1f\n\x17\x61verage_word_difficulty\x18\x08 \x01(\x01\x12\x14\n\x0cunique_words\x18\t \x03(\t\x12\x19\n\x05stats\x18\n \x01(\x0b\x32\n.cta.Stats\"6\n\x05Stats\x12\x18\n\x10known_word_count\x18\x01 \x01(\x05\x12\x13\n\x0bknown_ratio\x18\x02 \x01(\x01\x62\x06proto3'
+  serialized_pb=b'\n\rarticle.proto\x12\x03\x63ta\x1a\x1fgoogle/protobuf/timestamp.proto\"*\n\x08\x41rticles\x12\x1e\n\x08\x61rticles\x18\x01 \x03(\x0b\x32\x0c.cta.Article\"\xab\x02\n\x07\x41rticle\x12,\n\x08\x61\x64\x64_date\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x14\n\x0c\x63hinese_body\x18\x02 \x01(\t\x12\x15\n\rchinese_title\x18\x03 \x01(\t\x12\x0b\n\x03url\x18\x04 \x01(\t\x12\x30\n\x0cpublish_date\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0e\n\x06\x61uthor\x18\x06 \x01(\t\x12\x12\n\nword_count\x18\x07 \x01(\x05\x12\x1f\n\x17\x61verage_word_difficulty\x18\x08 \x01(\x01\x12\x14\n\x0cunique_words\x18\t \x03(\t\x12\x19\n\x05stats\x18\n \x01(\x0b\x32\n.cta.Stats\x12\x10\n\x08\x66\x61vorite\x18\x0b \x01(\x08\"6\n\x05Stats\x12\x18\n\x10known_word_count\x18\x01 \x01(\x05\x12\x13\n\x0bknown_ratio\x18\x02 \x01(\x01\x62\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
@@ -137,6 +137,13 @@ _ARTICLE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='favorite', full_name='cta.Article.favorite', index=10,
+      number=11, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -150,7 +157,7 @@ _ARTICLE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=100,
-  serialized_end=381,
+  serialized_end=399,
 )
 
 
@@ -188,8 +195,8 @@ _STATS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=383,
-  serialized_end=437,
+  serialized_start=401,
+  serialized_end=455,
 )
 
 _ARTICLES.fields_by_name['articles'].message_type = _ARTICLE
