@@ -27,22 +27,22 @@ class ArticleTable extends StatelessWidget {
 
   static Widget fromArticle(
       BuildContext context, ArticleWrapper articleWrapper) {
-    return  Card(
-        color: articleWrapper.article.favorite ? Colors.pink[200] : null,
-        child: InkWell(
-          onTap: () => openArticleViewer(context, articleWrapper),
-          onLongPress: () {
-            updateFavorite(articleWrapper, !articleWrapper.article.favorite);
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-                children: columnConfig
-                    .map((config) =>
-                        config.valueCreator.call(context, articleWrapper, config))
-                    .toList()),
-          ),
+    return Card(
+      color: articleWrapper.article.favorite ? Colors.pink[200] : null,
+      child: InkWell(
+        onTap: () => openArticleViewer(context, articleWrapper),
+        onLongPress: () {
+          updateFavorite(articleWrapper, !articleWrapper.article.favorite);
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+              children: columnConfig
+                  .map((config) =>
+                      config.valueCreator.call(context, articleWrapper, config))
+                  .toList()),
         ),
+      ),
     );
   }
 
@@ -53,38 +53,51 @@ class ArticleTable extends StatelessWidget {
                 .map((config) => Container(
                     width: config.width,
                     alignment: config.alignment,
-                    child: Text(config.title)))
+                    child: config.sortable
+                        ? sortableHeader(config)
+                        : Text(config.name)))
                 .toList()),
       );
 
+  static Widget sortableHeader(DataColumnConfig config) {
+    return ActionChip(avatar: Icon(Icons.arrow_upward),
+        label: Text(config.name),
+        onPressed: () {});
+  }
+
   static final List<DataColumnConfig> columnConfig = [
     DataColumnConfig(
-        title: 'Title',
+        name: 'Title',
         valueCreator:
             DataColumnConfig.propertyCell((a) => a.article.chineseTitle),
         alignment: Alignment.centerLeft,
-        width: 125),
+        width: 125,
+        sortable: false),
     DataColumnConfig(
-        title: 'Total',
+        name: 'Total',
         valueCreator: DataColumnConfig.propertyCell((a) => a.totalWords),
-        alignment: Alignment.centerRight,
-        width: 60),
+        alignment: Alignment.center,
+        width: 80,
+        sortable: true),
     DataColumnConfig(
-        title: 'Unknown',
+        name: 'Unknown',
         valueCreator: DataColumnConfig.propertyCell((a) => a.unknownCount),
-        alignment: Alignment.centerRight,
-        width: 80),
+        alignment: Alignment.center,
+        width: 120,
+        sortable: true),
     DataColumnConfig(
-        title: 'Ratio',
+        name: 'Ratio',
         valueCreator: DataColumnConfig.propertyCell((a) => a.ratio),
-        alignment: Alignment.centerRight,
-        width: 60),
+        alignment: Alignment.center,
+        width: 90,
+        sortable: true),
     DataColumnConfig(
-        title: 'Diff',
+        name: 'Diff',
         valueCreator:
             DataColumnConfig.propertyCell((a) => a.averageWordDifficulty),
-        alignment: Alignment.centerRight,
-        width: 60),
+        alignment: Alignment.center,
+        width: 80,
+        sortable: true),
   ];
 }
 
@@ -94,15 +107,17 @@ typedef PropertyExtractor = String Function(ArticleWrapper articleWrapper);
 
 class DataColumnConfig {
   final double width;
-  final String title;
+  final String name;
   final CellCreator valueCreator;
   final AlignmentGeometry alignment;
+  final bool sortable;
 
   DataColumnConfig(
-      {@required this.title,
+      {@required this.name,
       @required this.valueCreator,
       @required this.alignment,
-      @required this.width});
+      @required this.width,
+      @required this.sortable});
 
   static CellCreator propertyCell(PropertyExtractor extractor) =>
       (context, articleWrapper, config) => Container(
