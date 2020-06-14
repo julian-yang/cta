@@ -32,6 +32,7 @@ dependencies:
   translator: ^0.1.2
   material_design_icons_flutter: ^3.2.4096
   protobuf: ^1.0.1
+  provider: ^4.1.3
   proto:
     path: ../proto
 

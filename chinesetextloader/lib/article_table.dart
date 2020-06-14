@@ -3,6 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'article_wrapper.dart';
 import 'utils.dart';
+import 'data_column_config.dart';
+import 'header_drag_target.dart';
+import 'package:provider/provider.dart';
 
 class ArticleTable extends StatefulWidget {
   @override
@@ -10,27 +13,32 @@ class ArticleTable extends StatefulWidget {
 }
 
 class _ArticleTableState extends State<ArticleTable> {
-  List<DataColumnConfig> tableColumnConfig = List.from(defaultColumnConfig);
-
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-        stream: getSortedSnapshot(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return LinearProgressIndicator();
-          List<ArticleWrapper> articles = snapshot.data.documents
-              .map((documentSnapshot) =>
-                  ArticleWrapper.fromSnapshot(documentSnapshot))
-              .toList();
-          ArticleComparator comparator = createComparator();
-          articles.sort(comparator);
-          return buildTable(context, articles);
-        });
+    return ChangeNotifierProvider(
+        create: (context) => DataColumnConfigModel(defaultColumnConfig),
+        // TODO: pipe Consumer here so we can use the model's ordering for comparators
+        child: Consumer<DataColumnConfigModel>(
+            builder: (context, configModel, child) =>
+                StreamBuilder<QuerySnapshot>(
+                    stream: getSortedSnapshot(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return LinearProgressIndicator();
+                      List<ArticleWrapper> articles = snapshot.data.documents
+                          .map((documentSnapshot) =>
+                              ArticleWrapper.fromSnapshot(documentSnapshot))
+                          .toList();
+                      ArticleComparator comparator =
+                          createComparator(configModel.columns);
+                      articles.sort(comparator);
+                      return buildTable(context, articles);
+                    })));
   }
 
-  int Function(ArticleWrapper a, ArticleWrapper b) createComparator() {
+  int Function(ArticleWrapper a, ArticleWrapper b) createComparator(
+      List<DataColumnConfig> columns) {
     return (ArticleWrapper a, ArticleWrapper b) {
-      for (DataColumnConfig config in tableColumnConfig) {
+      for (DataColumnConfig config in columns) {
         if (config.sortAscending == null) continue;
         // sorts by ascending
         int result = config.comparator.call(a, b);
@@ -59,9 +67,12 @@ class _ArticleTableState extends State<ArticleTable> {
   }
 
   Widget buildTable(BuildContext context, List<ArticleWrapper> articles) {
-    return wrap2DScrollbar(Column(
-        children: <Widget>[createHeaderRow(tableColumnConfig)] +
-            articles.map((article) => fromArticle(context, article)).toList()));
+    return wrap2DScrollbar(Consumer<DataColumnConfigModel>(
+        builder: (context, configModel, child) => Column(
+            children: <Widget>[createHeaderRow(configModel.columns)] +
+                articles
+                    .map((article) => fromArticle(context, article))
+                    .toList())));
   }
 
   static Widget wrap2DScrollbar(Widget child) => Scrollbar(
@@ -79,11 +90,12 @@ class _ArticleTableState extends State<ArticleTable> {
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Row(
-              children: tableColumnConfig
-                  .map((config) =>
-                      config.valueCreator.call(context, articleWrapper, config))
-                  .toList()),
+          child: Consumer<DataColumnConfigModel>(
+              builder: (context, configModel, child) => Row(
+                  children: configModel.columns
+                      .map((config) => config.valueCreator
+                          .call(context, articleWrapper, config))
+                      .toList())),
         ),
       ),
     );
@@ -92,15 +104,45 @@ class _ArticleTableState extends State<ArticleTable> {
   Widget createHeaderRow(List<DataColumnConfig> configs) => Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
-            children: configs
-                .map((config) => Container(
-                    width: config.width,
-                    alignment: config.alignment,
-                    child: config.sortAscending != null
-                        ? sortableHeader(config)
-                        : Text(config.name)))
-                .toList()),
+            children:
+                new List<int>.generate(configs.length, (i) => i).map((index) {
+          DataColumnConfig config = configs[index];
+          return Container(
+              width: config.width,
+              alignment: config.alignment,
+              child: config.sortAscending != null
+//                        ? sortableHeader(config)
+                  ? draggableHeaderSpace(config, index)
+                  : Text(config.name));
+        }).toList()),
       );
+
+  Widget draggableHeaderSpace(DataColumnConfig config, int index) {
+    return Column(
+//      alignment: Alignment.center,
+      children: <Widget>[
+        HeaderDragTarget(index),
+        Draggable<DataColumnConfig>(
+            child: sortableHeader(config),
+            feedback: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  shape: BoxShape.rectangle,
+                ),
+                child: Text('f')),
+            childWhenDragging: Opacity(
+              opacity: .5,
+              child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    shape: BoxShape.rectangle,
+                  ),
+                  child: Text('childWhenDragging')),
+            ),
+            data: config),
+      ],
+    );
+  }
 
   Widget sortableHeader(DataColumnConfig config) {
     return ActionChip(
@@ -109,10 +151,8 @@ class _ArticleTableState extends State<ArticleTable> {
         label: Text(config.name),
         onPressed: () {
           setState(() {
-            String name = config.name;
-            DataColumnConfig columnConfig =
-                tableColumnConfig.firstWhere((config) => config.name == name);
-            columnConfig.sortAscending = !columnConfig.sortAscending;
+            // TODO: maybe this will break in the future? May need to use consumer instead.
+            config.sortAscending = !config.sortAscending;
           });
         });
   }
@@ -149,44 +189,4 @@ class _ArticleTableState extends State<ArticleTable> {
         width: 120,
         sortAscending: true),
   ];
-}
-
-enum SortState { ASCENDING, DESCENDING }
-
-typedef CellCreator = Widget Function(BuildContext context,
-    ArticleWrapper articleWrapper, DataColumnConfig config);
-typedef PropertyExtractor = ArticleProperty Function(
-    ArticleWrapper articleWrapper);
-typedef ValueExtractor = dynamic Function(ArticleWrapper articleWrapper);
-typedef ArticleComparator = int Function(ArticleWrapper a, ArticleWrapper b);
-
-class DataColumnConfig {
-  final double width;
-  final String name;
-  final PropertyExtractor propertyExtractor;
-  final AlignmentGeometry alignment;
-  bool sortAscending;
-
-  DataColumnConfig({
-    @required this.name,
-    @required this.propertyExtractor,
-    @required this.alignment,
-    @required this.width,
-    this.sortAscending,
-  });
-
-  CellCreator get valueCreator => propertyCell(propertyExtractor);
-
-  ArticleComparator get comparator => createComparator(propertyExtractor);
-
-  static CellCreator propertyCell(PropertyExtractor extractor) =>
-      (context, articleWrapper, config) => Container(
-          width: config.width,
-          alignment: config.alignment,
-          child: Text(extractor.call(articleWrapper).display));
-
-  // Sorts ascending.
-  static ArticleComparator createComparator(PropertyExtractor extractor) =>
-      (ArticleWrapper a, ArticleWrapper b) =>
-          extractor.call(a).value.compareTo(extractor.call(b).value);
 }
