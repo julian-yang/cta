@@ -10,29 +10,60 @@ class ArticleTable extends StatefulWidget {
 }
 
 class _ArticleTableState extends State<ArticleTable> {
-  List<DataColumnConfig> columnConfig = List.from(defaultColumnConfig);
+  List<DataColumnConfig> tableColumnConfig = List.from(defaultColumnConfig);
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder <QuerySnapshot>(
-        stream: Firestore.instance.collection('scraped_articles').snapshots(),
+    return StreamBuilder<QuerySnapshot>(
+        stream: getSortedSnapshot(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return LinearProgressIndicator();
           List<ArticleWrapper> articles = snapshot.data.documents
               .map((documentSnapshot) =>
-              ArticleWrapper.fromSnapshot(documentSnapshot))
+                  ArticleWrapper.fromSnapshot(documentSnapshot))
+          .take(2)
               .toList()
-            ..sort(ArticleWrapper.compareAddDate);
+                ;
+          ArticleComparator comparator = createComparator();
+          articles.sort(comparator);
+//                ..sort(ArticleWrapper.compareAddDate);
           return buildTable(context, articles);
         });
   }
 
+  int Function(ArticleWrapper a, ArticleWrapper b) createComparator() {
+    return (ArticleWrapper a, ArticleWrapper b) {
+      for (DataColumnConfig config in tableColumnConfig) {
+        if (config.sortable == null) continue;
+        int result = config.comparator.call(a, b);
+        if (result != 0) {
+          return result;
+        }
+      }
+      return ArticleWrapper.compareAddDate(a, b);
+    };
+  }
+
+  Stream<QuerySnapshot> getSortedSnapshot() {
+    SortState ratioSortable = tableColumnConfig
+        .firstWhere((config) => config.name == 'Ratio')
+        .sortable;
+    SortState difficultySortable = tableColumnConfig
+        .firstWhere((config) => config.name == 'Diff')
+        .sortable;
+    return Firestore.instance
+        .collection('scraped_articles')
+//        .orderBy('stats.known_ratio',
+//            descending: ratioSortable == SortState.DESCENDING)
+//        .orderBy('average_word_difficulty',
+//            descending: difficultySortable == SortState.DESCENDING)
+        .snapshots();
+  }
+
   Widget buildTable(BuildContext context, List<ArticleWrapper> articles) {
     return wrap2DScrollbar(Column(
-        children: <Widget>[createHeaderRow(columnConfig)] +
-            articles
-                .map((article) => fromArticle(context, article))
-                .toList()));
+        children: <Widget>[createHeaderRow(tableColumnConfig)] +
+            articles.map((article) => fromArticle(context, article)).toList()));
   }
 
   static Widget wrap2DScrollbar(Widget child) => Scrollbar(
@@ -40,8 +71,7 @@ class _ArticleTableState extends State<ArticleTable> {
           child: SingleChildScrollView(
               scrollDirection: Axis.horizontal, child: child)));
 
-  Widget fromArticle(
-      BuildContext context, ArticleWrapper articleWrapper) {
+  Widget fromArticle(BuildContext context, ArticleWrapper articleWrapper) {
     return Card(
       color: articleWrapper.article.favorite ? Colors.pink[200] : null,
       child: InkWell(
@@ -52,7 +82,7 @@ class _ArticleTableState extends State<ArticleTable> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
-              children: columnConfig
+              children: tableColumnConfig
                   .map((config) =>
                       config.valueCreator.call(context, articleWrapper, config))
                   .toList()),
@@ -61,82 +91,103 @@ class _ArticleTableState extends State<ArticleTable> {
     );
   }
 
-  static Widget createHeaderRow(List<DataColumnConfig> configs) => Padding(
+  Widget createHeaderRow(List<DataColumnConfig> configs) => Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
             children: configs
                 .map((config) => Container(
                     width: config.width,
                     alignment: config.alignment,
-                    child: config.sortable
+                    child: config.sortable != null
                         ? sortableHeader(config)
                         : Text(config.name)))
                 .toList()),
       );
 
-  static Widget sortableHeader(DataColumnConfig config) {
-    return ActionChip(avatar: Icon(Icons.arrow_upward),
+  Widget sortableHeader(DataColumnConfig config) {
+    return ActionChip(
+        avatar: Icon(config.sortable == SortState.ASCENDING
+            ? Icons.arrow_upward
+            : Icons.arrow_downward),
         label: Text(config.name),
-        onPressed: () {});
+        onPressed: () {
+          setState(() {
+            String name = config.name;
+            DataColumnConfig columnConfig =
+                tableColumnConfig.firstWhere((config) => config.name == name);
+            columnConfig.sortable = columnConfig.sortable == SortState.ASCENDING
+                ? SortState.DESCENDING
+                : SortState.ASCENDING;
+          });
+        });
   }
 
   static final List<DataColumnConfig> defaultColumnConfig = [
     DataColumnConfig(
         name: 'Title',
-        valueCreator:
-            DataColumnConfig.propertyCell((a) => a.article.chineseTitle),
+        propertyExtractor: (a) => a.article.chineseTitle,
         alignment: Alignment.centerLeft,
         width: 125,
-        sortable: false),
+        sortable: null),
     DataColumnConfig(
         name: 'Total',
-        valueCreator: DataColumnConfig.propertyCell((a) => a.totalWords),
+        propertyExtractor: (a) => a.totalWords,
         alignment: Alignment.center,
         width: 80,
-        sortable: true),
+        sortable: SortState.DESCENDING),
     DataColumnConfig(
         name: 'Unknown',
-        valueCreator: DataColumnConfig.propertyCell((a) => a.unknownCount),
+        propertyExtractor: (a) => a.unknownCount,
         alignment: Alignment.center,
         width: 120,
-        sortable: true),
+        sortable: SortState.DESCENDING),
     DataColumnConfig(
         name: 'Ratio',
-        valueCreator: DataColumnConfig.propertyCell((a) => a.ratio),
+        propertyExtractor: (a) => a.ratio,
         alignment: Alignment.center,
         width: 90,
-        sortable: true),
+        sortable: SortState.DESCENDING),
     DataColumnConfig(
         name: 'Diff',
-        valueCreator:
-            DataColumnConfig.propertyCell((a) => a.averageWordDifficulty),
+        propertyExtractor: (a) => a.averageWordDifficulty,
         alignment: Alignment.center,
         width: 80,
-        sortable: true),
+        sortable: SortState.ASCENDING),
   ];
 }
+
+enum SortState { ASCENDING, DESCENDING }
 
 typedef CellCreator = Widget Function(BuildContext context,
     ArticleWrapper articleWrapper, DataColumnConfig config);
 typedef PropertyExtractor = String Function(ArticleWrapper articleWrapper);
+typedef ArticleComparator = int Function(ArticleWrapper a, ArticleWrapper b);
 
 class DataColumnConfig {
   final double width;
   final String name;
-  final CellCreator valueCreator;
+  final PropertyExtractor propertyExtractor;
   final AlignmentGeometry alignment;
-  final bool sortable;
+  SortState sortable;
 
-  const DataColumnConfig(
+  DataColumnConfig(
       {@required this.name,
-      @required this.valueCreator,
+      @required this.propertyExtractor,
       @required this.alignment,
       @required this.width,
       @required this.sortable});
+
+  CellCreator get valueCreator => propertyCell(propertyExtractor);
+
+  ArticleComparator get comparator => createComparator(propertyExtractor);
 
   static CellCreator propertyCell(PropertyExtractor extractor) =>
       (context, articleWrapper, config) => Container(
           width: config.width,
           alignment: config.alignment,
           child: Text(extractor.call(articleWrapper)));
+
+  static ArticleComparator createComparator(PropertyExtractor extractor) =>
+      (ArticleWrapper a, ArticleWrapper b) =>
+          extractor.call(a).compareTo(extractor.call(b));
 }
