@@ -20,29 +20,72 @@ class _HeaderDragTargetState extends State<HeaderDragTarget> {
   Widget build(BuildContext context) {
     return Consumer2<ColumnConfigModel, DragStateModel>(
         builder: (context, configModel, dragStateModel, child) =>
-            DragTarget<ColumnConfig>(
-                builder: (context, candidates, rejects) =>
-                    dragStateModel.draggedColumn != null
-                        ? buildTargetBox(candidates)
-                        : SizedBox.shrink(),
-                onWillAccept: (data) {
-                  int index = configModel.columns.indexOf(data);
-                  return index != widget.index && index != widget.index - 1;
-                },
-                onAccept: (data) {
-                  configModel.rearrange(data, widget.index);
-                }));
+            dragStateModel.draggedColumn != null
+                ? buildDragTargetPair(configModel, dragStateModel)
+                : SizedBox.shrink());
   }
 
-  Widget buildTargetBox(List<ColumnConfig> candidates) {
-    return DecoratedBox(
-        decoration: BoxDecoration(
-          color: candidates.isNotEmpty ? Colors.red : Colors.orange,
-          shape: BoxShape.rectangle,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Text('target'),
-        ));
+  Widget buildDragTargetPair(
+      ColumnConfigModel configModel, DragStateModel dragStateModel) {
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      buildDragTarget(configModel, dragStateModel, rightBox: false),
+      buildDragTarget(configModel, dragStateModel, rightBox: true),
+    ]);
   }
+
+  Widget buildDragTarget(
+      ColumnConfigModel configModel, DragStateModel dragStateModel,
+      {bool rightBox}) {
+    return DragTarget<ColumnConfig>(
+        builder: (context, candidates, rejects) =>
+            dragStateModel.draggedColumn != null
+                ? buildTargetBox(candidates, rejects, rightBox: rightBox)
+                : SizedBox.shrink(),
+        onWillAccept: (data) {
+          int index = configModel.columns.indexOf(data);
+          if (index == widget.index) {
+            return false;
+          }
+          if (rightBox) {
+            return index != widget.index + 1;
+          } else {
+            return index != widget.index - 1;
+          }
+        },
+        onAccept: (data) {
+          if (rightBox) {
+          configModel.rearrange(data, widget.index + 1);
+          } else {
+            configModel.rearrange(data, widget.index);
+          }
+        });
+  }
+
+  Widget buildTargetBox(List<ColumnConfig> candidates, List rejects,
+      {@required bool rightBox}) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+          // update color picker to include rejects
+          color: pickColor(candidates, rejects),
+          shape: BoxShape.rectangle,
+          border: rightBox ? rightBoxBorder : leftBoxBorder),
+    );
+  }
+
+  Color pickColor(List candidates, List rejects) {
+    if (candidates.isNotEmpty) {
+      return Colors.green[200];
+    } else if (rejects.isNotEmpty) {
+      return Colors.red[400];
+    } else {
+      return Colors.orange;
+    }
+  }
+
+  static const Border leftBoxBorder = Border(right: border);
+  static const Border rightBoxBorder = Border(left: border);
+
+  static const BorderSide border = BorderSide(color: Colors.white, width: 2);
 }
