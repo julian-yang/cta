@@ -1,5 +1,6 @@
 // Create an infinite scrolling lazily loaded list
 import 'package:chineseTextLoader/favorites_viewer.dart';
+import 'package:chineseTextLoader/known_word_uploader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'article_table/article_table.dart';
@@ -31,7 +32,8 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> _tabs = <Widget>[
     FavoritesViewer(),
     ArticleTable(),
-    AddArticleForm()
+//    AddArticleForm(),
+    KnownWordUploader(),
   ];
 
   void _onItemTapped(int index) {
@@ -63,8 +65,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 icon: Icon(Icons.favorite), title: Text('Favorites')),
             BottomNavigationBarItem(
                 icon: Icon(Icons.library_books), title: Text('Articles')),
+//            BottomNavigationBarItem(
+//                icon: Icon(Icons.library_add), title: Text('Add Article')),
             BottomNavigationBarItem(
-                icon: Icon(Icons.library_add), title: Text('Add Article'))
+                icon: Icon(Icons.cloud_upload), title: Text('Upload vocab')),
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: Colors.amber[800],

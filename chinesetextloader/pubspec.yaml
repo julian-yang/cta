@@ -21,6 +21,7 @@ dependencies:
   cloud_firestore: ^0.13.6
   cupertino_icons: ^0.1.2
   english_words: ^3.1.0
+  file_picker: ^1.11.0+3
   flutter_launcher_icons: "^0.7.0"
   fluttertoast: ^4.0.1
   url_launcher: ^4.0.3
