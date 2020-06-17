@@ -124,7 +124,9 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
             children: <Widget>[
               ListTile(
                 title: Text('${word.headWord} ${word.pinyin}'),
-                subtitle: Text(word.definitions.first),
+                subtitle: Text(word.definitions.isNotEmpty
+                    ? word.definitions.first
+                    : 'n/a'),
               )
             ],
           )))
@@ -133,22 +135,38 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
   void _onPickedFile(File file) async {
     List<String> lines = await file.readAsLines(encoding: utf8);
     Vocabularies vocab = Vocabularies();
+    List<String> missingDefinitions = [];
     for (String line in lines) {
+      print('line: $line');
       List<String> parts = line.split('\t');
       String headWord = parts[0];
       String pinyin = parts[1];
-      List<String> definitions = parts[2].split('; ');
-      print('$headWord $pinyin\n');
-      for (String definition in definitions) {
-        print('* $definition');
+      List<String> definitions = [];
+      if (parts.length >= 3) {
+        List<String> parseDefinitions= parts[2].split('; ');
+//        print('$headWord $pinyin\n');
+//        for (String definition in parseDefinitions) {
+//          print('* $definition');
+//        }
+        definitions.add(parts[2]);
+      } else {
+        print('!!!! No definitions found for $headWord');
+        missingDefinitions.add(headWord);
       }
       print('\n');
       Word word = Word()
         ..headWord = headWord
         ..pinyin = pinyin;
-      word..definitions.add(parts[2]);
+      word..definitions.addAll(definitions);
       vocab.knownWords.add(word);
     }
+    if (missingDefinitions.isNotEmpty) {
+      print('Missing definitions:');
+      for (String missing in missingDefinitions) {
+        print('* $missing');
+      }
+    }
+    print('----');
     setState(() => this.vocab = vocab);
   }
 
