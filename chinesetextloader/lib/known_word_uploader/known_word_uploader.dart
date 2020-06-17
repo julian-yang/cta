@@ -58,15 +58,19 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
           if (latestVocabListSnapshot.exists) {
             await tx.update(latestVocabListRef, mergedProto3Json);
           }
-          return {'existingWords': vocabAndExisting.existingWords};
+          return {'existingWords': vocabAndExisting.existingWords,
+            'merged': vocabAndExisting.merged.writeToJson()
+          };
         });
 
         // Use this way to cast to List<String> since result is actually Map<String, dynamic>
         List<String> existingWords = List<String>.from(result['existingWords']);
+        Vocabularies merged = Vocabularies()..mergeFromJson(result['merged']);
         showDialog(
             context: context,
             child: Card(child: _createUploadedDialog(existingWords)));
         print(result);
+        print(merged.toProto3Json());
       };
 
   Widget _createUploadedDialog(List<String> existingWords) => Card(
