@@ -17,7 +17,7 @@ const Word$json = const {
   '2': const [
     const {'1': 'head_word', '3': 1, '4': 1, '5': 9, '10': 'headWord'},
     const {'1': 'pinyin', '3': 2, '4': 1, '5': 9, '10': 'pinyin'},
-    const {'1': 'definition', '3': 3, '4': 3, '5': 9, '10': 'definition'},
+    const {'1': 'definitions', '3': 3, '4': 3, '5': 9, '10': 'definitions'},
   ],
 };
 

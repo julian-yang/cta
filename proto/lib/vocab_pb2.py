@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x0bvocab.proto\x12\x03\x63ta\".\n\x0cVocabularies\x12\x1e\n\x0bknown_words\x18\x01 \x03(\x0b\x32\t.cta.Word\"=\n\x04Word\x12\x11\n\thead_word\x18\x01 \x01(\t\x12\x0e\n\x06pinyin\x18\x02 \x01(\t\x12\x12\n\ndefinition\x18\x03 \x03(\tb\x06proto3'
+  serialized_pb=b'\n\x0bvocab.proto\x12\x03\x63ta\".\n\x0cVocabularies\x12\x1e\n\x0bknown_words\x18\x01 \x03(\x0b\x32\t.cta.Word\">\n\x04Word\x12\x11\n\thead_word\x18\x01 \x01(\t\x12\x0e\n\x06pinyin\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65\x66initions\x18\x03 \x03(\tb\x06proto3'
 )
 
 
@@ -80,7 +80,7 @@ _WORD = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='definition', full_name='cta.Word.definition', index=2,
+      name='definitions', full_name='cta.Word.definitions', index=2,
       number=3, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -99,7 +99,7 @@ _WORD = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=68,
-  serialized_end=129,
+  serialized_end=130,
 )
 
 _VOCABULARIES.fields_by_name['known_words'].message_type = _WORD

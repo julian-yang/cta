@@ -9,7 +9,7 @@ message Vocabularies {
 message Word {
   string head_word = 1;
   string pinyin = 2;
-  repeated string definition = 3;
+  repeated string definitions = 3;
   // Maybe add sample sentence?
 }
 

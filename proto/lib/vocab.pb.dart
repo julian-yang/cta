@@ -38,7 +38,7 @@ class Word extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('Word', package: const $pb.PackageName('cta'), createEmptyInstance: create)
     ..aOS(1, 'headWord')
     ..aOS(2, 'pinyin')
-    ..pPS(3, 'definition')
+    ..pPS(3, 'definitions')
     ..hasRequiredFields = false
   ;
 
@@ -76,6 +76,6 @@ class Word extends $pb.GeneratedMessage {
   void clearPinyin() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.List<$core.String> get definition => $_getList(2);
+  $core.List<$core.String> get definitions => $_getList(2);
 }
 
