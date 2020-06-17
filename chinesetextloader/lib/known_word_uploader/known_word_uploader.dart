@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'package:xml/xml.dart';
+import 'package:proto/vocab.pb.dart';
 
 class KnownWordUploader extends StatefulWidget {
   @override
@@ -34,18 +36,26 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
 
   void _onPickedFile(File file) async {
     List<String> lines = await file.readAsLines(encoding: utf8);
-    for (String line in lines) {
-      List<String> parts = line.split('\t');
-      String word = parts[0];
-      String pinyin = parts[1];
-      List<String> definitions = parts[2].split('; ');
-      print('$word $pinyin\n');
-      for (String definition in definitions) {
-        print('* $definition');
-      }
-      print('\n');
+    XmlDocument xmlDocument = parse(lines.join(' '));
+    List<XmlElement> cards = xmlDocument.findAllElements("card").toList();
+    for (XmlElement card in cards) {
+      XmlElement entry = card.findElements("entry").first;
     }
-    var blah = 1;
+
+//    for (String line in lines) {
+//      List<String> parts = line.split('\t');
+//      String word = parts[0];
+//      String pinyin = parts[1];
+//      List<String> definitions = parts[2].split('; ');
+//      print('$word $pinyin\n');
+//      for (String definition in definitions) {
+//        print('* $definition');
+//      }
+//      print('\n');
+//    }
+//    var blah = 1;
   }
-};
+}
+
+
 
