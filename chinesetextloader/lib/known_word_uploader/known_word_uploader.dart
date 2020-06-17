@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:proto/vocab.pb.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class KnownWordUploader extends StatefulWidget {
   @override
@@ -43,10 +44,71 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
         ]));
   }
 
-  Function _uploadVocab(BuildContext context) => () {
-
-        showDialog(context: context, child: Text('Upload!'));
+  Function _uploadVocab(BuildContext context) => () async {
+        Map<String, dynamic> result = await Firestore.instance.runTransaction((Transaction tx) async {
+          DocumentReference latestVocabListRef = _findLatestVocabList();
+          DocumentSnapshot latestVocabListSnapshot =
+              await tx.get(latestVocabListRef);
+          Vocabularies latestVocabList =
+              _parseVocabListFromFirestore(latestVocabListSnapshot.data);
+          VocabAndExisting vocabAndExisting =
+              _mergeVocabLists(latestVocabList, vocab);
+          Object mergedProto3Json = vocabAndExisting.merged.toProto3Json();
+          if (latestVocabListSnapshot.exists) {
+            await tx.update(latestVocabListRef, mergedProto3Json);
+          }
+          return vocabAndExisting;
+//          showDialog(
+//              context: context,
+//              child: Card(
+//                  child:
+//                      _createUploadedDialog(vocabAndExisting.existingWords)));
+        });
       };
+
+  Widget _createUploadedDialog(List<String> existingWords) => Card(
+          child: Column(children: <Widget>[
+        Text('Uploaded!'),
+        Expanded(
+            child: ListView(
+                padding: const EdgeInsets.all(8),
+                children: _createExistingWordCards(existingWords)))
+      ]));
+
+  List<Widget> _createExistingWordCards(List<String> existingWords) =>
+      existingWords
+          .map((word) => Card(child: Column(children: [Text(word)])))
+          .toList();
+
+  Map<String, dynamic> _generateTestMap() {
+    Map<String, dynamic> baseMap = {'head_word': '你好', 'pinyin': 'ni2hao3'};
+    baseMap['definitions'] = ['${DateTime.now().toIso8601String()}'];
+    return baseMap;
+  }
+
+  DocumentReference _findLatestVocabList() {
+    return Firestore.instance.collection('known_words').document('latest');
+  }
+
+  Vocabularies _parseVocabListFromFirestore(Map<String, dynamic> data) {
+    // We should be able to merge proto3 directly since we don't have timestamps.
+    Vocabularies vocabularies = Vocabularies()..mergeFromProto3Json(data);
+    return vocabularies;
+  }
+
+  VocabAndExisting _mergeVocabLists(Vocabularies existing, Vocabularies toAdd) {
+    // when no mapping function is specified, it uses identity
+    Map<String, Word> existingMap =
+        Map.fromIterable(existing.knownWords, key: (word) => word.headWord);
+    Map<String, Word> toAddMap =
+        Map.fromIterable(toAdd.knownWords, key: (word) => word.headWord);
+    List<String> existingWords =
+        existingMap.keys.where((word) => toAddMap.containsKey(word)).toList();
+    existingMap.addAll(toAddMap);
+    Vocabularies merged = Vocabularies();
+    merged.knownWords.addAll(existingMap.values);
+    return VocabAndExisting(merged, existingWords);
+  }
 
   List<Widget> _renderVocabularies() => (vocab?.knownWords ?? <Word>[])
       .map((word) => Card(
@@ -55,7 +117,7 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
             children: <Widget>[
               ListTile(
                 title: Text('${word.headWord} ${word.pinyin}'),
-                subtitle: Text(word.definition.first),
+                subtitle: Text(word.definitions.first),
               )
             ],
           )))
@@ -77,7 +139,7 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
       Word word = Word()
         ..headWord = headWord
         ..pinyin = pinyin;
-      word..definition.add(parts[2]);
+      word..definitions.add(parts[2]);
       vocab.knownWords.add(word);
     }
     setState(() => this.vocab = vocab);
@@ -86,9 +148,7 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
   List<String> parseDefinition(String definition) {
     List<String> definitions = [];
     for (String token in definition.split(' ')) {
-      if (PARTS_OF_SPEECH.contains(token)) {
-
-      }
+      if (PARTS_OF_SPEECH.contains(token)) {}
     }
   }
 
@@ -101,4 +161,11 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
     "adverb",
     "preposition",
   };
+}
+
+class VocabAndExisting {
+  final Vocabularies merged;
+  final List<String> existingWords;
+
+  VocabAndExisting(this.merged, this.existingWords);
 }
