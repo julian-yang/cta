@@ -45,7 +45,8 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
   }
 
   Function _uploadVocab(BuildContext context) => () async {
-        Map<String, dynamic> result = await Firestore.instance.runTransaction((Transaction tx) async {
+        Map<String, dynamic> result =
+            await Firestore.instance.runTransaction((Transaction tx) async {
           DocumentReference latestVocabListRef = _findLatestVocabList();
           DocumentSnapshot latestVocabListSnapshot =
               await tx.get(latestVocabListRef);
@@ -57,13 +58,15 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
           if (latestVocabListSnapshot.exists) {
             await tx.update(latestVocabListRef, mergedProto3Json);
           }
-          return vocabAndExisting;
-//          showDialog(
-//              context: context,
-//              child: Card(
-//                  child:
-//                      _createUploadedDialog(vocabAndExisting.existingWords)));
+          return {'existingWords': vocabAndExisting.existingWords};
         });
+
+        // Use this way to cast to List<String> since result is actually Map<String, dynamic>
+        List<String> existingWords = List<String>.from(result['existingWords']);
+        showDialog(
+            context: context,
+            child: Card(child: _createUploadedDialog(existingWords)));
+        print(result);
       };
 
   Widget _createUploadedDialog(List<String> existingWords) => Card(
