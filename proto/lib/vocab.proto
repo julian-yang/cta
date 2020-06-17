@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package cta;
+
+message Vocabularies {
+  repeated Word known_words = 1;
+}
+
+message Word {
+  string head_word = 1;
+  string pinyin = 2;
+  repeated string definition = 3;
+  // Maybe add sample sentence?
+}
+

@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   protobuf: ^1.0.1
+  protoc_plugin: ^19.0.1
 
 dev_dependencies:
   flutter_test:

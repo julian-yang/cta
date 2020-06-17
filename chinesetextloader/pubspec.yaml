@@ -36,6 +36,7 @@ dependencies:
   provider: ^4.1.3
   proto:
     path: ../proto
+  xml:
 
 
 dev_dependencies:

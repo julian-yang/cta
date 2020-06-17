@@ -1,6 +1,6 @@
 // Create an infinite scrolling lazily loaded list
 import 'package:chineseTextLoader/favorites_viewer.dart';
-import 'package:chineseTextLoader/known_word_uploader.dart';
+import 'package:chineseTextLoader/known_word_uploader/known_word_uploader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'article_table/article_table.dart';
