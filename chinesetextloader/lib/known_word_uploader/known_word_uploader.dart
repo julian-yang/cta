@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'dart:convert';
+import '../article_wrapper.dart';
 import 'package:proto/vocab.pb.dart';
+import 'package:proto/article.pb.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class KnownWordUploader extends StatefulWidget {
@@ -54,14 +56,40 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
               _parseVocabListFromFirestore(latestVocabListSnapshot.data);
           VocabAndExisting vocabAndExisting =
               _mergeVocabLists(latestVocabList, vocab);
+
+          Set<String> knownWords = Set.from(vocabAndExisting.merged.knownWords
+              .map((word) => word.headWord)
+              .toList());
+          VocabAndExisting hskWords = await _loadHskWords();
+          knownWords.addAll(hskWords.existingWords);
+
+          List<DocumentReference> articleReferences =
+              await _getArticleReferencesFromFirestore();
+          articleReferences.forEach((articleRef) async {
+            DocumentSnapshot articleSnapshot = await tx.get(articleRef);
+            if (articleSnapshot.exists) {
+              ArticleWrapper articleWrapper =
+                  ArticleWrapper.fromSnapshot(articleSnapshot);
+              _updateArticleCalculations(articleWrapper, knownWords);
+              await tx.update(
+                  articleRef, articleWrapper.article.toProto3Json());
+            } else {
+              print('blagh');
+            }
+          });
+
           Object mergedProto3Json = vocabAndExisting.merged.toProto3Json();
           if (latestVocabListSnapshot.exists) {
             await tx.update(latestVocabListRef, mergedProto3Json);
           }
-          return {'existingWords': vocabAndExisting.existingWords,
+
+//          await tx.update(_hskDocumentRef(), hskWords.merged.toProto3Json());
+
+          return {
+            'existingWords': vocabAndExisting.existingWords,
             'merged': vocabAndExisting.merged.writeToJson()
           };
-        });
+        }, timeout: Duration(seconds: 10));
 
         // Use this way to cast to List<String> since result is actually Map<String, dynamic>
         List<String> existingWords = List<String>.from(result['existingWords']);
@@ -97,10 +125,67 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
     return Firestore.instance.collection('known_words').document('latest');
   }
 
+  DocumentReference _hskDocumentRef() =>
+      Firestore.instance.collection('known_words').document('hsk');
+
+  Future<VocabAndExisting> _loadHskWords() async {
+    DocumentSnapshot snapshot = await _hskDocumentRef().get();
+    if (!snapshot.exists) {
+      print('******!!!!! MISSING HSK woRDS');
+      return VocabAndExisting(Vocabularies(), []);
+    }
+
+    Vocabularies hskVocabularies = Vocabularies()
+      ..mergeFromProto3Json(snapshot.data);
+    List<String> hskWords =
+        hskVocabularies.knownWords.map((word) => word.headWord).toList();
+    return VocabAndExisting(hskVocabularies, hskWords);
+  }
+
   Vocabularies _parseVocabListFromFirestore(Map<String, dynamic> data) {
     // We should be able to merge proto3 directly since we don't have timestamps.
     Vocabularies vocabularies = Vocabularies()..mergeFromProto3Json(data);
     return vocabularies;
+  }
+
+  Future<List<DocumentReference>> _getArticleReferencesFromFirestore() async {
+    QuerySnapshot querySnapshot =
+        await Firestore.instance.collection('scraped_articles').getDocuments();
+    return querySnapshot.documents
+        .map((documentSnapshot) => documentSnapshot.reference)
+        .toList();
+  }
+
+  Future<List<ArticleWrapper>> _getArticlesFromFirestore() async {
+    QuerySnapshot querySnapshot =
+        await Firestore.instance.collection('scraped_articles').getDocuments();
+    return querySnapshot.documents
+        .map(
+            (documentSnapshot) => ArticleWrapper.fromSnapshot(documentSnapshot))
+        .toList();
+  }
+
+  static ArticleWrapper _updateArticleCalculations(
+      ArticleWrapper articleWrapper, Set<String> knownWords) {
+    Set<String> uniqueArticleWords =
+        Set.from(articleWrapper.article.segmentation);
+    Set<String> uniqueKnownArticleWords =
+        knownWords.intersection(uniqueArticleWords);
+    Map<String, int> histogram = {};
+    for (String word in articleWrapper.article.segmentation) {
+      histogram.update(word, (value) => value + 1, ifAbsent: () => 1);
+    }
+    int knownWordCount = uniqueKnownArticleWords
+        .map((word) => histogram[word])
+        .fold(0, (a, b) => a + b);
+
+    articleWrapper.article.stats = articleWrapper.article.stats.clone();
+    articleWrapper.article.stats.knownWordCount = knownWordCount;
+    articleWrapper.article.stats.knownRatio = knownWordCount.toDouble() /
+        articleWrapper.article.segmentation.length.toDouble();
+    articleWrapper.article.stats.uniqueKnownRatio =
+        uniqueKnownArticleWords.length.toDouble() / uniqueArticleWords.length;
+    return articleWrapper;
   }
 
   VocabAndExisting _mergeVocabLists(Vocabularies existing, Vocabularies toAdd) {
@@ -143,7 +228,7 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
       String pinyin = parts[1];
       List<String> definitions = [];
       if (parts.length >= 3) {
-        List<String> parseDefinitions= parts[2].split('; ');
+        List<String> parseDefinitions = parts[2].split('; ');
 //        print('$headWord $pinyin\n');
 //        for (String definition in parseDefinitions) {
 //          print('* $definition');

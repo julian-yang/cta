@@ -6,6 +6,12 @@ class ArticleWrapper {
   final Article article;
   final DocumentReference reference;
 
+  ArticleWrapper duplicate() {
+    return ArticleWrapper._(article.clone(), reference);
+  }
+
+  ArticleWrapper._(this.article, this.reference);
+
   ArticleWrapper.fromSnapshot(DocumentSnapshot snapshot)
       : article = snapshotToArticle(snapshot),
         reference = snapshot.reference;
@@ -46,7 +52,7 @@ class ArticleWrapper {
   ArticleProperty get key => ArticleProperty(article.url, article.url);
 
   static String getArticleTitle(ArticleWrapper a) => a.article.chineseTitle;
-  static int getTotalWords(ArticleWrapper a) => a.article.wordCount;
+  static int getTotalWords(ArticleWrapper a) => a.article.stats.wordCount;
 
   static int getUnknownWords(ArticleWrapper a) => unknownWordCount(a.article);
 
@@ -56,10 +62,10 @@ class ArticleWrapper {
       '${(a.article.stats.knownRatio * 100).toStringAsFixed(1)}%';
 
   static double getAverageWordDifficulty(ArticleWrapper a) =>
-      a.article.averageWordDifficulty;
+      a.article.stats.averageWordDifficulty;
 
   static String getAverageWordDifficultyStr(ArticleWrapper a) =>
-      a.article.averageWordDifficulty.toStringAsFixed(2);
+      a.article.stats.averageWordDifficulty.toStringAsFixed(2);
 
 //  DateTime addDate() =>
 //  DateTime.fromMicrosecondsSinceEpoch();

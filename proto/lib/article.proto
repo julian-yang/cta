@@ -14,14 +14,18 @@ message Article {
     string url = 4;
     google.protobuf.Timestamp publish_date = 5;
     string author = 6;
-    int32 word_count = 7;
-    double average_word_difficulty = 8;
-    repeated string unique_words = 9;
+    // the first words of segmentation are the "chinese_title"
+    repeated string segmentation = 9;
     Stats stats = 10;
     bool favorite = 11;
 }
 
 message Stats {
-    int32 known_word_count = 1;
-    double known_ratio = 2;
+    // equivalent to running set(segmentation).size
+    int32 word_count = 1;
+    double average_word_difficulty = 2;
+    double mean_square_difficulty = 3;
+    double unique_known_ratio = 4;
+    double known_ratio = 5;
+    int32 known_word_count = 6;
 }
