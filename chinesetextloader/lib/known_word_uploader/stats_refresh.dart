@@ -99,8 +99,9 @@ class _StatsRefreshState extends State<StatsRefresh> {
   }
 
   Widget _createDoubleField(double oldVal, double newVal) {
-    String convertedOld = oldVal.toStringAsFixed(2);
-    String convertedNew = newVal.toStringAsFixed(2);
+    int precision = findPrecision(oldVal, newVal);
+    String convertedOld = oldVal.toStringAsFixed(precision);
+    String convertedNew = newVal.toStringAsFixed(precision);
 //    return Text('$convertedNew ($convertedOld)');
 
     return RichText(
@@ -110,16 +111,30 @@ class _StatsRefreshState extends State<StatsRefresh> {
             text: convertedNew,
             style: TextStyle(color: pickColor(oldVal, newVal))),
         TextSpan(
-            text: ' ($convertedNew)', style: TextStyle(color: Colors.black)),
+            text: ' ($convertedOld)', style: TextStyle(color: Colors.black)),
       ],
     ));
   }
 
+  int findPrecision(double oldVal, double newVal) {
+    double diff = (oldVal - newVal).abs();
+    if (diff >= 0) {
+      return 2;
+    }
+
+    int decimalPlaces = 0;
+    while (diff < 0) {
+      decimalPlaces++;
+      diff *= 10;
+    }
+    return decimalPlaces + 2;
+  }
+
   Color pickColor(num oldVal, num newVal) {
     if (oldVal > newVal) {
-      return Colors.green;
-    } else if (oldVal < newVal) {
       return Colors.red;
+    } else if (oldVal < newVal) {
+      return Colors.green;
     } else {
       return Colors.black;
     }

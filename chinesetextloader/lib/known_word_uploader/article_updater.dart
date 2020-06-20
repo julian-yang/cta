@@ -15,6 +15,9 @@ Future<List<ArticleComparison>> updateAllArticleStats() async {
       VocabulariesWrapper latestVocab =
           await VocabulariesWrapper.getLatestVocabulariesWrapper(tx: tx);
       Set<String> knownWords = Set.from(latestVocab.headWords);
+      Set<String> hskWords = await VocabulariesWrapper.loadHskWords();
+      knownWords.addAll(hskWords);
+
       List<DocumentReference> articles =
           await getArticleReferencesFromFirestore();
       List<ArticleComparison> results = await Future.wait(articles

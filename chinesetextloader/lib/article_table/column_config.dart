@@ -100,7 +100,7 @@ class ColumnConfig {
     width: 120,
   );
   static const KNOWN_RATIO = ColumnConfig(
-    name: 'Ratio',
+    name: 'Known Ratio',
     displayValueExtractor: ArticleWrapper.getKnownRatioAsPercentage,
     compareValueExtractor: ArticleWrapper.getKnownRatio,
     alignment: Alignment.center,

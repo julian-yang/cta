@@ -33,4 +33,23 @@ class VocabulariesWrapper {
     Vocabularies vocabularies = Vocabularies()..mergeFromProto3Json(data);
     return vocabularies;
   }
+
+
+  static DocumentReference _hskDocumentRef() =>
+      Firestore.instance.collection('known_words').document('hsk');
+
+  static Future<Set<String>> loadHskWords() async {
+    DocumentSnapshot snapshot = await _hskDocumentRef().get();
+    if (!snapshot.exists) {
+      print('******!!!!! MISSING HSK woRDS');
+      return {};
+    }
+
+    Vocabularies hskVocabularies = Vocabularies()
+      ..mergeFromProto3Json(snapshot.data);
+    List<String> hskWords =
+    hskVocabularies.knownWords.map((word) => word.headWord).toList();
+    return Set.from(hskWords);
+  }
+
 }

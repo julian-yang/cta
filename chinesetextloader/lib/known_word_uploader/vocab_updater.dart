@@ -18,8 +18,8 @@ Future<VocabAndExisting> uploadVocab(
       Set<String> knownWords = Set.from(vocabAndExisting.merged.knownWords
           .map((word) => word.headWord)
           .toList());
-      VocabAndExisting hskWords = await _loadHskWords();
-      knownWords.addAll(hskWords.existingWords);
+      Set<String> hskWords = await VocabulariesWrapper.loadHskWords();
+      knownWords.addAll(hskWords);
 
 //    List<DocumentReference> articleReferences =
 //        await getArticleReferencesFromFirestore();
@@ -54,23 +54,6 @@ Map<String, dynamic> _generateTestMap() {
   Map<String, dynamic> baseMap = {'head_word': '你好', 'pinyin': 'ni2hao3'};
   baseMap['definitions'] = ['${DateTime.now().toIso8601String()}'];
   return baseMap;
-}
-
-DocumentReference _hskDocumentRef() =>
-    Firestore.instance.collection('known_words').document('hsk');
-
-Future<VocabAndExisting> _loadHskWords() async {
-  DocumentSnapshot snapshot = await _hskDocumentRef().get();
-  if (!snapshot.exists) {
-    print('******!!!!! MISSING HSK woRDS');
-    return VocabAndExisting(Vocabularies(), []);
-  }
-
-  Vocabularies hskVocabularies = Vocabularies()
-    ..mergeFromProto3Json(snapshot.data);
-  List<String> hskWords =
-      hskVocabularies.knownWords.map((word) => word.headWord).toList();
-  return VocabAndExisting(hskVocabularies, hskWords);
 }
 
 VocabAndExisting _mergeVocabLists(Vocabularies existing, Vocabularies toAdd) {
