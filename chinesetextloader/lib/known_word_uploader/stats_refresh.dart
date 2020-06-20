@@ -82,10 +82,12 @@ class _StatsRefreshState extends State<StatsRefresh> {
           Stats oldStats = comparison.oldArticle.stats;
           Stats newStats = comparison.newArticle.stats;
           return DataRow(cells: <DataCell>[
-            DataCell(Text(comparison.newArticle.chineseTitle)),
-            DataCell(_createField(
+            DataCell(Container(
+                width: 200, child: Text(comparison.newArticle.chineseTitle))),
+            DataCell(_createDoubleField(
                 oldStats.uniqueKnownRatio, newStats.uniqueKnownRatio)),
-            DataCell(_createField(oldStats.knownRatio, newStats.knownRatio)),
+            DataCell(
+                _createDoubleField(oldStats.knownRatio, newStats.knownRatio)),
             DataCell(
                 _createField(oldStats.knownWordCount, newStats.knownWordCount)),
           ]);
@@ -94,5 +96,32 @@ class _StatsRefreshState extends State<StatsRefresh> {
 
   Widget _createField(num oldVal, num newVal) {
     return Text('$newVal ($oldVal)');
+  }
+
+  Widget _createDoubleField(double oldVal, double newVal) {
+    String convertedOld = oldVal.toStringAsFixed(2);
+    String convertedNew = newVal.toStringAsFixed(2);
+//    return Text('$convertedNew ($convertedOld)');
+
+    return RichText(
+        text: TextSpan(
+      children: [
+        TextSpan(
+            text: convertedNew,
+            style: TextStyle(color: pickColor(oldVal, newVal))),
+        TextSpan(
+            text: ' ($convertedNew)', style: TextStyle(color: Colors.black)),
+      ],
+    ));
+  }
+
+  Color pickColor(num oldVal, num newVal) {
+    if (oldVal > newVal) {
+      return Colors.green;
+    } else if (oldVal < newVal) {
+      return Colors.red;
+    } else {
+      return Colors.black;
+    }
   }
 }
