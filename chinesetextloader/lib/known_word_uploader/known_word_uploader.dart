@@ -44,7 +44,7 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
                 RaisedButton(
                     onPressed:
                         _vocab != null ? () => onUploadPressed(context) : null,
-                    child: Text('Upload!'))
+                    child: Text('Upload!')),
               ])
             ])));
   }
@@ -64,12 +64,14 @@ class _KnownWordUploaderState extends State<KnownWordUploader> {
     VocabAndExisting result = await uploadVocab(context, _vocab);
     setState(() => _showProgress = false);
     showDialog(
-        context: context,
-        child: _createUploadedDialog(result.existingWords));
+        context: context, child: _createUploadedDialog(result.existingWords));
   }
+
+  void onUpdateStatsPressed(context) async {}
 
   Widget _createUploadedDialog(List<String> existingWords) =>
       SimpleDialog(title: Text('Uploaded!'), children: <Widget>[
+        Text('Existing words: '),
         Container(
             width: 400.0,
             height: 500.0,
