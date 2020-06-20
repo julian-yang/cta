@@ -78,22 +78,24 @@ class _StatsRefreshState extends State<StatsRefresh>
     return DataTable(
         columns: const <DataColumn>[
           DataColumn(label: Text('Title')),
+          DataColumn(label: Text('knownWordCount')),
           DataColumn(label: Text('uniqueKnownRatio')),
           DataColumn(label: Text('knownRatio')),
-          DataColumn(label: Text('knownWordCount')),
         ],
+        sortAscending: true,
+        sortColumnIndex: 2,
         rows: results.map((comparison) {
           Stats oldStats = comparison.oldArticle.stats;
           Stats newStats = comparison.newArticle.stats;
           return DataRow(cells: <DataCell>[
             DataCell(Container(
                 width: 200, child: Text(comparison.newArticle.chineseTitle))),
-            DataCell(_createDoubleField(
-                oldStats.uniqueKnownRatio, newStats.uniqueKnownRatio)),
-            DataCell(
-                _createDoubleField(oldStats.knownRatio, newStats.knownRatio)),
             DataCell(
                 _createField(oldStats.knownWordCount, newStats.knownWordCount)),
+            DataCell(
+                _createDoubleField(oldStats.knownRatio, newStats.knownRatio)),
+            DataCell(_createDoubleField(
+                oldStats.uniqueKnownRatio, newStats.uniqueKnownRatio)),
           ]);
         }).toList());
   }
