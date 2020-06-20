@@ -1,14 +1,45 @@
+import 'package:chineseTextLoader/known_word_uploader/vocab_updater.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../article_wrapper.dart';
 import 'package:proto/article.pb.dart';
+import 'package:proto/vocab.pb.dart';
+import 'dart:convert';
 
-Future<List<ArticleComparison>> updateAllArticleStats(
-    BuildContext context, Set<String> knownWords) async {
-  List<DocumentReference> articles = await getArticleReferencesFromFirestore();
-  return Future.wait(articles
-      .map((articleRef) => updateArticleStatsTx(context, articleRef, knownWords))
-      .toList());
+import 'VocabulariesWrapper.dart';
+
+Future<List<ArticleComparison>> updateAllArticleStats() async {
+  try {
+    Map<String, dynamic> rawResult =
+        await Firestore.instance.runTransaction((Transaction tx) async {
+      VocabulariesWrapper latestVocab =
+          await VocabulariesWrapper.getLatestVocabulariesWrapper(tx: tx);
+      Set<String> knownWords = Set.from(latestVocab.headWords);
+      List<DocumentReference> articles =
+          await getArticleReferencesFromFirestore();
+      List<ArticleComparison> results = await Future.wait(articles
+//          .take(1)
+          .map((articleRef) => updateArticleStats(tx, articleRef, knownWords))
+          .toList());
+      await tx.update(
+          latestVocab.reference, latestVocab.vocabularies.toProto3Json());
+      return {
+        'result': results.map((comparison) => comparison.toMapResult()).toList()
+      };
+    }, timeout: Duration(seconds: 20));
+    List<ArticleComparison> results = [];
+    for (Map result in rawResult['result']) {
+      ArticleComparison comparison = ArticleComparison.fromMapResult(result);
+      results.add(comparison);
+    }
+    // I have no idea why i can't use map...
+//    List<ArticleComparison> results2 = rawResult['result']
+//        .map((c) => ArticleComparison.fromMapResult(c))
+//        .toList();
+    return results;
+  } catch (e) {
+    return [];
+  }
 }
 
 // TODO: calculate what changed
@@ -57,12 +88,17 @@ ArticleComparison _updateArticleCalculations(
   Article oldArticle = articleWrapper.article.clone();
   articleWrapper.article.stats = articleWrapper.article.stats.clone();
   articleWrapper.article.stats.knownWordCount = knownWordCount;
-  articleWrapper.article.stats.knownRatio = knownWordCount.toDouble() /
-      articleWrapper.article.segmentation.length.toDouble();
-  articleWrapper.article.stats.uniqueKnownRatio =
-      uniqueKnownArticleWords.length.toDouble() / uniqueArticleWords.length;
+  articleWrapper.article.stats.knownRatio = safeDivide(
+      knownWordCount.toDouble(),
+      articleWrapper.article.segmentation.length.toDouble());
+  articleWrapper.article.stats.uniqueKnownRatio = safeDivide(
+      uniqueKnownArticleWords.length.toDouble(), uniqueArticleWords.length);
   return ArticleComparison(articleWrapper.reference,
       oldArticle: oldArticle, newArticle: articleWrapper.article);
+}
+
+double safeDivide(a, b) {
+  return b != 0 ? a / b : 0;
 }
 
 class ArticleComparison {
@@ -87,7 +123,7 @@ class ArticleComparison {
         this.newArticle = Article(),
         this.success = false;
 
-  ArticleComparison.fromMapResult(Map<String, String> result)
+  ArticleComparison.fromMapResult(Map<dynamic, dynamic> result)
       : this.oldArticle = Article()..mergeFromJson(result[_oldArticleKey]),
         this.newArticle = Article()..mergeFromJson(result[_newArticleKey]),
         this.ref = Firestore.instance.document(result[_refKey]),

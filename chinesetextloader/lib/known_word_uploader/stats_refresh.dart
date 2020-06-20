@@ -1,9 +1,12 @@
+import 'package:chineseTextLoader/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:proto/article.pb.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:proto/vocab.pb.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'article_updater.dart';
 import 'vocab_updater.dart';
 
 class StatsRefresh extends StatefulWidget {
@@ -12,9 +15,8 @@ class StatsRefresh extends StatefulWidget {
 }
 
 class _StatsRefreshState extends State<StatsRefresh> {
-  File _pickedFile;
-  Vocabularies _vocab;
   bool _showProgress = false;
+  List<ArticleComparison> _results = [];
 
   @override
   Widget build(BuildContext context) {
@@ -25,35 +27,29 @@ class _StatsRefreshState extends State<StatsRefresh> {
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Expanded(
-                      child: ListView(
-                          padding: const EdgeInsets.all(8),
-                          children: _renderVocabularies())),
-                  ButtonBar(alignment: MainAxisAlignment.center, children: <Widget>[
-                    RaisedButton(
-                        onPressed:
-                        _vocab != null ? () => onUploadPressed(context) : null,
-                        child: Text('Refresh stats!')),
-                  ])
-                ])));
+              Expanded(
+//                      child: ListView(
+//                          padding: const EdgeInsets.all(8),
+//                          children: _results.isNotEmpty ? _renderResults() : [
+//                          ])
+                  child: wrap2DScrollbar(_renderComparisonTable(_results))),
+              ButtonBar(alignment: MainAxisAlignment.center, children: <Widget>[
+                RaisedButton(
+                    onPressed: () => onRefreshPressed(context),
+                    child: Text('Refresh stats!')),
+              ])
+            ])));
   }
 
-  void onUploadPressed(context) async {
-    if (_vocab == null) {
-      showDialog(
-          context: context,
-          child: SimpleDialog(title: Text('Upload vocab'), children: <Widget>[
-            Text('Please pick a file to extract vocab first.')
-          ]));
-      return;
-    }
+  void onRefreshPressed(context) async {
     setState(() {
       _showProgress = true;
     });
-    VocabAndExisting result = await uploadVocab(context, _vocab);
-    setState(() => _showProgress = false);
-    showDialog(
-        context: context, child: _createUploadedDialog(result.existingWords));
+    List<ArticleComparison> result = await updateAllArticleStats();
+    setState(() {
+      _showProgress = false;
+      _results = result;
+    });
   }
 
   void onUpdateStatsPressed(context) async {}
@@ -74,73 +70,29 @@ class _StatsRefreshState extends State<StatsRefresh> {
           .map((word) => Card(child: Column(children: [Text(word)])))
           .toList();
 
-  List<Widget> _renderVocabularies() => (_vocab?.knownWords ?? <Word>[])
-      .map((word) => Card(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          ListTile(
-            title: Text('${word.headWord} ${word.pinyin}'),
-            subtitle: Text(word.definitions.isNotEmpty
-                ? word.definitions.first
-                : 'n/a'),
-          )
+  Widget _renderComparisonTable(List<ArticleComparison> results) {
+    return DataTable(
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Title')),
+          DataColumn(label: Text('uniqueKnownRatio')),
+          DataColumn(label: Text('knownRatio')),
+          DataColumn(label: Text('knownWordCount')),
         ],
-      )))
-      .toList();
-
-  void _onPickedFile(File file) async {
-    List<String> lines = await file.readAsLines(encoding: utf8);
-    Vocabularies vocab = Vocabularies();
-    List<String> missingDefinitions = [];
-    for (String line in lines) {
-      print('line: $line');
-      List<String> parts = line.split('\t');
-      String headWord = parts[0];
-      String pinyin = parts[1];
-      List<String> definitions = [];
-      if (parts.length >= 3) {
-        List<String> parseDefinitions = parts[2].split('; ');
-//        print('$headWord $pinyin\n');
-//        for (String definition in parseDefinitions) {
-//          print('* $definition');
-//        }
-        definitions.add(parts[2]);
-      } else {
-        print('!!!! No definitions found for $headWord');
-        missingDefinitions.add(headWord);
-      }
-      print('\n');
-      Word word = Word()
-        ..headWord = headWord
-        ..pinyin = pinyin;
-      word..definitions.addAll(definitions);
-      vocab.knownWords.add(word);
-    }
-    if (missingDefinitions.isNotEmpty) {
-      print('Missing definitions:');
-      for (String missing in missingDefinitions) {
-        print('* $missing');
-      }
-    }
-    print('----');
-    setState(() => this._vocab = vocab);
+        rows: results.map((comparison) {
+          Stats oldStats = comparison.oldArticle.stats;
+          Stats newStats = comparison.newArticle.stats;
+          return DataRow(cells: <DataCell>[
+            DataCell(Text(comparison.newArticle.chineseTitle)),
+            DataCell(_createField(
+                oldStats.uniqueKnownRatio, newStats.uniqueKnownRatio)),
+            DataCell(_createField(oldStats.knownRatio, newStats.knownRatio)),
+            DataCell(
+                _createField(oldStats.knownWordCount, newStats.knownWordCount)),
+          ]);
+        }).toList());
   }
 
-  List<String> parseDefinition(String definition) {
-    List<String> definitions = [];
-    for (String token in definition.split(' ')) {
-      if (PARTS_OF_SPEECH.contains(token)) {}
-    }
+  Widget _createField(num oldVal, num newVal) {
+    return Text('$newVal ($oldVal)');
   }
-
-  static const Set<String> PARTS_OF_SPEECH = {
-    "noun",
-    "pronoun",
-    "adjective",
-    "determiner",
-    "verb",
-    "adverb",
-    "preposition",
-  };
 }

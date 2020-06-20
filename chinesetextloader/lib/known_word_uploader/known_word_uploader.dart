@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
-import 'dart:io';
 import 'dart:convert';
-import 'package:proto/vocab.pb.dart';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:proto/vocab.pb.dart';
+
 import 'vocab_updater.dart';
 
 class KnownWordUploader extends StatefulWidget {

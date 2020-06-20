@@ -19,14 +19,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="caa30d88-5245-43ee-96e9-3888d1d7a78e" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../chinesetextloader/lib/known_word_uploader/known_word_uploader.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../chinesetextloader/lib/known_word_uploader/known_word_uploader.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../chinesetextloader/lib/utils.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../chinesetextloader/lib/utils.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../proto/lib/article.pb.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../proto/lib/article.pb.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../proto/lib/article.pbjson.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../proto/lib/article.pbjson.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../proto/lib/article.proto" beforeDir="false" afterPath="$PROJECT_DIR$/../proto/lib/article.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../proto/lib/article_pb2.py" beforeDir="false" afterPath="$PROJECT_DIR$/../proto/lib/article_pb2.py" afterDir="false" />
-    </list>
+    <list default="true" id="caa30d88-5245-43ee-96e9-3888d1d7a78e" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

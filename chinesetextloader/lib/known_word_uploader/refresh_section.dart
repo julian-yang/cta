@@ -3,9 +3,18 @@ import 'package:flutter/material.dart';
 
 import 'known_word_uploader.dart';
 
-class RefreshSection extends StatelessWidget {
-  final Color selectedColor = Colors.orange[800];
-  final Color unselectedColor = Colors.grey;
+class RefreshSection extends StatefulWidget {
+  @override
+  _RefreshSectionState createState() => new _RefreshSectionState();
+}
+
+class _RefreshSectionState extends State<RefreshSection> {
+  static final Color selectedColor = Colors.orange[800];
+  static final Color unselectedColor = Colors.grey;
+
+  final KnownWordUploader _knownWordUploader = KnownWordUploader();
+  final StatsRefresh _statsRefresh = StatsRefresh();
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -17,18 +26,18 @@ class RefreshSection extends StatelessWidget {
 //              indicator: BoxDecoration(
 ////                color: Colors.blue[700]
 //              ),
-              labelColor: selectedColor,
-              unselectedLabelColor: unselectedColor,
-              indicatorColor: selectedColor,
-              tabs: [
-                Tab(icon: Icon(Icons.cloud_upload), text: 'Upload vocab'),
-                Tab(icon: Icon(Icons.sync), text: 'Update stats'),
-              ],
-            )),
+          labelColor: selectedColor,
+          unselectedLabelColor: unselectedColor,
+          indicatorColor: selectedColor,
+          tabs: [
+            Tab(icon: Icon(Icons.cloud_upload), text: 'Upload vocab'),
+            Tab(icon: Icon(Icons.sync), text: 'Update stats'),
+          ],
+        )),
         Expanded(
             child: TabBarView(children: [
-          KnownWordUploader(),
-          StatsRefresh(),
+          _knownWordUploader,
+          _statsRefresh,
         ]))
       ]),
     );

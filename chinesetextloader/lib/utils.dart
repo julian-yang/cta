@@ -70,10 +70,14 @@ void openArticleViewer(BuildContext context, ArticleWrapper articleWrapper) {
 void updateFavorite(ArticleWrapper article, bool isFavorite) {
   Firestore.instance.runTransaction((transaction) async {
 //    final freshSnapshot = await transaction.get(article.reference);
-    await transaction
-        .update(article.reference, {'favorite': isFavorite});
+    await transaction.update(article.reference, {'favorite': isFavorite});
   });
 }
+
+Widget wrap2DScrollbar(Widget child) => Scrollbar(
+    child: SingleChildScrollView(
+        child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal, child: child)));
 
 //void commit(article) {
 //  Firestore.instance.runTransaction((transaction) async {

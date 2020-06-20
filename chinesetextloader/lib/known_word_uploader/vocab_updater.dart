@@ -1,48 +1,51 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:proto/vocab.pb.dart';
-import 'article_updater.dart';
+
+import 'VocabulariesWrapper.dart';
+//import 'article_updater.dart';
 
 Future<VocabAndExisting> uploadVocab(
     BuildContext context, Vocabularies vocab) async {
-  Map<String, dynamic> result =
-      await Firestore.instance.runTransaction((Transaction tx) async {
-    DocumentReference latestVocabListRef = _findLatestVocabList();
-    DocumentSnapshot latestVocabListSnapshot = await tx.get(latestVocabListRef);
-    Vocabularies latestVocabList =
-        _parseVocabListFromFirestore(latestVocabListSnapshot.data);
-    VocabAndExisting vocabAndExisting =
-        _mergeVocabLists(latestVocabList, vocab);
+  try {
+    Map<String, dynamic> result =
+    await Firestore.instance.runTransaction((Transaction tx) async {
+      VocabulariesWrapper latestVocab =
+      await VocabulariesWrapper.getLatestVocabulariesWrapper(tx: tx);
+      VocabAndExisting vocabAndExisting =
+      _mergeVocabLists(latestVocab.vocabularies, vocab);
 
-    Set<String> knownWords = Set.from(vocabAndExisting.merged.knownWords
-        .map((word) => word.headWord)
-        .toList());
-    VocabAndExisting hskWords = await _loadHskWords();
-    knownWords.addAll(hskWords.existingWords);
+      Set<String> knownWords = Set.from(vocabAndExisting.merged.knownWords
+          .map((word) => word.headWord)
+          .toList());
+      VocabAndExisting hskWords = await _loadHskWords();
+      knownWords.addAll(hskWords.existingWords);
 
-    List<DocumentReference> articleReferences =
-        await getArticleReferencesFromFirestore();
-    List<Future<ArticleComparison>> comparisonFutures = articleReferences
-        .take(2)
-        .map((articleRef) => updateArticleStats(tx, articleRef, knownWords))
-        .toList();
-    await Future.wait(comparisonFutures);
+//    List<DocumentReference> articleReferences =
+//        await getArticleReferencesFromFirestore();
+//    List<Future<ArticleComparison>> comparisonFutures = articleReferences
+//        .take(2)
+//        .map((articleRef) => updateArticleStats(tx, articleRef, knownWords))
+//        .toList();
+//    await Future.wait(comparisonFutures);
 
-    Object mergedProto3Json = vocabAndExisting.merged.toProto3Json();
-    if (latestVocabListSnapshot.exists) {
-      await tx.update(latestVocabListRef, mergedProto3Json);
-    }
+      Object mergedProto3Json = vocabAndExisting.merged.toProto3Json();
+      await tx.update(latestVocab.reference, mergedProto3Json);
 
-    return {
-      'existingWords': vocabAndExisting.existingWords,
-      'merged': vocabAndExisting.merged.writeToJson()
-    };
-  }, timeout: Duration(seconds: 10));
+      return {
+        'existingWords': vocabAndExisting.existingWords,
+        'merged': vocabAndExisting.merged.writeToJson()
+      };
+    }, timeout: Duration(seconds: 10));
 
-  // Use this way to cast to List<String> since result is actually Map<String, dynamic>
-  List<String> existingWords = List<String>.from(result['existingWords']);
-  Vocabularies merged = Vocabularies()..mergeFromJson(result['merged']);
-  return VocabAndExisting(merged, existingWords);
+    // Use this way to cast to List<String> since result is actually Map<String, dynamic>
+    List<String> existingWords = List<String>.from(result['existingWords']);
+    Vocabularies merged = Vocabularies()
+      ..mergeFromJson(result['merged']);
+    return VocabAndExisting(merged, existingWords);
+  } catch (e) {
+    return VocabAndExisting(null, []);
+  }
 //      print(result);
 //      print(merged.toProto3Json());
 }
@@ -51,10 +54,6 @@ Map<String, dynamic> _generateTestMap() {
   Map<String, dynamic> baseMap = {'head_word': '你好', 'pinyin': 'ni2hao3'};
   baseMap['definitions'] = ['${DateTime.now().toIso8601String()}'];
   return baseMap;
-}
-
-DocumentReference _findLatestVocabList() {
-  return Firestore.instance.collection('known_words').document('latest');
 }
 
 DocumentReference _hskDocumentRef() =>
@@ -72,12 +71,6 @@ Future<VocabAndExisting> _loadHskWords() async {
   List<String> hskWords =
       hskVocabularies.knownWords.map((word) => word.headWord).toList();
   return VocabAndExisting(hskVocabularies, hskWords);
-}
-
-Vocabularies _parseVocabListFromFirestore(Map<String, dynamic> data) {
-  // We should be able to merge proto3 directly since we don't have timestamps.
-  Vocabularies vocabularies = Vocabularies()..mergeFromProto3Json(data);
-  return vocabularies;
 }
 
 VocabAndExisting _mergeVocabLists(Vocabularies existing, Vocabularies toAdd) {
