@@ -13,13 +13,19 @@ class KnownWordUploader extends StatefulWidget {
   _KnownWordUploaderState createState() => new _KnownWordUploaderState();
 }
 
-class _KnownWordUploaderState extends State<KnownWordUploader> {
+class _KnownWordUploaderState extends State<KnownWordUploader>
+    with AutomaticKeepAliveClientMixin<KnownWordUploader> {
   File _pickedFile;
   Vocabularies _vocab;
   bool _showProgress = false;
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    // for AutomaticKeepAliveClientMixin
+    super.build(context);
     // TODO: implement build
     return ModalProgressHUD(
         inAsyncCall: _showProgress,

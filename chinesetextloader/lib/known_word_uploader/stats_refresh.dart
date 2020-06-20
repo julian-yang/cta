@@ -14,13 +14,17 @@ class StatsRefresh extends StatefulWidget {
   _StatsRefreshState createState() => new _StatsRefreshState();
 }
 
-class _StatsRefreshState extends State<StatsRefresh> {
+class _StatsRefreshState extends State<StatsRefresh>
+    with AutomaticKeepAliveClientMixin<StatsRefresh> {
   bool _showProgress = false;
   List<ArticleComparison> _results = [];
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+    super.build(context);
     return ModalProgressHUD(
         inAsyncCall: _showProgress,
         child: Center(
