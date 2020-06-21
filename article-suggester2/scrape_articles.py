@@ -4,6 +4,7 @@ import os
 import time
 import datetime
 import scrape_bbc
+import scrape_liberty_times
 import article_utils
 import dateparser
 import lib.article_pb2 as article_pb2
@@ -43,7 +44,8 @@ def manifest_articles(articles):
 
 
 if __name__ == "__main__":
-    bbc_articles = scrape_bbc.scrapeBBC()
-    zipfile = manifest_articles(bbc_articles)
+    # articles = scrape_bbc.scrapeBBC()
+    articles = scrape_liberty_times.scrapeLibertyTimes()
+    zipfile = manifest_articles(articles)
 
     # pprint.pprint(scrapeBBC().pop())
