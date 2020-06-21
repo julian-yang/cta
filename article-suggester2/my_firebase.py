@@ -10,6 +10,8 @@ import pprint
 import article_utils
 import os
 
+print_existing_firebase_articles = False
+
 # Note you can only call this once per script run!
 def get_db():
     cwd = os.path.dirname(os.path.realpath(__file__))
@@ -49,9 +51,10 @@ def insert_scraped_articles(db_connection, articles):
         added_articles.append(result)
     pp = pprint.PrettyPrinter(indent=2)
 
-    print('\n**********\nExisting docs:\n**********')
-    for doc in docs:
-        print(articleStringWithoutSegmentation(pp, doc))
+    if print_existing_firebase_articles:
+        print('\n**********\nExisting docs:\n**********')
+        for doc in docs:
+            print(articleStringWithoutSegmentation(pp, doc))
 
     print('\n**********\nadded docs:\n**********')
     added_articles = [(added_article[0], scraped_articles_collection.document(added_article[1].id).get()) for added_article in added_articles]
