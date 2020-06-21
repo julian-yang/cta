@@ -3,15 +3,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import json
-import csv
 import io
 import os
 import article_utils
 import scrape_articles
-from operator import attrgetter
-from article import Article
 import my_firebase as firebase
-import pprint
+import scrape_bbc
 
 def parse_articles(zip_file, article_mapping):
     driver = webdriver.Chrome()
@@ -110,7 +107,6 @@ def load_known_words():
             split = line.split('\t', 1)
             word = split[0]
             known_words.append(word)
-
     return known_words
 
 
@@ -122,29 +118,9 @@ def add_known_ratio(known_words, articles):
         article.stats.unique_known_ratio = len(set(article_known_words)) / len(set(article.segmentation))
         article.stats.known_word_count = len(article_known_words)
 
-# def merge_article_data(scraped, parsed_articles):
-#     mappings = {}
-#     for scraped_article in scraped:
-#         mappings[scraped_article['filename']] = {'scraped': scraped_article}
-#     for parsed_article in parsed_articles:
-#         entry = mappings[parsed_article.filename]
-#         entry['parsed'] = parsed_article
-#     merged = []
-#     for filename, mapping in mappings.items():
-#         article = mapping['scraped'].copy()
-#         parsed = mapping['parsed']
-#         article['wordCount'] = parsed.wordCount
-#         article['avgWordDifficulty'] = parsed.avgWordDifficulty
-#         article['uniqueWords'] = parsed.uniqueWords
-#         merged.append(article)
-#     return merged
-
-
-
-
 
 if __name__ == "__main__":
-    scraped_articles = scrape_articles.scrapeBBC()
+    scraped_articles = scrape_bbc.scrapeBBC()
     (zip_file, article_mapping) = scrape_articles.manifest_articles(scraped_articles)
     known_words = load_known_words()
     articles = parse_articles(zip_file, article_mapping)
