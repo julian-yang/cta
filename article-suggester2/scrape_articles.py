@@ -27,7 +27,7 @@ def manifest_articles(articles):
     article_mapping = {}
     with ZipFile(zip_filename, 'w') as zip:
         for article in articles:
-            filename = rf'{article.chinese_title}.txt'
+            filename = rf'{sanitize_article_title(article.chinese_title)}.txt'
             full_filename = os.path.join(directory, filename)# rf'{directory}\{filename}'
             print(full_filename)
             file = open(full_filename, "w", encoding="utf-8")
@@ -42,10 +42,20 @@ def manifest_articles(articles):
     return (zip_filename, article_mapping)
 
 
+def sanitize_article_title(title):
+    if os.path.sep == '/':
+        return title.replace('/', '\\')
+    elif os.path.sep == '\\':
+        return title.replace('\\', '/')
+    else:
+        return title
+
+
 
 if __name__ == "__main__":
     # articles = scrape_bbc.scrapeBBC()
     articles = scrape_liberty_times.scrapeLibertyTimes()
     zipfile = manifest_articles(articles)
 
+    article_utils.dump_to_json(articles)
     # pprint.pprint(scrapeBBC().pop())
