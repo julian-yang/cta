@@ -73,7 +73,7 @@ def scrapeBBC():
 def manifest_articles(articles):
     st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d__%H_%M_%S')
     cwd = os.path.dirname(os.path.realpath(__file__))
-    directory = rf'{cwd}\{st}'
+    directory = os.path.join(cwd, st) #rf'{cwd}\{st}'
     print(directory)
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -83,7 +83,7 @@ def manifest_articles(articles):
     with ZipFile(zip_filename, 'w') as zip:
         for article in articles:
             filename = rf'{article.chinese_title}.txt'
-            full_filename = rf'{directory}\{filename}'
+            full_filename = os.path.join(directory, filename)# rf'{directory}\{filename}'
             print(full_filename)
             file = open(full_filename, "w", encoding="utf-8")
             # for line in article.chinese_body:
