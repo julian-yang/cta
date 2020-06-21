@@ -28,6 +28,62 @@ unsupported_url = [
     'https://ent.ltn.com.tw/news/breakingnews/'
 ]
 
+
+def is_caption_tag(element):
+    if 'class' in element.attrs and 'ph_b' in element.attrs['class']:
+        return True
+    elif element.find('span', class_='ph_b'):
+        return True
+    else:
+        return False
+
+
+def is_acceptable_text(element):
+    element_type = type(element)
+    if element_type == NavigableString:
+        return True
+    elif element_type == Tag and element.name == 'br':
+        maybe_print(f'br tag? {element}')
+        return True
+    elif element.text.strip() == '。':
+        return True
+    elif element_type == Tag and element.name == 'a':
+        maybe_print(f'a tag? {element}')
+        return True
+    elif is_caption_tag(element):
+        maybe_print(f'caption tag? {element}')
+        return False
+    else:
+        maybe_print(f'some other tag? {element}')
+        return False
+
+
+def maybe_print(text):
+    debug_print = False
+    if debug_print:
+        print(text)
+
+
+def is_article_text(p_tag):
+    if not list(p_tag.children):
+        return False # empty tag?
+    elif '點我訂閱自由財經Youtube頻道' in p_tag.text:
+        print(f'Youtube link?: {p_tag.text}')
+        return False
+    else:
+        test = [child for child in p_tag.children if not is_acceptable_text(child)]
+        if test:
+            print(f'Banned ptag: {p_tag}')
+            return False
+        else:
+            return True
+
+
+def extract_article_text(p_tags):
+    article_texts = [pTag.text for pTag in p_tags if is_article_text(pTag)]
+    return '\n'.join(article_texts)
+
+
 def scrape_liberty_article(url):
     if url.startswith('https://news.ltn.com.tw/news/') and not url.startswith('https://news.ltn.com.tw/news/focus/'):
         return scrape_general_liberty_article(url)
@@ -59,17 +115,11 @@ def scrape_general_liberty_article(url):
     raw_date = article_div.find('span', class_='time')
     if raw_date is not None:
         article.publish_date.FromDatetime(dateparser.parse(raw_date.text))
-    article_body = []
-
     pTags = article_div.find_all('p', attrs={'class': None})
-    # for child in article_div.find_all('p', attrs={'class': None}):
-    #     if isArticleText(child):
-    #         article_body.append(child.text)
-    #         # print(child.text)
-    # pprint.pprint(article_body, width=1)
-    article.chinese_body = extractArticleText(pTags) #"\n".join(article_body)
+    article.chinese_body = extract_article_text(pTags)
     article_utils.print_article(article)
     return article
+
 
 # scrape economics article
 def scrape_ec_liberty_article(url):
@@ -80,7 +130,6 @@ def scrape_ec_liberty_article(url):
     session.mount('https://', adapter)
 
     response = session.get(url)
-    # response = requests.get(url)
     if not response.status_code == 200:
         return None
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -93,63 +142,9 @@ def scrape_ec_liberty_article(url):
         article.publish_date.FromDatetime(dateparser.parse(raw_date.text))
 
     pTags = article_div.find('div', class_='text').find_all('p', attrs={'class': None})
-    # article_body = []
-    # for child in article_div.find('div', class_='text').find_all('p', attrs={'class': none}):
-    #     if isArticleText(child):
-    #         article_body.append(child.text)
-    article.chinese_body = extractArticleText(pTags)
+    article.chinese_body = extract_article_text(pTags)
     article_utils.print_article(article)
     return article
-
-def isCaptionTag(element):
-    if 'class' in element.attrs and 'ph_b' in element.attrs['class']:
-        return True
-    elif element.find('span', class_='ph_b'):
-        return True
-    else:
-        return False
-
-def isAcceptableText(element):
-    elementType = type(element)
-    if elementType == NavigableString:
-        return True
-    elif elementType == Tag and element.name == 'br':
-        maybePrint(f'br tag? {element}')
-        return True
-    elif element.text.strip() == '。':
-        return True
-    elif elementType == Tag and element.name == 'a':
-        maybePrint(f'a tag? {element}')
-        return True
-    elif isCaptionTag(element):
-        maybePrint(f'caption tag? {element}')
-        return False
-    else:
-        maybePrint(f'some other tag? {element}')
-        return False
-
-debug_print = False
-def maybePrint(text):
-    if debug_print:
-        print(text)
-
-def isArticleText(pTag):
-    if not list(pTag.children):
-        return False # empty tag?
-    elif '點我訂閱自由財經Youtube頻道' in pTag.text:
-        print(f'Youtube link?: {pTag.text}')
-        return False
-    else:
-        test = [child for child in pTag.children if not isAcceptableText(child)]
-        if test:
-            print(f'Banned ptag: {pTag}')
-            return False
-        else:
-            return True
-
-def extractArticleText(pTags):
-    article_texts = [pTag.text for pTag in pTags if isArticleText(pTag)]
-    return '\n'.join(article_texts)
 
 
 # scrape entertainment article
@@ -161,7 +156,6 @@ def scrape_ent_liberty_article(url):
     session.mount('https://', adapter)
 
     response = session.get(url)
-    # response = requests.get(url)
     if not response.status_code == 200:
         return None
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -174,16 +168,12 @@ def scrape_ent_liberty_article(url):
         article.publish_date.FromDatetime(dateparser.parse(raw_date.text))
 
     pTags = article_div.find_all('p', attrs={'class': None})
-    # article_body = []
-    # for child in article_div.find_all('p', attrs={'class': None}):
-    #     if isArticleText(child):
-    #         article_body.append(child.text)
-    article.chinese_body = extractArticleText(pTags) # "\n".join(article_body)
+    article.chinese_body = extract_article_text(pTags) # "\n".join(article_body)
     article_utils.print_article(article)
     return article
 
 
-def scrapeBasePage(base_page_url):
+def scrape_base_page(base_page_url):
     response = requests.get(base_page_url)
     if not response.status_code == 200:
         return None
@@ -204,7 +194,7 @@ def scrapeLibertyTimes():
     categories = ['list/breakingnews', 'list/breakingnews/popular']
     article_urls = set()
     for category in categories:
-        article_urls.update(scrapeBasePage(f'{liberty_urlbase}{category}'))
+        article_urls.update(scrape_base_page(f'{liberty_urlbase}{category}'))
 
     articles = []
     # uncomment to just scrape the first article
