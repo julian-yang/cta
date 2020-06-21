@@ -7,6 +7,10 @@ import article_utils
 import dateparser
 import lib.article_pb2 as article_pb2
 from zipfile import ZipFile
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+
+only_scrape_1 = True
 
 def hello():
     print('hello world')
@@ -14,7 +18,14 @@ def hello():
 
 # returns a article_pyb2.Article
 def scrape_bbc_article(url):
-    response = requests.get(url)
+    session = requests.Session()
+    retry = Retry(connect=10, backoff_factor=0.5)
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+
+    response = session.get(url)
+    # response = requests.get(url)
     if not response.status_code == 200:
         return None
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -61,7 +72,8 @@ def scrapeBBC():
 
     articles = []
     # uncomment to just scrape the first article
-    article_urls = article_urls[0:1]
+    if only_scrape_1:
+        article_urls = article_urls[0:1]
     for link in article_urls:
         print(link)
         article = scrape_bbc_article(link)
@@ -88,6 +100,8 @@ def manifest_articles(articles):
             file = open(full_filename, "w", encoding="utf-8")
             # for line in article.chinese_body:
             #     file.write(line)
+            file.write(article.chinese_title)
+            file.write('\n\n')
             file.write(article.chinese_body)
             file.close()
             zip.write(full_filename, arcname=filename)

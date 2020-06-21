@@ -28,9 +28,9 @@ class ArticleCard extends StatelessWidget {
                     children: <TableRow>[
                   TableRow(
                       children: createRow([
-                    ArticleProperty('Total:', _article.wordCount.toString()),
+                    ArticleProperty('Total:', _article.stats.wordCount.toString()),
                     ArticleProperty('Diff:',
-                        _article.averageWordDifficulty.toStringAsFixed(2))
+                        _article.stats.averageWordDifficulty.toStringAsFixed(2))
                   ])),
                   TableRow(
                       children: createRow([

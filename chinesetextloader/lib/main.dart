@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'article_table/article_table.dart';
 import 'add_article_form.dart';
 import 'add_article_wizard.dart';
+import 'known_word_uploader/refresh_section.dart';
 
 void main() => runApp(new MyApp());
 
@@ -13,6 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
+      theme: ThemeData.light(),
       title: 'Startup Name Generator',
       home: MyHomePage(),
     );
@@ -33,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
     FavoritesViewer(),
     ArticleTable(),
 //    AddArticleForm(),
-    KnownWordUploader(),
+    RefreshSection(),
   ];
 
   void _onItemTapped(int index) {
@@ -68,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
 //            BottomNavigationBarItem(
 //                icon: Icon(Icons.library_add), title: Text('Add Article')),
             BottomNavigationBarItem(
-                icon: Icon(Icons.cloud_upload), title: Text('Upload vocab')),
+                icon: Icon(Icons.sync), title: Text('Sync')),
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: Colors.amber[800],

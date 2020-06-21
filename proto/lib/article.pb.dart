@@ -44,9 +44,7 @@ class Article extends $pb.GeneratedMessage {
     ..aOS(4, 'url')
     ..aOM<$0.Timestamp>(5, 'publishDate', subBuilder: $0.Timestamp.create)
     ..aOS(6, 'author')
-    ..a<$core.int>(7, 'wordCount', $pb.PbFieldType.O3)
-    ..a<$core.double>(8, 'averageWordDifficulty', $pb.PbFieldType.OD)
-    ..pPS(9, 'uniqueWords')
+    ..pPS(9, 'segmentation')
     ..aOM<Stats>(10, 'stats', subBuilder: Stats.create)
     ..aOB(11, 'favorite')
     ..hasRequiredFields = false
@@ -125,52 +123,38 @@ class Article extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   void clearAuthor() => clearField(6);
 
-  @$pb.TagNumber(7)
-  $core.int get wordCount => $_getIZ(6);
-  @$pb.TagNumber(7)
-  set wordCount($core.int v) { $_setSignedInt32(6, v); }
-  @$pb.TagNumber(7)
-  $core.bool hasWordCount() => $_has(6);
-  @$pb.TagNumber(7)
-  void clearWordCount() => clearField(7);
-
-  @$pb.TagNumber(8)
-  $core.double get averageWordDifficulty => $_getN(7);
-  @$pb.TagNumber(8)
-  set averageWordDifficulty($core.double v) { $_setDouble(7, v); }
-  @$pb.TagNumber(8)
-  $core.bool hasAverageWordDifficulty() => $_has(7);
-  @$pb.TagNumber(8)
-  void clearAverageWordDifficulty() => clearField(8);
-
   @$pb.TagNumber(9)
-  $core.List<$core.String> get uniqueWords => $_getList(8);
+  $core.List<$core.String> get segmentation => $_getList(6);
 
   @$pb.TagNumber(10)
-  Stats get stats => $_getN(9);
+  Stats get stats => $_getN(7);
   @$pb.TagNumber(10)
   set stats(Stats v) { setField(10, v); }
   @$pb.TagNumber(10)
-  $core.bool hasStats() => $_has(9);
+  $core.bool hasStats() => $_has(7);
   @$pb.TagNumber(10)
   void clearStats() => clearField(10);
   @$pb.TagNumber(10)
-  Stats ensureStats() => $_ensure(9);
+  Stats ensureStats() => $_ensure(7);
 
   @$pb.TagNumber(11)
-  $core.bool get favorite => $_getBF(10);
+  $core.bool get favorite => $_getBF(8);
   @$pb.TagNumber(11)
-  set favorite($core.bool v) { $_setBool(10, v); }
+  set favorite($core.bool v) { $_setBool(8, v); }
   @$pb.TagNumber(11)
-  $core.bool hasFavorite() => $_has(10);
+  $core.bool hasFavorite() => $_has(8);
   @$pb.TagNumber(11)
   void clearFavorite() => clearField(11);
 }
 
 class Stats extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('Stats', package: const $pb.PackageName('cta'), createEmptyInstance: create)
-    ..a<$core.int>(1, 'knownWordCount', $pb.PbFieldType.O3)
-    ..a<$core.double>(2, 'knownRatio', $pb.PbFieldType.OD)
+    ..a<$core.int>(1, 'wordCount', $pb.PbFieldType.O3)
+    ..a<$core.double>(2, 'averageWordDifficulty', $pb.PbFieldType.OD)
+    ..a<$core.double>(3, 'meanSquareDifficulty', $pb.PbFieldType.OD)
+    ..a<$core.double>(4, 'uniqueKnownRatio', $pb.PbFieldType.OD)
+    ..a<$core.double>(5, 'knownRatio', $pb.PbFieldType.OD)
+    ..a<$core.int>(6, 'knownWordCount', $pb.PbFieldType.O3)
     ..hasRequiredFields = false
   ;
 
@@ -190,21 +174,57 @@ class Stats extends $pb.GeneratedMessage {
   static Stats _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.int get knownWordCount => $_getIZ(0);
+  $core.int get wordCount => $_getIZ(0);
   @$pb.TagNumber(1)
-  set knownWordCount($core.int v) { $_setSignedInt32(0, v); }
+  set wordCount($core.int v) { $_setSignedInt32(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasKnownWordCount() => $_has(0);
+  $core.bool hasWordCount() => $_has(0);
   @$pb.TagNumber(1)
-  void clearKnownWordCount() => clearField(1);
+  void clearWordCount() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.double get knownRatio => $_getN(1);
+  $core.double get averageWordDifficulty => $_getN(1);
   @$pb.TagNumber(2)
-  set knownRatio($core.double v) { $_setDouble(1, v); }
+  set averageWordDifficulty($core.double v) { $_setDouble(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasKnownRatio() => $_has(1);
+  $core.bool hasAverageWordDifficulty() => $_has(1);
   @$pb.TagNumber(2)
-  void clearKnownRatio() => clearField(2);
+  void clearAverageWordDifficulty() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.double get meanSquareDifficulty => $_getN(2);
+  @$pb.TagNumber(3)
+  set meanSquareDifficulty($core.double v) { $_setDouble(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasMeanSquareDifficulty() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearMeanSquareDifficulty() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.double get uniqueKnownRatio => $_getN(3);
+  @$pb.TagNumber(4)
+  set uniqueKnownRatio($core.double v) { $_setDouble(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasUniqueKnownRatio() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearUniqueKnownRatio() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.double get knownRatio => $_getN(4);
+  @$pb.TagNumber(5)
+  set knownRatio($core.double v) { $_setDouble(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasKnownRatio() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearKnownRatio() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.int get knownWordCount => $_getIZ(5);
+  @$pb.TagNumber(6)
+  set knownWordCount($core.int v) { $_setSignedInt32(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasKnownWordCount() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearKnownWordCount() => clearField(6);
 }
 

@@ -1,15 +1,12 @@
-import 'package:proto/article.pb.dart';
-import 'package:vector_math/vector_math.dart' hide Colors;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../article_wrapper.dart';
 import '../utils.dart';
-import 'header_draggable_chip.dart';
 import 'column_config.dart';
-import 'header_drag_target.dart';
-import 'package:provider/provider.dart';
 import 'drag_state_model.dart';
-import 'dart:collection';
+import 'header_drag_target.dart';
+import 'header_draggable_chip.dart';
 
 class ArticleTable extends StatefulWidget {
   @override
@@ -82,11 +79,6 @@ class _ArticleTableState extends State<ArticleTable> {
                     .map((article) => buildArticleRow(context, article))
                     .toList())));
   }
-
-  static Widget wrap2DScrollbar(Widget child) => Scrollbar(
-      child: SingleChildScrollView(
-          child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal, child: child)));
 
   Widget buildArticleRow(BuildContext context, ArticleWrapper articleWrapper) {
     return Card(

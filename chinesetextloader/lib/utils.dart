@@ -1,14 +1,15 @@
-import 'package:proto/google/protobuf/timestamp.pb.dart' as timestampPb;
-import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:platform/platform.dart';
-import 'package:fixnum/fixnum.dart';
 import 'package:proto/article.pb.dart';
-import 'article_wrapper.dart';
+import 'package:proto/google/protobuf/timestamp.pb.dart' as timestampPb;
+import 'package:url_launcher/url_launcher.dart';
+
 import 'article_viewer.dart';
+import 'article_wrapper.dart';
 
 void openUrl(String url) async {
   if (await canLaunch(url)) {
@@ -56,7 +57,7 @@ DateTime convertTimestamp(timestampPb.Timestamp timestamp) {
 }
 
 int unknownWordCount(Article article) =>
-    article.uniqueWords.length - article.stats.knownWordCount;
+    article.stats.wordCount - article.stats.knownWordCount;
 
 void openArticleViewer(BuildContext context, ArticleWrapper articleWrapper) {
   Navigator.push(
@@ -69,10 +70,14 @@ void openArticleViewer(BuildContext context, ArticleWrapper articleWrapper) {
 void updateFavorite(ArticleWrapper article, bool isFavorite) {
   Firestore.instance.runTransaction((transaction) async {
 //    final freshSnapshot = await transaction.get(article.reference);
-    await transaction
-        .update(article.reference, {'favorite': isFavorite});
+    await transaction.update(article.reference, {'favorite': isFavorite});
   });
 }
+
+Widget wrap2DScrollbar(Widget child) => Scrollbar(
+    child: SingleChildScrollView(
+        child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal, child: child)));
 
 //void commit(article) {
 //  Firestore.instance.runTransaction((transaction) async {
