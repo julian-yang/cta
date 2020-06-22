@@ -136,9 +136,9 @@ if __name__ == "__main__":
 
     article_utils.dump_to_json(articles)
 
-    # db = firebase.get_db()
+    db = firebase.get_db()
     # firebase.insert_hsk_words(db, load_hsk_words())
-    # firebase.insert_scraped_articles(db, articles)
+    firebase.insert_scraped_articles(db, articles)
 
     # selection = input('Please select which article to use: ')
     # print(f'you selected: {selection}')

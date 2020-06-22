@@ -35,8 +35,8 @@ def print_articles_min(articles):
 
 def parse_firebase_article(doc):
     dict = doc.to_dict()
-    add_date = dict.pop('add_date', None)
-    publish_date = dict.pop('publish_date', None)
+    add_date = dict.pop('addDate', None)
+    publish_date = dict.pop('publishDate', None)
     try:
         json_str = json.dumps(dict, default=str)
         article = json_format.Parse(json_str, article_pb2.Article())
@@ -56,15 +56,15 @@ def parse_firebase_articles(docs):
 
 def add_article_to_firebase(collection, article):
     article.add_date.GetCurrentTime()
-    article_dict = json_format.MessageToDict(article, preserving_proto_field_name=True)
-    article_dict['add_date'] = article.add_date.ToDatetime()
-    article_dict['publish_date'] = article.publish_date.ToDatetime()
+    article_dict = json_format.MessageToDict(article, preserving_proto_field_name=False)
+    article_dict['addDate'] = article.add_date.ToDatetime()
+    article_dict['publishDate'] = article.publish_date.ToDatetime()
     result = collection.add(article_dict)
     return result
 
 
 def add_vocabularies_to_firebase(collection, vocabularies):
-    vocabularies_dict = json_format.MessageToDict(vocabularies, preserving_proto_field_name=True)
+    vocabularies_dict = json_format.MessageToDict(vocabularies, preserving_proto_field_name=False)
     result = collection.add(vocabularies_dict)
     return result
 
