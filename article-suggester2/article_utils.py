@@ -69,14 +69,18 @@ def add_vocabularies_to_firebase(collection, vocabularies):
     return result
 
 
-def dump_to_json(articles):
+cached_name = 'cached_articles.json'
+
+
+def dump_to_json(articles, filename=cached_name):
     articles_proto = article_pb2.Articles()
     articles_proto.articles.extend(articles)
-    with open('cached_articles.json', 'w', encoding="utf-8") as fout:
+    with open(filename, 'w', encoding="utf-8") as fout:
         fout.write(text_format.MessageToString(articles_proto, as_utf8=True))
 
-def load_from_json():
-    with open('cached_articles.json', 'r', encoding="utf-8") as fin:
+
+def load_from_json(filename=cached_name):
+    with open(filename, 'r', encoding="utf-8") as fin:
         data = fin.read()
         articles = text_format.Parse(data, article_pb2.Articles())
         return list(articles.articles)
