@@ -12,11 +12,7 @@ Future<List<ArticleComparison>> updateAllArticleStats() async {
   try {
     Map<String, dynamic> rawResult =
         await Firestore.instance.runTransaction((Transaction tx) async {
-      VocabulariesWrapper latestVocab =
-          await VocabulariesWrapper.getLatestVocabulariesWrapper(tx: tx);
-      Set<String> knownWords = Set.from(latestVocab.headWords);
-      Set<String> hskWords = await VocabulariesWrapper.loadHskWords();
-      knownWords.addAll(hskWords);
+      Set<String> knownWords = await VocabulariesWrapper.loadKnownWords();
 
       List<DocumentReference> articles =
           await getArticleReferencesFromFirestore();
@@ -24,8 +20,8 @@ Future<List<ArticleComparison>> updateAllArticleStats() async {
 //          .take(1)
           .map((articleRef) => updateArticleStats(tx, articleRef, knownWords))
           .toList());
-      await tx.update(
-          latestVocab.reference, latestVocab.vocabularies.toProto3Json());
+//      await tx.update(
+//          latestVocab.reference, latestVocab.vocabularies.toProto3Json());
       return {
         'result': results.map((comparison) => comparison.toMapResult()).toList()
       };

@@ -18,7 +18,7 @@ class VocabulariesWrapper {
       {Transaction tx}) async {
     DocumentSnapshot latestVocabListSnapshot = tx != null
         ? await tx.get(latestVocabulariesRef)
-        : Firestore.instance.document(latestVocabulariesRef.path);
+        : await Firestore.instance.document(latestVocabulariesRef.path).get();
     if (latestVocabListSnapshot.exists) {
       Vocabularies latestVocabularies =
       _parseVocabListFromFirestore(latestVocabListSnapshot.data);
@@ -34,22 +34,39 @@ class VocabulariesWrapper {
     return vocabularies;
   }
 
-
-  static DocumentReference _hskDocumentRef() =>
-      Firestore.instance.collection('known_words').document('hsk');
-
-  static Future<Set<String>> loadHskWords() async {
-    DocumentSnapshot snapshot = await _hskDocumentRef().get();
+  static Future<Set<String>> loadKnownWordsDocument(DocumentReference docRef) async {
+    DocumentSnapshot snapshot = await docRef.get();
     if (!snapshot.exists) {
-      print('******!!!!! MISSING HSK woRDS');
       return {};
     }
-
-    Vocabularies hskVocabularies = Vocabularies()
+    Vocabularies existingVocabularies = Vocabularies()
       ..mergeFromProto3Json(snapshot.data);
-    List<String> hskWords =
-    hskVocabularies.knownWords.map((word) => word.headWord).toList();
-    return Set.from(hskWords);
+    List<String> uniqueWords =
+    existingVocabularies.knownWords.map((word) => word.headWord).toList();
+    return Set.from(uniqueWords);
   }
 
+  static Future<Set<String>> loadHskWords() async {
+    DocumentReference hskDocRef = Firestore.instance.collection('known_words').document('hsk');
+    return loadKnownWordsDocument(hskDocRef);
+  }
+
+  static Future<Set<String>> loadObviousWords() async {
+    DocumentReference obviousDocRef = Firestore.instance.collection('known_words').document('obvious');
+    return loadKnownWordsDocument(obviousDocRef);
+  }
+
+  static Future<Set<String>> loadKnownWords() async {
+    VocabulariesWrapper latest = await VocabulariesWrapper.getLatestVocabulariesWrapper();
+    Set<String> knownWords = Set.from(latest.headWords);
+    print('Latest size: ${knownWords.length}');
+    Set<String> hskWords = await loadHskWords();
+    print('Hsk size: ${hskWords.length}');
+    knownWords.addAll(hskWords);
+    Set<String> obviousWords = await loadObviousWords();
+    knownWords.addAll(obviousWords);
+    print('Obvious size: ${obviousWords.length}');
+    print('Total size: ${knownWords.length}');
+    return knownWords;
+  }
 }
