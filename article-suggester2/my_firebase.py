@@ -9,6 +9,7 @@ import datetime
 import pprint
 import article_utils
 import os
+import json
 
 print_existing_firebase_articles = False
 
@@ -23,13 +24,36 @@ def get_db():
 
 
 def insert_hsk_words(db_connection, hsk_words):
-    known_words_collection = db_connection.collection(u'known_words')
-    converted_hsk_words = [convertToWordProto(word) for word in hsk_words]
-    hsk_vocabularies = vocab_pb2.Vocabularies()
-    hsk_vocabularies.known_words.extend(converted_hsk_words)
-    hsk_vocabularies_dict = json_format.MessageToDict(hsk_vocabularies, preserving_proto_field_name=True)
-    known_words_collection.document(u'hsk').set(hsk_vocabularies_dict)
+    insert_words_to_vocabularies(db_connection, hsk_words, u'hsk', rewrite=True)
 
+
+def insert_words_to_vocabularies(db_connection, word_list, vocabularies_name, rewrite=False):
+    known_words_collection = db_connection.collection(u'known_words')
+    converted_word_list = [convertToWordProto(word) for word in word_list]
+    new_vocabularies = vocab_pb2.Vocabularies()
+    new_vocabularies.known_words.extend(converted_word_list)
+    target_document = known_words_collection.document(vocabularies_name)
+    if rewrite:
+        new_vocabularies_dict = json_format.MessageToDict(new_vocabularies, preserving_proto_field_name=False)
+        target_document.set(new_vocabularies_dict)
+    else:
+        existing_vocabularies = parse_vocabularies(target_document.get())
+        merged = merge_vocabularies(existing_vocabularies, new_vocabularies)
+        merged_vocabularies_dict = json_format.MessageToDict(merged, preserving_proto_field_name=False)
+        target_document.set(merged_vocabularies_dict)
+
+def map_headword_to_word(vocabularies):
+    return {word.head_word:word for word in vocabularies.known_words}
+
+def merge_vocabularies(a, b):
+    a_dict = map_headword_to_word(a)
+    b_dict = map_headword_to_word(b)
+    merged_dict = {}
+    merged_dict.update(a_dict)
+    merged_dict.update(b_dict)
+    merged = vocab_pb2.Vocabularies()
+    merged.known_words.extend(merged_dict.values())
+    return merged
 
 def convertToWordProto(word):
     proto = vocab_pb2.Word()
@@ -38,11 +62,7 @@ def convertToWordProto(word):
 
 
 def insert_scraped_articles(db_connection, articles):
-    scraped_articles_collection = db_connection.collection(u'scraped_articles')
-    print('streaming existing articles...')
-    docs = list(scraped_articles_collection.stream())
-    print('parsing existing articles...')
-    existing_articles = article_utils.parse_firebase_articles(docs)
+    docs, existing_articles, scraped_articles_collection = get_existing_articles(db_connection)
     existing_urls = [article.url for article in existing_articles]
     new_articles = [article for article in articles if article.url not in existing_urls]
     added_articles = []
@@ -64,6 +84,34 @@ def insert_scraped_articles(db_connection, articles):
         print(articleStringWithoutSegmentation(pp, doc))
 
 
+def get_existing_articles(db_connection):
+    scraped_articles_collection = db_connection.collection(u'scraped_articles')
+    print('streaming existing articles...')
+    docs = list(scraped_articles_collection.stream())
+    print('parsing existing articles...')
+    existing_articles = article_utils.parse_firebase_articles(docs)
+    return docs, existing_articles, scraped_articles_collection
+
+
+def parse_vocabularies(vocabularies_ref):
+    if vocabularies_ref.exists:
+        json_str = json.dumps(vocabularies_ref.to_dict(), default=str)
+        return json_format.Parse(json_str, vocab_pb2.Vocabularies())
+    else:
+        return vocab_pb2.Vocabularies()
+
+
+def get_known_words(db_connection):
+    word_documents = [u'latest', u'hsk', u'obvious']
+    known_words_collection = db_connection.collection(u'known_words')
+    known_words = set()
+    for word_document in word_documents:
+        doc_ref = known_words_collection.document(word_document).get()
+        doc_words = [word.head_word for word in parse_vocabularies(doc_ref).known_words]
+        known_words.update(doc_words)
+    return known_words
+
+
 def articleStringWithoutSegmentation(pp, doc):
     stripDoc = doc.to_dict()
     stripDoc.pop('segmentation', None)
@@ -77,6 +125,10 @@ def calculate_avg_length():
     lengths = [len(doc.to_dict()['chineseBody']) for doc in docs]
     average = sum(lengths) / len(lengths)
     print(f'average={average}, lengths={lengths}')
+
+
+def insert_obvious_words(db_connection, words):
+    insert_words_to_vocabularies(db_connection, words, 'obvious')
 
 
 if __name__ == "__main__":

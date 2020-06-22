@@ -125,7 +125,9 @@ if __name__ == "__main__":
     # scraped_articles = scrape_bbc.scrapeBBC()
     scraped_articles = scrape_liberty_times.scrapeLibertyTimes()
     (zip_file, article_mapping) = scrape_articles.manifest_articles(scraped_articles)
-    known_words = load_known_words()
+
+    db = firebase.get_db()
+    known_words = firebase.get_known_words(db)
     articles = parse_articles(zip_file, article_mapping)
     add_known_ratio(known_words, articles)
     # sort by secondary key first, then primary key.
@@ -136,7 +138,6 @@ if __name__ == "__main__":
 
     article_utils.dump_to_json(articles)
 
-    db = firebase.get_db()
     # firebase.insert_hsk_words(db, load_hsk_words())
     firebase.insert_scraped_articles(db, articles)
 
