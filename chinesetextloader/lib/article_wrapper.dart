@@ -25,6 +25,22 @@ class ArticleWrapper {
     return article;
   }
 
+  Map<String, dynamic> convertToFirestoreObj() {
+    Map<String, dynamic> articleObj = article.toProto3Json();
+    // need to override timestamp fields.
+    return Map.fromEntries(articleObj.entries.map(maybeConvertToTimestamp));
+  }
+
+  static MapEntry<String, dynamic> maybeConvertToTimestamp(
+      MapEntry<String, dynamic> entry) {
+    try {
+      DateTime dateTime = DateTime.parse(entry.value);
+      return MapEntry(entry.key, Timestamp.fromDate(dateTime));
+    } catch (e) {
+      return entry;
+    }
+  }
+
   static MapEntry<String, dynamic> maybeConvertTimestamp(
           String key, dynamic value) =>
       (value is Timestamp)
@@ -52,6 +68,7 @@ class ArticleWrapper {
   ArticleProperty get key => ArticleProperty(article.url, article.url);
 
   static String getArticleTitle(ArticleWrapper a) => a.article.chineseTitle;
+
   static int getTotalWords(ArticleWrapper a) => a.article.stats.wordCount;
 
   static int getUnknownWords(ArticleWrapper a) => unknownWordCount(a.article);

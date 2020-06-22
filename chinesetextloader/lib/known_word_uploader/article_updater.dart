@@ -66,7 +66,7 @@ Future<ArticleComparison> updateArticleStats(Transaction tx,
         ArticleWrapper.fromSnapshot(articleSnapshot);
     ArticleComparison comparison =
         _updateArticleCalculations(articleWrapper, knownWords);
-    await tx.update(articleRef, articleWrapper.article.toProto3Json());
+    await tx.update(articleRef, articleWrapper.convertToFirestoreObj());
     return comparison;
   } else {
     print('Could not update article: ${articleRef.path}');
@@ -104,7 +104,7 @@ double safeDivide(a, b) {
   return b != 0 ? a / b : 0;
 }
 
-class ArticleComparison {
+class ArticleComparison implements Comparable<ArticleComparison> {
   final Article newArticle;
   final Article oldArticle;
   final DocumentReference ref;
@@ -137,6 +137,26 @@ class ArticleComparison {
         _oldArticleKey: oldArticle.writeToJson(),
         _refKey: ref.path
       };
+
+  int compareTo(ArticleComparison other) {
+    if(_compare() != other._compare()) {
+      return _compare() - other._compare();
+    }
+    if (newArticle.stats.knownRatio != other.newArticle.stats.knownRatio) {
+      return newArticle.stats.knownRatio.compareTo(other.newArticle.stats.knownRatio) * -1;
+    }
+    return newArticle.stats.uniqueKnownRatio.compareTo(other.newArticle.stats.uniqueKnownRatio) * -1;
+  }
+
+  int _compare() {
+    if (newArticle.stats.knownRatio > oldArticle.stats.knownRatio) {
+      return 1;
+    } else if (newArticle.stats.knownRatio < oldArticle.stats.knownRatio) {
+      return 2;
+    } else {
+      return 3;
+    }
+  }
 }
 
 Future<List<DocumentReference>> getArticleReferencesFromFirestore() async {

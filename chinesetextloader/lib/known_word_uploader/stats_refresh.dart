@@ -52,6 +52,7 @@ class _StatsRefreshState extends State<StatsRefresh>
     List<ArticleComparison> result = await updateAllArticleStats();
     setState(() {
       _showProgress = false;
+      result.sort();
       _results = result;
     });
   }
@@ -75,6 +76,7 @@ class _StatsRefreshState extends State<StatsRefresh>
           .toList();
 
   Widget _renderComparisonTable(List<ArticleComparison> results) {
+    results.sort();
     return DataTable(
         columns: const <DataColumn>[
           DataColumn(label: Text('Title')),
@@ -93,9 +95,9 @@ class _StatsRefreshState extends State<StatsRefresh>
             DataCell(
                 _createField(oldStats.knownWordCount, newStats.knownWordCount)),
             DataCell(
-                _createDoubleField(oldStats.knownRatio, newStats.knownRatio)),
+                _createDoubleField(oldStats.knownRatio, newStats.knownRatio, isPercent: true)),
             DataCell(_createDoubleField(
-                oldStats.uniqueKnownRatio, newStats.uniqueKnownRatio)),
+                oldStats.uniqueKnownRatio, newStats.uniqueKnownRatio, isPercent: true)),
           ]);
         }).toList());
   }
@@ -104,10 +106,15 @@ class _StatsRefreshState extends State<StatsRefresh>
     return Text('$newVal ($oldVal)');
   }
 
-  Widget _createDoubleField(double oldVal, double newVal) {
+  Widget _createDoubleField(double oldVal, double newVal, {bool isPercent = false}) {
     int precision = findPrecision(oldVal, newVal);
     String convertedOld = oldVal.toStringAsFixed(precision);
     String convertedNew = newVal.toStringAsFixed(precision);
+
+    if (isPercent) {
+      convertedNew = '${(newVal * 100).toStringAsFixed(precision)}%';
+      convertedOld = '${(oldVal * 100).toStringAsFixed(precision)}%';
+    }
 //    return Text('$convertedNew ($convertedOld)');
 
     return RichText(
@@ -123,17 +130,16 @@ class _StatsRefreshState extends State<StatsRefresh>
   }
 
   int findPrecision(double oldVal, double newVal) {
-    double diff = (oldVal - newVal).abs();
-    if (diff >= 0) {
+    if (oldVal == newVal) {
       return 2;
     }
-
+    double diff = (oldVal - newVal).abs();
     int decimalPlaces = 0;
-    while (diff < 0) {
+    while (diff < 1) {
       decimalPlaces++;
       diff *= 10;
     }
-    return decimalPlaces + 2;
+    return decimalPlaces;
   }
 
   Color pickColor(num oldVal, num newVal) {
