@@ -23,7 +23,7 @@ def ask_if_obvious(candidates):
     for item in candidates:
         cur = cur + 1
         if get_yes_no(f'\n ({cur}/{total}) Please y/n if you know "{item}": '):
-            obvious.append(item[0])
+            obvious.append(item)
     return obvious
 
 

@@ -1,3 +1,4 @@
+import 'package:chineseTextLoader/known_word_uploader/obvious_words_container.dart';
 import 'package:chineseTextLoader/known_word_uploader/stats_refresh.dart';
 import 'package:flutter/material.dart';
 
@@ -14,11 +15,12 @@ class _RefreshSectionState extends State<RefreshSection> {
 
   final KnownWordUploader _knownWordUploader = KnownWordUploader();
   final StatsRefresh _statsRefresh = StatsRefresh();
+  final ObviousWordsContainer _obviousWordsContainer = ObviousWordsContainer();
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Column(children: <Widget>[
         Material(
 //            color: Colors.orange[900],
@@ -32,12 +34,14 @@ class _RefreshSectionState extends State<RefreshSection> {
           tabs: [
             Tab(icon: Icon(Icons.cloud_upload), text: 'Upload vocab'),
             Tab(icon: Icon(Icons.sync), text: 'Update stats'),
+            Tab(icon: Icon(Icons.insert_chart), text: 'Add words')
           ],
         )),
         Expanded(
             child: TabBarView(children: [
           _knownWordUploader,
           _statsRefresh,
+          _obviousWordsContainer
         ]))
       ]),
     );

@@ -11,6 +11,7 @@ import lib.article_pb2 as article_pb2
 from zipfile import ZipFile
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
+import my_firebase as firebase
 
 def hello():
     print('hello world')
@@ -28,6 +29,8 @@ def manifest_articles(articles):
     with ZipFile(zip_filename, 'w') as zip:
         for article in articles:
             filename = rf'{sanitize_article_title(article.chinese_title)}.txt'
+            if filename in article_mapping.keys():
+                continue
             full_filename = os.path.join(directory, filename)# rf'{directory}\{filename}'
             print(full_filename)
             file = open(full_filename, "w", encoding="utf-8")
@@ -43,19 +46,21 @@ def manifest_articles(articles):
 
 
 def sanitize_article_title(title):
-    if os.path.sep == '/':
-        return title.replace('/', '\\')
-    elif os.path.sep == '\\':
-        return title.replace('\\', '/')
-    else:
-        return title
+    return title.replace('/', '-').replace('\\', '-')
+    # if os.path.sep == '/':
+    #     return title.replace('/', '\\')
+    # elif os.path.sep == '\\':
+    #     return title.replace('\\', '/')
+    # else:
+    #     return title
 
 
 
 if __name__ == "__main__":
     # articles = scrape_bbc.scrapeBBC()
-    articles = scrape_liberty_times.scrapeLibertyTimes()
+    articles = scrape_liberty_times.scrapeLibertyTimes(firebase.get_db())
+    article_utils.dump_to_json(articles)
     zipfile = manifest_articles(articles)
 
-    article_utils.dump_to_json(articles)
+
     # pprint.pprint(scrapeBBC().pop())

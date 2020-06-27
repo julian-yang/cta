@@ -10,6 +10,7 @@ import re
 import article_utils
 import dateparser
 import lib.article_pb2 as article_pb2
+import my_firebase as firebase
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
@@ -231,27 +232,37 @@ def scrape_base_page(base_page_url):
     return article_urls
 
 # returns a list of dict
-def scrapeLibertyTimes():
+def scrapeLibertyTimes(db):
     liberty_urlbase = 'https://news.ltn.com.tw/'
     # traditional_prefix = '/zhongwen/trad'
-    categories = ['list/breakingnews', 'list/breakingnews/popular']
+    categories = ['list/breakingnews', 'list/breakingnews/popular', 'list/breakingnews/politics',
+                  'list/breakingnews/society', 'list/breakingnews/world', 'list/breakingnews/novelty',
+                  'list/breakingnews/local']
     article_urls = set()
     for category in categories:
         article_urls.update(scrape_base_page(f'{liberty_urlbase}{category}'))
 
+    (docs, existing_articles, scraped_articles_collection) = firebase.get_existing_articles(db)
+    existing_urls = set([article.url for article in existing_articles])
+    article_urls.difference_update(existing_urls)
+
+    print(f'Found {len(article_urls)} new articles, scraping...')
     articles = []
     # uncomment to just scrape the first article
     if only_scrape_1:
         article_urls = article_urls[0:1]
 
     failed_urls = []
+    count = 1
     for link in article_urls:
-        print(link)
+        print(f'({count}/{len(article_urls)}) {link}')
         (article, landing_url) = scrape_liberty_article(link)
         if article is not None:
             articles.append(article)
+            time.sleep(2)
         else:
             failed_urls.append(landing_url)
+        count = count + 1
 
     if len(failed_urls) > 0:
         failed_urls_sorted = sorted(failed_urls)

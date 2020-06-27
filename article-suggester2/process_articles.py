@@ -123,10 +123,12 @@ def add_known_ratio(known_words, articles):
 
 if __name__ == "__main__":
     # scraped_articles = scrape_bbc.scrapeBBC()
-    scraped_articles = scrape_liberty_times.scrapeLibertyTimes()
+    db = firebase.get_db()
+    # scraped_articles = scrape_liberty_times.scrapeLibertyTimes(db)
+    scraped_articles = article_utils.load_from_json()
     (zip_file, article_mapping) = scrape_articles.manifest_articles(scraped_articles)
 
-    db = firebase.get_db()
+
     known_words = firebase.get_known_words(db)
     articles = parse_articles(zip_file, article_mapping)
     add_known_ratio(known_words, articles)

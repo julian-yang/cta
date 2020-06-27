@@ -23,6 +23,7 @@ dependencies:
   english_words: ^3.1.0
   file_picker: ^1.11.0+3
   flutter_launcher_icons: "^0.7.0"
+  flutter_tindercard: ^0.1.8
   fluttertoast: ^4.0.1
   url_launcher: ^4.0.3
   platform: ^2.2.0
