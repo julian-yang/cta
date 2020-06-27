@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:proto/vocab.pb.dart';
 
-import 'VocabulariesWrapper.dart';
+import 'vocabularies_wrapper.dart';
 //import 'article_updater.dart';
 
 Future<VocabAndExisting> uploadVocab(

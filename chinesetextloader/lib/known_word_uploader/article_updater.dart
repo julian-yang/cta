@@ -6,7 +6,7 @@ import 'package:proto/article.pb.dart';
 import 'package:proto/vocab.pb.dart';
 import 'dart:convert';
 
-import 'VocabulariesWrapper.dart';
+import 'vocabularies_wrapper.dart';
 
 Future<List<ArticleComparison>> updateAllArticleStats() async {
   try {
