@@ -48,6 +48,7 @@ class Article extends $pb.GeneratedMessage {
     ..aOM<Stats>(10, 'stats', subBuilder: Stats.create)
     ..aOB(11, 'favorite')
     ..pPS(12, 'tags')
+    ..a<$core.int>(13, 'chapterNum', $pb.PbFieldType.O3)
     ..hasRequiredFields = false
   ;
 
@@ -149,6 +150,15 @@ class Article extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(12)
   $core.List<$core.String> get tags => $_getList(9);
+
+  @$pb.TagNumber(13)
+  $core.int get chapterNum => $_getIZ(10);
+  @$pb.TagNumber(13)
+  set chapterNum($core.int v) { $_setSignedInt32(10, v); }
+  @$pb.TagNumber(13)
+  $core.bool hasChapterNum() => $_has(10);
+  @$pb.TagNumber(13)
+  void clearChapterNum() => clearField(13);
 }
 
 class Stats extends $pb.GeneratedMessage {

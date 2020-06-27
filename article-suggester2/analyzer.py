@@ -21,8 +21,7 @@ def ask_if_obvious(candidates):
     return obvious
 
 
-def compute_top_words(db_connection):
-    (docs, articles, scraped_articles_collection) = firebase.get_existing_articles(db_connection)
+def compute_top_words(db_connection, articles):
     histogram = {}
     for article in articles:
         for word in article.segmentation:
@@ -40,7 +39,10 @@ def compute_top_words(db_connection):
 
 if __name__ == "__main__":
     db = firebase.get_db()
-    known_words, sorted_histogram, word_to_count = compute_top_words(db)
+    get_articles_method = firebase.get_existing_articles
+    get_articles_method(db)
+
+    known_words, sorted_histogram, word_to_count = compute_top_words(db, get_articles_method(db))
     top20 = list(itertools.islice(word_to_count.items(), 0, 20))
     print('Top 20')
     pprint.pprint(top20)
@@ -66,7 +68,7 @@ if __name__ == "__main__":
             break
 
     print('Done')
-    known_words, sorted_histogram, word_to_count = compute_top_words(db)
+    known_words, sorted_histogram, word_to_count = compute_top_words(db, get_articles_method(db))
     print('Top 20 unknown:')
     filtered = collections.OrderedDict([item for item in word_to_count.items() if item[0] not in known_words])
     top20_filtered = list(itertools.islice(filtered.items(), 0, 20))

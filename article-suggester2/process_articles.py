@@ -8,8 +8,7 @@ import os
 import article_utils
 import scrape_articles
 import my_firebase as firebase
-import scrape_bbc
-import scrape_liberty_times
+import utils
 
 
 def parse_articles(zip_file, article_mapping):
@@ -121,13 +120,11 @@ def add_known_ratio(known_words, articles):
         article.stats.known_word_count = len(article_known_words)
 
 
+use_cache = False
 if __name__ == "__main__":
-    # scraped_articles = scrape_bbc.scrapeBBC()
     db = firebase.get_db()
-    # scraped_articles = scrape_liberty_times.scrapeLibertyTimes(db)
-    scraped_articles = article_utils.load_from_json()
+    scraped_articles = article_utils.load_from_json() if use_cache else scrape_articles.scrapeArticles(db)
     (zip_file, article_mapping) = scrape_articles.manifest_articles(scraped_articles)
-
 
     known_words = firebase.get_known_words(db)
     articles = parse_articles(zip_file, article_mapping)
@@ -139,9 +136,11 @@ if __name__ == "__main__":
     article_utils.print_articles_min(articles)
 
     article_utils.dump_to_json(articles)
+    if utils.get_yes_no('Insert into firebase? '):
+        firebase.insert_scraped_articles(db, articles)
+
+    print('Done!')
 
     # firebase.insert_hsk_words(db, load_hsk_words())
-    firebase.insert_scraped_articles(db, articles)
-
     # selection = input('Please select which article to use: ')
     # print(f'you selected: {selection}')

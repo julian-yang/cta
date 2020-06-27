@@ -34,7 +34,7 @@ def maybe_print(text):
         print(f'* {text}\n')
 
 
-def scrape_chapter(book_title, url, converter):
+def scrape_chapter(book_title, url, converter, chapter_num):
     response = get_http_session().get(url)
     # response = requests.get(url)
     if not response.status_code == 200:
@@ -42,10 +42,11 @@ def scrape_chapter(book_title, url, converter):
     soup = BeautifulSoup(response.content, 'html.parser')
     article = article_pb2.Article()
     article.url = url
-    article.chinese_title = soup.find('td', class_='cntitle').text.replace(':', '：').rstrip()
+    article.chinese_title = converter.convert(soup.find('td', class_='cntitle').text.replace(':', '：').rstrip())
     content_tag = soup.find('td', class_='content')
     paragraphs = [converter.convert(p_tag.text) for p_tag in content_tag.select('p')]
     article.chinese_body = '\n'.join(paragraphs)
+    article.chapter_num = chapter_num
     article.tags.extend(['dushu', 'book', book_title])
     article_utils.print_article(article)
     return article
@@ -90,7 +91,7 @@ def scrapeDuShu(db):
     count = 1
     for link in chapter_urls:
         print(f'({count}/{len(chapter_urls)}) {link}')
-        article = scrape_chapter(book_title, link, converter)
+        article = scrape_chapter(book_title, link, converter, count)
         if article is not None:
             articles.append(article)
             # time.sleep(2)

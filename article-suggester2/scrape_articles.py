@@ -68,14 +68,19 @@ scrape_types = {
     }
 }
 
-if __name__ == "__main__":
+
+def scrapeArticles(db):
     types_format = '\n'.join([f' * ({num}) {val["name"]}' for (num, val) in scrape_types.items()])
     scrape_type = int(input(f'Enter type to scrape:\n{types_format}\n'))
     utils.get_yes_no(f'Confirm type (y/n): ({scrape_type}) {scrape_types[scrape_type]["name"]}\n')
-    # articles = scrape_bbc.scrapeBBC()
-    # articles = scrape_liberty_times.scrapeLibertyTimes(firebase.get_db())
-    articles = scrape_types[scrape_type]['scraper'](firebase.get_db())
+    articles = scrape_types[scrape_type]['scraper'](db)
+    return articles
+
+
+
+if __name__ == "__main__":
+    articles = scrapeArticles(firebase.get_db())
     article_utils.dump_to_json(articles)
-    zipfile = manifest_articles(articles)
+    (zip_file, article_mapping) = manifest_articles(articles)
 
     # pprint.pprint(scrapeBBC().pop())

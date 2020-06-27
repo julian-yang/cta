@@ -84,8 +84,14 @@ def insert_scraped_articles(db_connection, articles):
         print(articleStringWithoutSegmentation(pp, doc))
 
 
-def get_existing_articles(db_connection):
+def get_existing_articles(db_connection, where_clauses=[], orderby_clauses=[]):
     scraped_articles_collection = db_connection.collection(u'scraped_articles')
+    for where_clause in where_clauses:
+        scraped_articles_collection = where_clause(scraped_articles_collection)
+
+    for orderby_clause in orderby_clauses:
+        scraped_articles_collection = orderby_clause(scraped_articles_collection)
+
     print('streaming existing articles...')
     docs = list(scraped_articles_collection.stream())
     print('parsing existing articles...')
