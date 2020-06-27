@@ -6,16 +6,15 @@ import pprint
 import itertools
 
 
+def where_tag(tag_name):
+    return lambda scraped_articles_collection: scraped_articles_collection.where(u'tags', 'array_contains_any', [tag_name])
+
 def has_book_tag(scraped_articles_collection):
     return scraped_articles_collection.where(u'tags', 'array_contains_any', [u'book'])
 
 
 def order_by_title(scraped_articles_collection):
     return scraped_articles_collection.order_by(u'chineseTitle', direction=firestore.Query.ASCENDING)
-
-
-def docRefId_to_article(docs, existing_articles):
-    return {docRef.id: article for (docRef, article) in zip(docs, existing_articles)}
 
 
 def title_extractor(article):
@@ -26,12 +25,14 @@ def ch_extractor(article):
 
 
 # sort_fn_list should be in the order of priority, this method will reverse the order when actually sorting
-def sort(refId_to_article, sort_key_extractor_list):
-    article_list = [(refId, article) for refId, article in refId_to_article.items()]
+def sort(docs, sort_key_extractor_list):
     for sort_key_extractor in sort_key_extractor_list[::-1]:
-        article_list.sort(key=lambda article_tuple: sort_key_extractor(article_tuple[1]))
-    return {article_tuple[0]: article_tuple[1] for article_tuple in article_list}
+        docs.sort(key=lambda doc: sort_key_extractor(article_utils.parse_firebase_article(doc)))
+    return docs
 
+
+def get_lion_witch_wardrobe(db):
+    firebase.get_existing_articles(db, [where_tag(r'《獅子女巫和魔衣櫥》')])
 
 
 if __name__ == "__main__":
@@ -39,14 +40,14 @@ if __name__ == "__main__":
     # if True:
     #     article_utils.print_articles_min(articles)
     db = firebase.get_db()
-    (docs, existing_articles, scraped_articles_collection) = firebase.get_existing_articles(db, [has_book_tag])
-    articles_queried = docRefId_to_article(docs, existing_articles)
-    articles_queried = sort(articles_queried, [ch_extractor])
+    docs = firebase.get_existing_articles(db, [has_book_tag])
+    sort(docs, [ch_extractor])
 
     pp = pprint.PrettyPrinter(indent=2)
     count = 1
-    for docRef, article in articles_queried.items():
-        print(f'({count}/{len(articles_queried)}) {article.chinese_title}')
+    for doc in docs:
+        article = article_utils.parse_firebase_article(doc)
+        print(f'({count}/{len(docs)}) {article.chinese_title}')
         article_utils.print_article_min(article)
         # print(f'  *  docRef: {docRef}')
         # print(f'  *  chapter_num: {pp.pformat(article.chapter_num)}')
@@ -55,18 +56,19 @@ if __name__ == "__main__":
         print('')
         count = count + 1
 
-    confirm = utils.get_yes_no(f'Are you sure you want to delete {len(articles_queried)} articles? ')
+    confirm = utils.get_yes_no(f'Are you sure you want to delete {len(docs)} articles? ')
     if confirm:
         count = 0
-        for docRef, article in itertools.islice(articles_queried.items(), 0, None):
-            print(f'Deleting ({count}/{len(articles_queried)}) {article.chinese_title} ...')
-            print(f'  *  docRef: {docRef}')
+        for doc in docs:
+            article = article_utils.parse_firebase_article(doc)
+            print(f'Deleting ({count}/{len(docs)}) {article.chinese_title} ...')
+            print(f'  *  docRef: {doc.id}')
             print(f'  *  chapter_num: {pp.pformat(article.chapter_num)}')
             print(f'  *  favorite: {pp.pformat(article.favorite)}')
             print(f'  *  tags: {pp.pformat(article.tags)}')
             print('')
             count = count + 1
-            db.collection(u'scraped_articles').document(docRef).delete()
+            db.collection(u'scraped_articles').document(doc.id).delete()
     #
     #
 

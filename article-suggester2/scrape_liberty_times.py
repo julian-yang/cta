@@ -263,8 +263,8 @@ def scrapeLibertyTimes(db):
     for category in categories:
         article_urls.update(scrape_base_page(f'{liberty_urlbase}{category}'))
 
-    (docs, existing_articles, scraped_articles_collection) = firebase.get_existing_articles(db)
-    existing_urls = set([article.url for article in existing_articles])
+    docs = firebase.get_existing_articles(db)
+    existing_urls = set([article.url for article in article_utils.parse_firebase_articles(docs)])
     article_urls.difference_update(existing_urls)
 
     print(f'Found {len(article_urls)} new articles, scraping...')

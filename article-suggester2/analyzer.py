@@ -8,6 +8,7 @@ import my_firebase as firebase
 import collections
 import itertools
 import utils
+from scripts.query_articles import where_tag, get_lion_witch_wardrobe
 
 
 def ask_if_obvious(candidates):
@@ -37,10 +38,13 @@ def compute_top_words(db_connection, articles):
          sorted_histogram.items()])
     return known_words, sorted_histogram, word_to_count
 
+
 if __name__ == "__main__":
     db = firebase.get_db()
-    get_articles_method = firebase.get_existing_articles
-    get_articles_method(db)
+    # get_articles_method = firebase.get_existing_articles
+
+    get_articles_method = lambda db: article_utils.parse_firebase_articles(get_lion_witch_wardrobe(db))
+
 
     known_words, sorted_histogram, word_to_count = compute_top_words(db, get_articles_method(db))
     top20 = list(itertools.islice(word_to_count.items(), 0, 20))
