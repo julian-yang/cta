@@ -53,7 +53,7 @@ def is_acceptable_text(element):
     is_tag_type = element_type == Tag
     if element_type == NavigableString:
         return True
-    elif is_tag_type and (element.val in ['br', 'a', 'b', 'font'] or header_regex.match(element.val)):
+    elif is_tag_type and (element.name in ['br', 'a', 'b', 'font'] or header_regex.match(element.name)):
         maybe_print(f'acceptable tag? {element}')
         return True
     elif element.text.strip() == '。':
@@ -61,10 +61,10 @@ def is_acceptable_text(element):
     elif is_caption_tag(element):
         maybe_print(f'caption tag? {element}')
         return False
-    elif is_tag_type and element.val == 'span' and not bool(element.attrs):
+    elif is_tag_type and element.name == 'span' and not bool(element.attrs):
         maybe_print(f'vanilla span? {element}')
         return True
-    elif is_tag_type and element.val in ['iframe']:
+    elif is_tag_type and element.name in ['iframe']:
         maybe_print(f'explicit banned tag? {element}')
         return False
     else:
@@ -109,24 +109,43 @@ def has_unsupported_general_url_prefix(url):
     return len(prefix_detection) != 0
 
 
+tag_regex = re.compile(r'\/news\/(\w+)\/')
+def find_tag_from_url(url):
+    match = tag_regex.findall(url)
+    if match:
+        return match[0]
+    else:
+        return None
+
+
 def scrape_liberty_article(input_url):
     response = get_http_session().get(input_url)
     # response = requests.get(url)
     if not response.status_code == 200:
         return None
     landing_url = response.url
+
+    url_tag = find_tag_from_url(input_url)
+    extra_tags = [url_tag] if url_tag is not None else []
     article = None
+
     if landing_url.startswith('https://news.ltn.com.tw/news/') and not has_unsupported_general_url_prefix(landing_url):
         article = scrape_general_liberty_article(landing_url)
     elif landing_url.startswith('https://ec.ltn.com.tw/article/'):
         article = scrape_ec_liberty_article(landing_url)
+        extra_tags.append('economics')
     elif landing_url.startswith('https://ent.ltn.com.tw/'):
         article = scrape_ent_liberty_article(landing_url)
+        extra_tags.append('entertainment')
     elif landing_url.startswith('https://sports.ltn.com.tw/news/'):
         article = scrape_sports_liberty_article(landing_url)
+        extra_tags.append('sports')
 
-    article.tags.extend(['news', 'liberty times'])
-    return (article, landing_url)
+    if article is not None:
+        article.tags.extend(['news', 'liberty times'])
+        article.tags.extend(extra_tags)
+
+    return article, landing_url
 
 
 # TODO: change these to take in BeautifulSoup
@@ -256,11 +275,13 @@ def scrapeLibertyTimes(db):
 
     failed_urls = []
     count = 1
+    succeeded_landing_urls = []
     for link in article_urls:
         print(f'({count}/{len(article_urls)}) {link}')
         (article, landing_url) = scrape_liberty_article(link)
         if article is not None:
             articles.append(article)
+            succeeded_landing_urls.append(landing_url)
             time.sleep(2)
         else:
             failed_urls.append(landing_url)

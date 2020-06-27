@@ -69,7 +69,6 @@ scrape_types = {
 }
 
 if __name__ == "__main__":
-    # TODO: create option to choose between BBC / LibertyTimes / DuShu
     types_format = '\n'.join([f' * ({num}) {val["name"]}' for (num, val) in scrape_types.items()])
     scrape_type = int(input(f'Enter type to scrape:\n{types_format}\n'))
     utils.get_yes_no(f'Confirm type (y/n): ({scrape_type}) {scrape_types[scrape_type]["name"]}\n')

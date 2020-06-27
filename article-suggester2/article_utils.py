@@ -14,6 +14,7 @@ def print_article_min(article):
     print_field('unique_known_ratio', article.stats.unique_known_ratio)
     print_field('mean_square_difficulty', article.stats.mean_square_difficulty)
     print_field('url', article.url)
+    print_field('tags', article.tags)
 
 
 def print_field(field, value):
