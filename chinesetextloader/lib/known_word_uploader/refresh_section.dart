@@ -34,7 +34,7 @@ class _RefreshSectionState extends State<RefreshSection> {
           tabs: [
             Tab(icon: Icon(Icons.cloud_upload), text: 'Upload vocab'),
             Tab(icon: Icon(Icons.sync), text: 'Update stats'),
-            Tab(icon: Icon(Icons.insert_chart), text: 'Add words')
+            Tab(icon: Icon(Icons.insert_chart), text: 'Obvious words')
           ],
         )),
         Expanded(
