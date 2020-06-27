@@ -5,14 +5,18 @@ import 'word_frequency.dart';
 import 'package:flutter/material.dart';
 
 class ObviousWordsCheckerContainer extends StatefulWidget {
+  final List<WordFrequency> obviousWordCandidates;
+
+  ObviousWordsCheckerContainer(this.obviousWordCandidates);
+
   @override
   _ObviousWordsCheckerContainerState createState() => new _ObviousWordsCheckerContainerState();
 }
 
 class _ObviousWordsCheckerContainerState extends State<ObviousWordsCheckerContainer> {
-  List<WordFrequency> obviousWordCandidates = [];
+//  List<WordFrequency>
   LinkedHashMap<String, bool> selectedWords = LinkedHashMap();
-  int currentIndex = 0;
+  int cardIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +36,7 @@ class _ObviousWordsCheckerContainerState extends State<ObviousWordsCheckerContai
                   Container(
                       child: RichText(
                           text: TextSpan(
-                              text: '${currentIndex + 1}/${obviousWordCandidates.length}',
+                              text: '${cardIndex + 1}/${widget.obviousWordCandidates.length}',
                               style:
                                   TextStyle(color: Colors.black, fontSize: 24)))),
                   Padding(
@@ -44,7 +48,7 @@ class _ObviousWordsCheckerContainerState extends State<ObviousWordsCheckerContai
                 height: MediaQuery.of(context).size.height * 0.6,
                 child: new TinderSwapCard(
                   orientation: AmassOrientation.BOTTOM,
-                  totalNum: obviousWordCandidates.length,
+                  totalNum: widget.obviousWordCandidates.length,
                   stackNum: 5,
                   swipeEdge: 4.0,
                   maxWidth: MediaQuery.of(context).size.width * 0.9,
@@ -55,7 +59,7 @@ class _ObviousWordsCheckerContainerState extends State<ObviousWordsCheckerContai
                     child: Center(
                         child: RichText(
                             text: TextSpan(
-                                text: obviousWordCandidates[index].word,
+                                text: widget.obviousWordCandidates[index].word,
                                 style: TextStyle(
                                     color: Colors.black, fontSize: 48)))),
                   ),
@@ -83,8 +87,8 @@ class _ObviousWordsCheckerContainerState extends State<ObviousWordsCheckerContai
                     /// Get orientation & index of swiped card!
                     if (orientation != CardSwipeOrientation.RECOVER) {
                       setState(() {
-                        currentIndex = index + 1;
-                        selectedWords[obviousWordCandidates[index].word] =
+                        cardIndex = index + 1;
+                        selectedWords[widget.obviousWordCandidates[index].word] =
                             orientation == CardSwipeOrientation.LEFT;
                       });
                     }

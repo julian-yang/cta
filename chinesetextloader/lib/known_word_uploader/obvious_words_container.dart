@@ -68,7 +68,8 @@ class _ObviousWordsContainerState extends State<ObviousWordsContainer> {
             ? () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => ObviousWordsCheckerContainer()))
+                    builder: (context) =>
+                        ObviousWordsCheckerContainer(candidates)))
             : null,
       );
 }

@@ -32,8 +32,14 @@ class WordFrequency {
       }
     }
     List<WordFrequency> wordFrequencies = wordFrequencyMapping.values.toList();
-    wordFrequencies.sort((a, b) => a.occurences.compareTo(b.occurences));
-    return wordFrequencies;
+    wordFrequencies.sort((a, b) {
+      int occurencesComp = a.occurences.compareTo(b.occurences);
+      if (occurencesComp != 0) {
+        return occurencesComp;
+      }
+      return a.urlToArticle.length.compareTo(b.urlToArticle.length);
+    });
+    return List.from(wordFrequencies.reversed);
   }
 
   static Future<List<WordFrequency>> getObviousWordCandidates() async {
