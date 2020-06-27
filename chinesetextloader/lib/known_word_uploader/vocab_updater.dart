@@ -10,16 +10,13 @@ Future<MergeVocabResult> insertObviousWords(List<String> obviousWords) async {
   try {
     Map<String, dynamic> result =
         await Firestore.instance.runTransaction((Transaction tx) async {
-//      Set<dynamic> test = await VocabulariesWrapper.loadKnownWords();
-//      Set<String> knownWords = Set<String>.from(await VocabulariesWrapper.loadKnownWords());
-//      Set<String> filteredObviousCandidates =
-//          Set.from(obviousWords).difference(knownWords);
-////          Set.from(obviousWords).difference(test);
-//
-//      List<Word> wordsToAdd = filteredObviousCandidates
-
-      List<Word> wordsToAdd = obviousWords
-          .map((String word) => Word()..headWord = word)
+      Set<String> knownWords = Set<String>.from(await VocabulariesWrapper.loadKnownWords());
+      // Purposely drop the type here, since if it's empty, Flutter/Java will freak out
+      // about casting the type.
+      Set filteredObviousCandidates =
+          Set.from(obviousWords).difference(knownWords);
+      List<Word> wordsToAdd = filteredObviousCandidates
+          .map((word) => Word()..headWord = word)
           .toList();
       Vocabularies toAdd = Vocabularies();
       toAdd.knownWords.addAll(wordsToAdd);

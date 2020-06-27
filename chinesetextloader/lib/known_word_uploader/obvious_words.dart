@@ -8,12 +8,12 @@ import 'word_frequency.dart';
 import 'package:flutter/material.dart';
 
 class ObviousWords extends StatefulWidget {
-  final List<WordFrequency> obviousWordCandidates;
-//  final List<WordFrequency> obviousWordCandidates = [WordFrequency(word: '我')];
+//  final List<WordFrequency> obviousWordCandidates;
+  final List<WordFrequency> obviousWordCandidates = [WordFrequency(word: '風')];
 
-  ObviousWords(this.obviousWordCandidates);
+//  ObviousWords(this.obviousWordCandidates);
 
-//  ObviousWords(List<WordFrequency> obviousWordCandidates);
+  ObviousWords(List<WordFrequency> obviousWordCandidates);
 
   @override
   _ObviousWordsState createState() => new _ObviousWordsState();
