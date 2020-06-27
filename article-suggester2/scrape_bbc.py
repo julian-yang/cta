@@ -42,17 +42,18 @@ def scrape_bbc_article(url):
         return None
     article_body = []
     for child in raw_article_body.contents:
-        if child.name == 'p' or child.name == 'h2':
+        if child.val == 'p' or child.val == 'h2':
             article_body.append(child.text)
             # print(child.text)
     # pprint.pprint(article_body, width=1)
     article.chinese_body = "\n".join(article_body)
+    article.tags.extend(['news', 'bbc'])
     article_utils.print_article(article)
     return article
 
 
 # returns a list of dict
-def scrapeBBC():
+def scrapeBBC(db):
     bbc_urlbase = 'https://www.bbc.com'
     traditional_prefix = '/zhongwen/trad'
     response = requests.get(f'{bbc_urlbase}{traditional_prefix}')

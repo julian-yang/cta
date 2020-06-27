@@ -53,7 +53,7 @@ def is_acceptable_text(element):
     is_tag_type = element_type == Tag
     if element_type == NavigableString:
         return True
-    elif is_tag_type and (element.name in ['br', 'a', 'b', 'font'] or header_regex.match(element.name)):
+    elif is_tag_type and (element.val in ['br', 'a', 'b', 'font'] or header_regex.match(element.val)):
         maybe_print(f'acceptable tag? {element}')
         return True
     elif element.text.strip() == '。':
@@ -61,10 +61,10 @@ def is_acceptable_text(element):
     elif is_caption_tag(element):
         maybe_print(f'caption tag? {element}')
         return False
-    elif is_tag_type and element.name == 'span' and not bool(element.attrs):
+    elif is_tag_type and element.val == 'span' and not bool(element.attrs):
         maybe_print(f'vanilla span? {element}')
         return True
-    elif is_tag_type and element.name in ['iframe']:
+    elif is_tag_type and element.val in ['iframe']:
         maybe_print(f'explicit banned tag? {element}')
         return False
     else:
@@ -124,6 +124,8 @@ def scrape_liberty_article(input_url):
         article = scrape_ent_liberty_article(landing_url)
     elif landing_url.startswith('https://sports.ltn.com.tw/news/'):
         article = scrape_sports_liberty_article(landing_url)
+
+    article.tags.extend(['news', 'liberty times'])
     return (article, landing_url)
 
 
