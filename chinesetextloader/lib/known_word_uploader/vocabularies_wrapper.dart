@@ -23,14 +23,14 @@ class VocabulariesWrapper {
         : await Firestore.instance.document(docRef.path).get();
     if (vocabulariesSnapshot.exists) {
       Vocabularies latestVocabularies =
-      _parseVocabListFromFirestore(vocabulariesSnapshot.data);
+      parseVocabListFromFirestore(vocabulariesSnapshot.data);
       return VocabulariesWrapper._(latestVocabularies, docRef);
     } else {
       return null;
     }
   }
 
-  static Vocabularies _parseVocabListFromFirestore(Map<String, dynamic> data) {
+  static Vocabularies parseVocabListFromFirestore(Map<String, dynamic> data) {
     // We should be able to merge proto3 directly since we don't have timestamps.
     Vocabularies vocabularies = Vocabularies()..mergeFromProto3Json(data);
     return vocabularies;

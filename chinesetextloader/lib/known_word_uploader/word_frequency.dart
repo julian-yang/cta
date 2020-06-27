@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:stream_transform/stream_transform.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'vocabularies_wrapper.dart';
@@ -14,9 +16,40 @@ class WordFrequency {
         this.occurences = 0,
         urlToArticle = {};
 
+  static Stream<List<WordFrequency>> getObviousWordsStream() {
+    Stream<List<WordFrequency>> histogramStream = Firestore.instance
+        .collection('scraped_articles')
+        .getDocuments()
+        .asStream()
+        .transform(StreamTransformer.fromHandlers(
+            handleData: (snapshot, sink) {
+              sink.add(generateWordHistogram(snapshot));
+            },
+            handleError: (error, stacktrace, sink) {
+              sink.addError(error, stacktrace);
+            },
+            handleDone: (sink) => sink.close()));
+    Stream<Vocabularies> obviousWordsStream =
+        VocabulariesWrapper.obviousWordsDocRef.snapshots().map((snapshot) =>
+            VocabulariesWrapper.parseVocabListFromFirestore(snapshot.data));
+    return histogramStream.combineLatest(obviousWordsStream,
+        (List<WordFrequency> histogram, Vocabularies vocab) {
+      Set<String> obviousWords =
+          vocab.knownWords.map((word) => word.headWord).toSet();
+      return histogram
+          .where((wordFrequency) => obviousWords.contains(wordFrequency.word))
+          .toList();
+    });
+  }
+
   static Future<List<WordFrequency>> getWordHistogram() async {
     QuerySnapshot articlesSnapshot =
         await Firestore.instance.collection('scraped_articles').getDocuments();
+    return generateWordHistogram(articlesSnapshot);
+  }
+
+  static List<WordFrequency> generateWordHistogram(
+      QuerySnapshot articlesSnapshot) {
     List<ArticleWrapper> articles = articlesSnapshot.documents
         .map(
             (documentSnapshot) => ArticleWrapper.fromSnapshot(documentSnapshot))

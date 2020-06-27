@@ -51,16 +51,16 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Chinese Text Loader'),
       ),
       body: IndexedStack(index: _selectedIndex, children: _tabs),
-      floatingActionButton: Builder(
-          builder: (context) => FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AddArticleWizard()));
-              },
-              child: Icon(Icons.add),
-              backgroundColor: Colors.amber[800])),
+//      floatingActionButton: Builder(
+//          builder: (context) => FloatingActionButton(
+//              onPressed: () {
+//                Navigator.push(
+//                    context,
+//                    MaterialPageRoute(
+//                        builder: (context) => AddArticleWizard()));
+//              },
+//              child: Icon(Icons.add),
+//              backgroundColor: Colors.amber[800])),
       bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
