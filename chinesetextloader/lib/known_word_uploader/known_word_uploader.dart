@@ -69,7 +69,7 @@ class _KnownWordUploaderState extends State<KnownWordUploader>
     setState(() {
       _showProgress = true;
     });
-    VocabAndExisting result = await uploadVocab(context, _vocab);
+    MergeVocabResult result = await uploadVocab(context, _vocab);
     setState(() => _showProgress = false);
     showDialog(
         context: context, child: _createUploadedDialog(result.existingWords));

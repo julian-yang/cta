@@ -1,6 +1,6 @@
 import 'package:chineseTextLoader/known_word_uploader/word_frequency.dart';
 import 'package:flutter/material.dart';
-import 'obvious_words_checker_container.dart';
+import 'obvious_words.dart';
 
 class ObviousWordsContainer extends StatefulWidget {
   @override
@@ -69,7 +69,7 @@ class _ObviousWordsContainerState extends State<ObviousWordsContainer> {
                 context,
                 MaterialPageRoute(
                     builder: (context) =>
-                        ObviousWordsCheckerContainer(candidates)))
+                        ObviousWords(candidates)))
             : null,
       );
 }

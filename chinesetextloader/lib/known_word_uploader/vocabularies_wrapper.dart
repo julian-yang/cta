@@ -13,16 +13,18 @@ class VocabulariesWrapper {
   static DocumentReference get latestVocabulariesRef =>
     Firestore.instance.collection('known_words').document('latest');
 
+  static DocumentReference get obviousWordsDocRef =>
+      Firestore.instance.collection('known_words').document('obvious');
 
-  static Future<VocabulariesWrapper> getLatestVocabulariesWrapper(
+  static Future<VocabulariesWrapper> getVocabulariesWrapper(DocumentReference docRef,
       {Transaction tx}) async {
-    DocumentSnapshot latestVocabListSnapshot = tx != null
-        ? await tx.get(latestVocabulariesRef)
-        : await Firestore.instance.document(latestVocabulariesRef.path).get();
-    if (latestVocabListSnapshot.exists) {
+    DocumentSnapshot vocabulariesSnapshot = tx != null
+        ? await tx.get(docRef)
+        : await Firestore.instance.document(docRef.path).get();
+    if (vocabulariesSnapshot.exists) {
       Vocabularies latestVocabularies =
-      _parseVocabListFromFirestore(latestVocabListSnapshot.data);
-      return VocabulariesWrapper._(latestVocabularies, latestVocabulariesRef);
+      _parseVocabListFromFirestore(vocabulariesSnapshot.data);
+      return VocabulariesWrapper._(latestVocabularies, docRef);
     } else {
       return null;
     }
@@ -34,8 +36,9 @@ class VocabulariesWrapper {
     return vocabularies;
   }
 
-  static Future<Set<String>> loadKnownWordsDocument(DocumentReference docRef) async {
-    DocumentSnapshot snapshot = await docRef.get();
+  static Future<Set<String>> loadKnownWordsDocument(DocumentReference docRef, {Transaction tx}) async {
+    DocumentSnapshot snapshot =
+        await (tx != null ? tx.get(docRef) : docRef.get());
     if (!snapshot.exists) {
       return {};
     }
@@ -52,12 +55,12 @@ class VocabulariesWrapper {
   }
 
   static Future<Set<String>> loadObviousWords() async {
-    DocumentReference obviousDocRef = Firestore.instance.collection('known_words').document('obvious');
+    DocumentReference obviousDocRef = obviousWordsDocRef;
     return loadKnownWordsDocument(obviousDocRef);
   }
 
   static Future<Set<String>> loadKnownWords() async {
-    VocabulariesWrapper latest = await VocabulariesWrapper.getLatestVocabulariesWrapper();
+    VocabulariesWrapper latest = await VocabulariesWrapper.getVocabulariesWrapper(latestVocabulariesRef);
     Set<String> knownWords = Set.from(latest.headWords);
     print('Latest size: ${knownWords.length}');
     Set<String> hskWords = await loadHskWords();
