@@ -27,6 +27,9 @@ protoc -I="<dir where proto file is>" --dart_out="<dir for output>" <proto file 
 
 # For example: 
 protoc -I="./proto/lib" --dart_out="./proto/lib" --python_out="./proto/lib" article.proto
+
+# For mac:
+protoc --dart_out="." --python_out="." article.proto
 ```
 
 You also need to generate timestamp proto file for dart:

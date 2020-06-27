@@ -1,16 +1,11 @@
-from bs4 import BeautifulSoup
-import requests
 import os
 import time
 import datetime
 import scrape_bbc
 import scrape_liberty_times
+import scrape_dushu
 import article_utils
-import dateparser
-import lib.article_pb2 as article_pb2
 from zipfile import ZipFile
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
 import my_firebase as firebase
 
 def hello():
@@ -57,8 +52,10 @@ def sanitize_article_title(title):
 
 
 if __name__ == "__main__":
+    # TODO: create option to choose between BBC / LibertyTimes / DuShu
     # articles = scrape_bbc.scrapeBBC()
-    articles = scrape_liberty_times.scrapeLibertyTimes(firebase.get_db())
+    # articles = scrape_liberty_times.scrapeLibertyTimes(firebase.get_db())
+    articles = scrape_dushu.scrapeDuShu(firebase.get_db())
     article_utils.dump_to_json(articles)
     zipfile = manifest_articles(articles)
 

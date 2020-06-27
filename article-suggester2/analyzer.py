@@ -7,13 +7,7 @@ from selenium import webdriver
 import my_firebase as firebase
 import collections
 import itertools
-
-
-def get_yes_no(text):
-    selection = ''
-    while selection not in ['y', 'n']:
-        selection = input(f'{text}')
-    return selection == 'y'
+import utils
 
 
 def ask_if_obvious(candidates):
@@ -22,7 +16,7 @@ def ask_if_obvious(candidates):
     total = len(candidates)
     for item in candidates:
         cur = cur + 1
-        if get_yes_no(f'\n ({cur}/{total}) Please y/n if you know "{item}": '):
+        if utils.get_yes_no(f'\n ({cur}/{total}) Please y/n if you know "{item}": '):
             obvious.append(item)
     return obvious
 
@@ -53,7 +47,7 @@ if __name__ == "__main__":
     filtered = collections.OrderedDict([item for item in word_to_count.items() if item[0] not in known_words])
 
     start = 0
-    if not get_yes_no('Update obvious words? (y/n): '):
+    if not utils.get_yes_no('Update obvious words? (y/n): '):
         print('goodbye!')
         exit(0)
 
@@ -68,7 +62,7 @@ if __name__ == "__main__":
         pprint.pprint(obvious)
         firebase.insert_obvious_words(db, obvious)
         start = start + 20
-        if not get_yes_no('Continue? (y/n): '):
+        if not utils.get_yes_no('Continue? (y/n): '):
             break
 
     print('Done')

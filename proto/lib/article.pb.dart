@@ -47,6 +47,7 @@ class Article extends $pb.GeneratedMessage {
     ..pPS(9, 'segmentation')
     ..aOM<Stats>(10, 'stats', subBuilder: Stats.create)
     ..aOB(11, 'favorite')
+    ..pPS(12, 'tags')
     ..hasRequiredFields = false
   ;
 
@@ -145,6 +146,9 @@ class Article extends $pb.GeneratedMessage {
   $core.bool hasFavorite() => $_has(8);
   @$pb.TagNumber(11)
   void clearFavorite() => clearField(11);
+
+  @$pb.TagNumber(12)
+  $core.List<$core.String> get tags => $_getList(9);
 }
 
 class Stats extends $pb.GeneratedMessage {

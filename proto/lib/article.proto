@@ -18,6 +18,7 @@ message Article {
     repeated string segmentation = 9;
     Stats stats = 10;
     bool favorite = 11;
+    repeated string tags = 12;
 }
 
 message Stats {
