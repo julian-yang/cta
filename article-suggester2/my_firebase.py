@@ -62,8 +62,9 @@ def convertToWordProto(word):
 
 
 def insert_scraped_articles(db_connection, articles):
-    docs, existing_articles, scraped_articles_collection = get_existing_articles(db_connection)
-    existing_urls = [article.url for article in existing_articles]
+    scraped_articles_collection = db_connection.collection(u'scraped_articles')
+    docs = get_existing_articles(db_connection)
+    existing_urls = [article.url for article in article_utils.parse_firebase_articles(docs)]
     new_articles = [article for article in articles if article.url not in existing_urls]
     added_articles = []
     for article in new_articles:
@@ -84,13 +85,24 @@ def insert_scraped_articles(db_connection, articles):
         print(articleStringWithoutSegmentation(pp, doc))
 
 
-def get_existing_articles(db_connection):
+def docRef_to_article(docs, existing_articles):
+    return {docRef: article for (docRef, article) in zip(docs, existing_articles)}
+
+
+def get_existing_articles(db_connection, where_clauses=[], orderby_clauses=[]):
     scraped_articles_collection = db_connection.collection(u'scraped_articles')
+    for where_clause in where_clauses:
+        scraped_articles_collection = where_clause(scraped_articles_collection)
+
+    for orderby_clause in orderby_clauses:
+        scraped_articles_collection = orderby_clause(scraped_articles_collection)
+
     print('streaming existing articles...')
     docs = list(scraped_articles_collection.stream())
-    print('parsing existing articles...')
-    existing_articles = article_utils.parse_firebase_articles(docs)
-    return docs, existing_articles, scraped_articles_collection
+    return docs
+    # print('parsing existing articles...')
+    # existing_articles = article_utils.parse_firebase_articles(docs)
+    # return docRef_to_article(docs, existing_articles)
 
 
 def parse_vocabularies(vocabularies_ref):

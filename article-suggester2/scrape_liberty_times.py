@@ -109,22 +109,43 @@ def has_unsupported_general_url_prefix(url):
     return len(prefix_detection) != 0
 
 
+tag_regex = re.compile(r'\/news\/(\w+)\/')
+def find_tag_from_url(url):
+    match = tag_regex.findall(url)
+    if match:
+        return match[0]
+    else:
+        return None
+
+
 def scrape_liberty_article(input_url):
     response = get_http_session().get(input_url)
     # response = requests.get(url)
     if not response.status_code == 200:
         return None
     landing_url = response.url
+
+    url_tag = find_tag_from_url(input_url)
+    extra_tags = [url_tag] if url_tag is not None else []
     article = None
+
     if landing_url.startswith('https://news.ltn.com.tw/news/') and not has_unsupported_general_url_prefix(landing_url):
         article = scrape_general_liberty_article(landing_url)
     elif landing_url.startswith('https://ec.ltn.com.tw/article/'):
         article = scrape_ec_liberty_article(landing_url)
+        extra_tags.append('economics')
     elif landing_url.startswith('https://ent.ltn.com.tw/'):
         article = scrape_ent_liberty_article(landing_url)
+        extra_tags.append('entertainment')
     elif landing_url.startswith('https://sports.ltn.com.tw/news/'):
         article = scrape_sports_liberty_article(landing_url)
-    return (article, landing_url)
+        extra_tags.append('sports')
+
+    if article is not None:
+        article.tags.extend(['news', 'liberty times'])
+        article.tags.extend(extra_tags)
+
+    return article, landing_url
 
 
 # TODO: change these to take in BeautifulSoup
@@ -242,8 +263,8 @@ def scrapeLibertyTimes(db):
     for category in categories:
         article_urls.update(scrape_base_page(f'{liberty_urlbase}{category}'))
 
-    (docs, existing_articles, scraped_articles_collection) = firebase.get_existing_articles(db)
-    existing_urls = set([article.url for article in existing_articles])
+    docs = firebase.get_existing_articles(db)
+    existing_urls = set([article.url for article in article_utils.parse_firebase_articles(docs)])
     article_urls.difference_update(existing_urls)
 
     print(f'Found {len(article_urls)} new articles, scraping...')
@@ -254,11 +275,13 @@ def scrapeLibertyTimes(db):
 
     failed_urls = []
     count = 1
+    succeeded_landing_urls = []
     for link in article_urls:
         print(f'({count}/{len(article_urls)}) {link}')
         (article, landing_url) = scrape_liberty_article(link)
         if article is not None:
             articles.append(article)
+            succeeded_landing_urls.append(landing_url)
             time.sleep(2)
         else:
             failed_urls.append(landing_url)

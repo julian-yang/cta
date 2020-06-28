@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package cta;
+
+message Book{
+  string title = 1;
+  repeated Chapter chapters = 2;
+}
+
+message Chapter {
+  string title = 1;
+  repeated string paragraphs = 3;
+}

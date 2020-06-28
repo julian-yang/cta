@@ -1,25 +1,25 @@
-from bs4 import BeautifulSoup
-import requests
 import os
 import time
 import datetime
+
+import scrape_aixdzs
 import scrape_bbc
 import scrape_liberty_times
+import utils
+import scrape_dushu
 import article_utils
-import dateparser
-import lib.article_pb2 as article_pb2
 from zipfile import ZipFile
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
 import my_firebase as firebase
+
 
 def hello():
     print('hello world')
 
+
 def manifest_articles(articles):
     st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d__%H_%M_%S')
     cwd = os.path.dirname(os.path.realpath(__file__))
-    directory = os.path.join(cwd, st) #rf'{cwd}\{st}'
+    directory = os.path.join(cwd, st)  # rf'{cwd}\{st}'
     print(directory)
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -31,7 +31,7 @@ def manifest_articles(articles):
             filename = rf'{sanitize_article_title(article.chinese_title)}.txt'
             if filename in article_mapping.keys():
                 continue
-            full_filename = os.path.join(directory, filename)# rf'{directory}\{filename}'
+            full_filename = os.path.join(directory, filename)  # rf'{directory}\{filename}'
             print(full_filename)
             file = open(full_filename, "w", encoding="utf-8")
             # for line in article.chinese_body:
@@ -55,12 +55,38 @@ def sanitize_article_title(title):
     #     return title
 
 
+scrape_types = {
+    1: {
+        'name': 'BBC',
+        'scraper': scrape_bbc.scrapeBBC
+    },
+    2: {
+        'name': 'Liberty Times',
+        'scraper': scrape_liberty_times.scrapeLibertyTimes
+    },
+    3: {
+        'name': 'DuShu',
+        'scraper': scrape_dushu.scrapeDuShu
+    },
+    4: {
+        'name': 'Aixdzs',
+        'scraper': scrape_aixdzs.scrapeAixdzs
+    }
+}
+
+
+def scrapeArticles(db):
+    types_format = '\n'.join([f' * ({num}) {val["name"]}' for (num, val) in scrape_types.items()])
+    scrape_type = int(input(f'Enter type to scrape:\n{types_format}\n'))
+    utils.get_yes_no(f'Confirm type (y/n): ({scrape_type}) {scrape_types[scrape_type]["name"]}\n')
+    articles = scrape_types[scrape_type]['scraper'](db)
+    return articles
+
+
 
 if __name__ == "__main__":
-    # articles = scrape_bbc.scrapeBBC()
-    articles = scrape_liberty_times.scrapeLibertyTimes(firebase.get_db())
+    articles = scrapeArticles(firebase.get_db())
     article_utils.dump_to_json(articles)
-    zipfile = manifest_articles(articles)
-
+    (zip_file, article_mapping) = manifest_articles(articles)
 
     # pprint.pprint(scrapeBBC().pop())

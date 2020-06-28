@@ -7,13 +7,8 @@ from selenium import webdriver
 import my_firebase as firebase
 import collections
 import itertools
-
-
-def get_yes_no(text):
-    selection = ''
-    while selection not in ['y', 'n']:
-        selection = input(f'{text}')
-    return selection == 'y'
+import utils
+from scripts.query_articles import where_tag, get_lion_witch_wardrobe
 
 
 def ask_if_obvious(candidates):
@@ -22,13 +17,12 @@ def ask_if_obvious(candidates):
     total = len(candidates)
     for item in candidates:
         cur = cur + 1
-        if get_yes_no(f'\n ({cur}/{total}) Please y/n if you know "{item}": '):
+        if utils.get_yes_no(f'\n ({cur}/{total}) Please y/n if you know "{item}": '):
             obvious.append(item)
     return obvious
 
 
-def compute_top_words(db_connection):
-    (docs, articles, scraped_articles_collection) = firebase.get_existing_articles(db_connection)
+def compute_top_words(db_connection, articles):
     histogram = {}
     for article in articles:
         for word in article.segmentation:
@@ -44,16 +38,22 @@ def compute_top_words(db_connection):
          sorted_histogram.items()])
     return known_words, sorted_histogram, word_to_count
 
+
 if __name__ == "__main__":
     db = firebase.get_db()
-    known_words, sorted_histogram, word_to_count = compute_top_words(db)
+    # get_articles_method = firebase.get_existing_articles
+
+    get_articles_method = lambda db: article_utils.parse_firebase_articles(get_lion_witch_wardrobe(db))
+
+
+    known_words, sorted_histogram, word_to_count = compute_top_words(db, get_articles_method(db))
     top20 = list(itertools.islice(word_to_count.items(), 0, 20))
     print('Top 20')
     pprint.pprint(top20)
     filtered = collections.OrderedDict([item for item in word_to_count.items() if item[0] not in known_words])
 
     start = 0
-    if not get_yes_no('Update obvious words? (y/n): '):
+    if not utils.get_yes_no('Update obvious words? (y/n): '):
         print('goodbye!')
         exit(0)
 
@@ -68,11 +68,11 @@ if __name__ == "__main__":
         pprint.pprint(obvious)
         firebase.insert_obvious_words(db, obvious)
         start = start + 20
-        if not get_yes_no('Continue? (y/n): '):
+        if not utils.get_yes_no('Continue? (y/n): '):
             break
 
     print('Done')
-    known_words, sorted_histogram, word_to_count = compute_top_words(db)
+    known_words, sorted_histogram, word_to_count = compute_top_words(db, get_articles_method(db))
     print('Top 20 unknown:')
     filtered = collections.OrderedDict([item for item in word_to_count.items() if item[0] not in known_words])
     top20_filtered = list(itertools.islice(filtered.items(), 0, 20))

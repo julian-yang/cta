@@ -24,6 +24,8 @@ const Article$json = const {
     const {'1': 'segmentation', '3': 9, '4': 3, '5': 9, '10': 'segmentation'},
     const {'1': 'stats', '3': 10, '4': 1, '5': 11, '6': '.cta.Stats', '10': 'stats'},
     const {'1': 'favorite', '3': 11, '4': 1, '5': 8, '10': 'favorite'},
+    const {'1': 'tags', '3': 12, '4': 3, '5': 9, '10': 'tags'},
+    const {'1': 'chapter_num', '3': 13, '4': 1, '5': 5, '10': 'chapterNum'},
   ],
 };
 
