@@ -1,6 +1,8 @@
 import os
 import time
 import datetime
+
+import scrape_aixdzs
 import scrape_bbc
 import scrape_liberty_times
 import utils
@@ -65,6 +67,10 @@ scrape_types = {
     3: {
         'name': 'DuShu',
         'scraper': scrape_dushu.scrapeDuShu
+    },
+    4: {
+        'name': 'Aixdzs',
+        'scraper': scrape_aixdzs.scrapeAixdzs
     }
 }
 

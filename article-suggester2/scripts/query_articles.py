@@ -32,7 +32,7 @@ def sort(docs, sort_key_extractor_list):
 
 
 def get_lion_witch_wardrobe(db):
-    firebase.get_existing_articles(db, [where_tag(r'《獅子女巫和魔衣櫥》')])
+    return firebase.get_existing_articles(db, [where_tag(r'納尼亞傳奇1：獅子、女巫和衣櫥')])
 
 
 if __name__ == "__main__":

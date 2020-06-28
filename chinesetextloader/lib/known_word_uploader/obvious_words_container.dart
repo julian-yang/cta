@@ -91,9 +91,11 @@ class _ObviousWordsContainerState extends State<ObviousWordsContainer> {
 
             return Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Row(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                  child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: children),
+                  children: children)),
             );
           });
 
