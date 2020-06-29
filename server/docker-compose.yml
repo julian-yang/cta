@@ -31,4 +31,11 @@ services:
         restart: always
         expose:
           - 80
-
+            # anki-connect: 
+            #     image: dorowu/ubuntu-desktop-lxde-vnc
+            #     restart: always
+            #     ports:
+            #     - 6080:80 
+            #     - 5900:5900
+            #     volumes:
+            #     - /dev/shm:/dev/shm 
