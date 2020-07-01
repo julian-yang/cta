@@ -2,11 +2,8 @@ import os
 import time
 import datetime
 
-import scrape_aixdzs
-import scrape_bbc
-import scrape_liberty_times
+from scrapers import liberty_times, bbc, aixdzs, dushu
 import utils
-import scrape_dushu
 import article_utils
 from zipfile import ZipFile
 import my_firebase as firebase
@@ -58,19 +55,19 @@ def sanitize_article_title(title):
 scrape_types = {
     1: {
         'name': 'BBC',
-        'scraper': scrape_bbc.scrapeBBC
+        'scraper': bbc.scrapeBBC
     },
     2: {
         'name': 'Liberty Times',
-        'scraper': scrape_liberty_times.scrapeLibertyTimes
+        'scraper': liberty_times.scrapeLibertyTimes
     },
     3: {
         'name': 'DuShu',
-        'scraper': scrape_dushu.scrapeDuShu
+        'scraper': dushu.scrapeDuShu
     },
     4: {
         'name': 'Aixdzs',
-        'scraper': scrape_aixdzs.scrapeAixdzs
+        'scraper': aixdzs.scrapeAixdzs
     }
 }
 

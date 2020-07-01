@@ -1,14 +1,7 @@
 from selenium import webdriver
-from bs4 import BeautifulSoup
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import json
-import csv
-import io
-import scrape_articles
-import pprint
-import requests
 from texttable import Texttable
 
 def login_tofu_learn():

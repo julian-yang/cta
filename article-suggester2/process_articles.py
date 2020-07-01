@@ -6,7 +6,7 @@ import json
 import io
 import os
 import article_utils
-import scrape_articles
+from scrapers import scrape_articles
 import my_firebase as firebase
 import utils
 

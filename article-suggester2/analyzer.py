@@ -1,14 +1,10 @@
 import article_utils
-import scrape_liberty_times
-import webbrowser
-import textwrap
 import pprint
-from selenium import webdriver
 import my_firebase as firebase
 import collections
 import itertools
 import utils
-from scripts.query_articles import where_tag, get_lion_witch_wardrobe
+from scripts.query_articles import get_lion_witch_wardrobe
 
 
 def ask_if_obvious(candidates):

@@ -1,6 +1,5 @@
 import article_utils
-import scrape_liberty_times
-import webbrowser
+from scrapers import liberty_times
 import textwrap
 import pprint
 from selenium import webdriver
@@ -33,7 +32,7 @@ def verify_article(article, driver):
 
 if __name__ == "__main__":
     if not use_cached:
-        articles = scrape_liberty_times.scrapeLibertyTimes()
+        articles = liberty_times.scrapeLibertyTimes()
         article_utils.dump_to_json(articles)
 
     articles = article_utils.load_from_json()
@@ -41,7 +40,7 @@ if __name__ == "__main__":
 
     driver = webdriver.Chrome()
     bad_articles = [article for article in articles if not verify_article(article, driver)]
-    article_utils.dump_to_json(bad_articles, 'bad_articles.json')
+    article_utils.dump_to_json(bad_articles, '../bad_articles.json')
 
 
 
