@@ -85,6 +85,13 @@ class ColumnConfig {
     alignment: Alignment.centerLeft,
     width: 125,
   );
+  static const KNOWN_RATIO = ColumnConfig(
+    name: 'Known Ratio',
+    displayValueExtractor: ArticleWrapper.getKnownRatioAsPercentage,
+    compareValueExtractor: ArticleWrapper.getKnownRatio,
+    alignment: Alignment.center,
+    width: 90,
+  );
   static const TOTAL_WORDS = ColumnConfig(
     name: 'Total',
     displayValueExtractor: ArticleWrapper.getTotalWords,
@@ -98,13 +105,6 @@ class ColumnConfig {
     compareValueExtractor: ArticleWrapper.getUnknownWords,
     alignment: Alignment.center,
     width: 120,
-  );
-  static const KNOWN_RATIO = ColumnConfig(
-    name: 'Known Ratio',
-    displayValueExtractor: ArticleWrapper.getKnownRatioAsPercentage,
-    compareValueExtractor: ArticleWrapper.getKnownRatio,
-    alignment: Alignment.center,
-    width: 90,
   );
   static const DIFFICULTY = ColumnConfig(
     name: 'Difficulty',

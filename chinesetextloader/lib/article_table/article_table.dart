@@ -131,9 +131,9 @@ class _ArticleTableState extends State<ArticleTable> {
   // ColumnConfig to SortAscending
   static final Map<ColumnConfig, SortState> defaultColumnConfig = {
     ColumnConfig.TITLE: SortState.NONE, // This one is not sortable
+    ColumnConfig.KNOWN_RATIO: SortState.DESCENDING,
     ColumnConfig.TOTAL_WORDS: SortState.ASCENDING,
     ColumnConfig.UNKNOWN_WORDS: SortState.ASCENDING,
-    ColumnConfig.KNOWN_RATIO: SortState.DESCENDING,
     ColumnConfig.DIFFICULTY: SortState.ASCENDING,
   };
 }
