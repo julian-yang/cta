@@ -27,6 +27,7 @@ def manifest_articles(articles):
         for article in articles:
             filename = rf'{sanitize_article_title(article.chinese_title)}.txt'
             if filename in article_mapping.keys():
+                print(f'Duplicate filename: {filename}!!')
                 continue
             full_filename = os.path.join(directory, filename)  # rf'{directory}\{filename}'
             print(full_filename)
