@@ -2,7 +2,7 @@ import os
 import time
 import datetime
 
-from scrapers import liberty_times, bbc, aixdzs, dushu
+from scrapers import liberty_times, bbc, aixdzs, dushu, custom_insert
 import utils
 import article_utils
 from zipfile import ZipFile
@@ -69,6 +69,10 @@ scrape_types = {
     4: {
         'name': 'Aixdzs',
         'scraper': aixdzs.scrapeAixdzs
+    },
+    5: {
+        'name': 'Custom insert',
+        'scraper': custom_insert.customInsert
     }
 }
 
