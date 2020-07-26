@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from bs4.element import Tag
+from bs4.element import Tag, Comment
 from bs4.element import NavigableString
 import requests
 import pprint
@@ -53,6 +53,8 @@ def is_acceptable_text(element):
     is_tag_type = element_type == Tag
     if element_type == NavigableString:
         return True
+    elif element_type == Comment:
+        return False
     elif is_tag_type and (element.name in ['br', 'a', 'b', 'font'] or header_regex.match(element.name)):
         maybe_print(f'acceptable tag? {element}')
         return True
@@ -256,9 +258,13 @@ def scrape_base_page(base_page_url):
 def scrapeLibertyTimes(db):
     liberty_urlbase = 'https://news.ltn.com.tw/'
     # traditional_prefix = '/zhongwen/trad'
-    categories = ['list/breakingnews', 'list/breakingnews/popular', 'list/breakingnews/politics',
-                  'list/breakingnews/society', 'list/breakingnews/world', 'list/breakingnews/novelty',
-                  'list/breakingnews/local']
+    # categories = ['list/breakingnews', 'list/breakingnews/popular', 'list/breakingnews/politics',
+    #               'list/breakingnews/society', 'list/breakingnews/world', 'list/breakingnews/novelty',
+    #               'list/breakingnews/local']
+
+    categories = ['list/breakingnews/life', 'list/breakingnews/popular',
+                  'list/breakingnews/world', 'list/breakingnews/novelty',
+                  ]
     article_urls = set()
     for category in categories:
         article_urls.update(scrape_base_page(f'{liberty_urlbase}{category}'))

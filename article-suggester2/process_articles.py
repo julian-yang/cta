@@ -6,7 +6,7 @@ import json
 import io
 import os
 import article_utils
-import scrape_articles
+from scrapers import scrape_articles
 import my_firebase as firebase
 import utils
 
@@ -120,7 +120,7 @@ def add_known_ratio(known_words, articles):
         article.stats.known_word_count = len(article_known_words)
 
 
-use_cache = True
+use_cache = False
 if __name__ == "__main__":
     db = firebase.get_db()
     scraped_articles = article_utils.load_from_json() if use_cache else scrape_articles.scrapeArticles(db)
@@ -128,8 +128,8 @@ if __name__ == "__main__":
 
     known_words = firebase.get_known_words(db)
     articles = parse_articles(zip_file, article_mapping)
-    if (len(articles) != len(scraped_articles)):
-        raise AssertionError(f'The parsed articles do not match input! input: {len(scraped_articles)} output: {len(articles)}')
+    if (len(article_mapping.keys()) != len(scraped_articles)):
+        print(f'The parsed articles do not match input! input: {len(scraped_articles)} output: {len(articles)}')
     add_known_ratio(known_words, articles)
     # sort by secondary key first, then primary key.
     articles.sort(key=lambda article: article.stats.average_word_difficulty)

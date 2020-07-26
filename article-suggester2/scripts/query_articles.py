@@ -12,6 +12,9 @@ def where_tag(tag_name):
 def has_book_tag(scraped_articles_collection):
     return scraped_articles_collection.where(u'tags', 'array_contains_any', [u'book'])
 
+def has_kaguya_tag(scraped_articles_collection):
+    return scraped_articles_collection.where(u'tags', 'array_contains_any', [u'kaguya'])
+
 
 def order_by_title(scraped_articles_collection):
     return scraped_articles_collection.order_by(u'chineseTitle', direction=firestore.Query.ASCENDING)
@@ -34,13 +37,16 @@ def sort(docs, sort_key_extractor_list):
 def get_lion_witch_wardrobe(db):
     return firebase.get_existing_articles(db, [where_tag(r'納尼亞傳奇1：獅子、女巫和衣櫥')])
 
+def get_kaguya(db):
+    return firebase.get_existing_articles(db, [where_tag(r'kaguya')])
+
 
 if __name__ == "__main__":
     # articles = article_utils.load_from_json()
     # if True:
     #     article_utils.print_articles_min(articles)
     db = firebase.get_db()
-    docs = firebase.get_existing_articles(db, [has_book_tag])
+    docs = firebase.get_existing_articles(db, [has_kaguya_tag])
     sort(docs, [ch_extractor])
 
     pp = pprint.PrettyPrinter(indent=2)

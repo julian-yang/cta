@@ -1,14 +1,10 @@
 import article_utils
-import scrape_liberty_times
-import webbrowser
-import textwrap
 import pprint
-from selenium import webdriver
 import my_firebase as firebase
 import collections
 import itertools
 import utils
-from scripts.query_articles import where_tag, get_lion_witch_wardrobe
+from scripts.query_articles import get_lion_witch_wardrobe, get_kaguya
 
 
 def ask_if_obvious(candidates):
@@ -25,7 +21,7 @@ def ask_if_obvious(candidates):
 def compute_top_words(db_connection, articles):
     histogram = {}
     for article in articles:
-        for word in article.segmentation:
+        for word in article.segmentation[:4000]:
             sofar = histogram.setdefault(word, {'count': 0, 'articles': {}})
             sofar['count'] = sofar['count'] + 1
             if article.url not in sofar['articles'].keys():
@@ -43,7 +39,8 @@ if __name__ == "__main__":
     db = firebase.get_db()
     # get_articles_method = firebase.get_existing_articles
 
-    get_articles_method = lambda db: article_utils.parse_firebase_articles(get_lion_witch_wardrobe(db))
+    # get_articles_method = lambda db: article_utils.parse_firebase_articles(get_lion_witch_wardrobe(db))
+    get_articles_method = lambda db: article_utils.parse_firebase_articles(get_kaguya(db))
 
 
     known_words, sorted_histogram, word_to_count = compute_top_words(db, get_articles_method(db))
