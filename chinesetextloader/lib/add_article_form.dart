@@ -235,16 +235,16 @@ class AddArticleFormState extends State<AddArticleForm> {
   Future<Article> fetchArticle(Uri uri) async {
     http.Response response = await http.get(uri);
     final document = parse(utf8.decode(response.bodyBytes));
-    final articleBodies = document.querySelectorAll('div.col-xs-12 > p');
-    final englishBody = articleBodies[0];
-    final chineseBody = articleBodies[1];
+    final englishBody = document.querySelectorAll('div.col-xs-12 > p').first.text.trim();
+    final articleBodies = document.querySelectorAll('div.col-xs-12')[1];
+    final chineseBody = articleBodies.text.trim().replaceFirst(englishBody, '');
     final chineseTitle = document.querySelector('div.news_tit').text.trim();
     final extractedDate = RegExp(r"\d+").firstMatch(uri.toString())[0] ?? "";
     return Article.fromMap({
       'chineseTitle': chineseTitle,
-      'chineseBody': chineseBody.text.trim(),
+      'chineseBody': chineseBody.trim(),
       'englishTitle': '',
-      'englishBody': englishBody.text.trim(),
+      'englishBody': englishBody.trim(),
       'url': uri.toString(),
       'addDate': DateTime.tryParse(extractedDate) ?? DateTime.now(),
     });
