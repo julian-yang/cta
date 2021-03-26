@@ -1,0 +1,33 @@
+[Sun Jun 28 01:22:35 UTC 2020][INFO] [Action] EE NewBook
+[Sun Jun 28 01:22:46 UTC 2020][INFO] [Action] E ItemChanged - -1,2
+[Sun Jun 28 01:22:47 UTC 2020][INFO] [Action] E ItemChanged - -1,2806
+[Sun Jun 28 01:22:50 UTC 2020][INFO] [Action] E ItemChanged - -1,6982
+[Sun Jun 28 01:22:51 UTC 2020][INFO] [Action] E ItemChanged - -1,10157
+[Sun Jun 28 01:22:52 UTC 2020][INFO] [Action] E ItemChanged - -1,17528
+[Sun Jun 28 01:22:53 UTC 2020][INFO] [Action] E ItemChanged - -1,25237
+[Sun Jun 28 01:22:53 UTC 2020][INFO] [Action] E ItemChanged - -1,33364
+[Sun Jun 28 01:22:55 UTC 2020][INFO] [Action] E ItemChanged - -1,41260
+[Sun Jun 28 01:22:55 UTC 2020][INFO] [Action] E ItemChanged - -1,48629
+[Sun Jun 28 01:22:56 UTC 2020][INFO] [Action] E ItemChanged - -1,52480
+[Sun Jun 28 01:22:56 UTC 2020][INFO] [Action] E ItemChanged - -1,60108
+[Sun Jun 28 01:22:57 UTC 2020][INFO] [Action] E ItemChanged - -1,19
+[Sun Jun 28 01:22:58 UTC 2020][INFO] [Action] E ItemChanged - -1,2
+[Sun Jun 28 01:23:09 UTC 2020][INFO] [Action] E ItemChanged - -1,19
+[Sun Jun 28 01:23:17 UTC 2020][INFO] [Action] E ItemChanged - -1,2806
+[Sun Jun 28 01:24:01 UTC 2020][INFO] [Action] E ItemChanged - -1,2806
+[Sun Jun 28 01:24:01 UTC 2020][INFO] [Action] E ItemChanged - -1,17528
+[Sun Jun 28 01:24:02 UTC 2020][INFO] [Action] E ItemChanged - -1,29574
+[Sun Jun 28 01:24:02 UTC 2020][INFO] [Action] E ItemChanged - -1,6982
+[Sun Jun 28 01:24:03 UTC 2020][INFO] [Action] E ItemChanged - -1,19
+[Sun Jun 28 01:24:03 UTC 2020][INFO] [Action] E ItemChanged - -1,2
+[Sun Jun 28 01:24:07 UTC 2020][INFO] [Action] E SaveBook - Save
+[Sun Jun 28 01:24:16 UTC 2020][INFO] [Action] E SaveBook - Save
+[Sun Jun 28 01:24:47 UTC 2020][INFO] [Action] EE PackageWorkspace
+[Sun Jun 28 01:24:47 UTC 2020][INFO] [Action] EFail PackageWorkspace - 5
+[Sun Jun 28 01:26:31 UTC 2020][INFO] [Action] E SaveBook - Save
+[Sun Jun 28 01:26:35 UTC 2020][INFO] [Action] EE PackageWorkspace
+[Sun Jun 28 01:26:35 UTC 2020][INFO] [Action] EFail PackageWorkspace - 5
+[Sun Jun 28 01:27:41 UTC 2020][INFO] [Action] E SaveBook - Save
+[Sun Jun 28 17:33:31 UTC 2020][INFO] [Action] EE PackageWorkspace
+[Sun Jun 28 17:33:33 UTC 2020][INFO] [Action] E SaveBook - Save
+[Sun Jun 28 17:33:34 UTC 2020][INFO] Logger Terminated

@@ -1,2 +1,8 @@
 .vscode
+local.properties
+.DS_Store
 *~
+
+.idea/libraries/Dart_SDK.xml
+/.idea/
+chinesetextloader/.flutter-plugins-dependencies

@@ -18,23 +18,39 @@ class Article {
         addDate = DateTime.now(),
         reference = null;
 
+//  Article.fromMap(Map<String, dynamic> map, {this.reference})
+//      : assert(map['chineseTitle'] != null),
+//        assert(map['chineseBody'] != null),
+//        assert(map['englishTitle'] != null),
+//        assert(map['englishBody'] != null),
+//        assert(map['url'] != null),
+//        assert(map['addDate'] != null),
+//        chineseTitle = map['chineseTitle'],
+//        chineseBody = map['chineseBody'],
+//        englishTitle = map['englishTitle'],
+//        englishBody = map['englishBody'],
+//        url = map['url'],
+//        addDate = map['addDate'];
+
   Article.fromMap(Map<String, dynamic> map, {this.reference})
-      : assert(map['chineseTitle'] != null),
-        assert(map['chineseBody'] != null),
-        assert(map['englishTitle'] != null),
-        assert(map['englishBody'] != null),
+      : assert(map['chinese_title'] != null),
+        assert(map['chinese_body'] != null),
         assert(map['url'] != null),
-        assert(map['addDate'] != null),
-        chineseTitle = map['chineseTitle'],
-        chineseBody = map['chineseBody'],
-        englishTitle = map['englishTitle'],
-        englishBody = map['englishBody'],
+        assert(map['add_date'] != null),
+        chineseTitle = map['chinese_title'],
+        chineseBody = map['chinese_body'],
+        englishTitle = map['english_title'] ?? '',
+        englishBody = map['english_body'] ?? '',
         url = map['url'],
-        addDate = map['addDate'];
+        addDate = convertTimestamp(map['add_date']);
 
   Article.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data, reference: snapshot.reference);
 
   @override
   String toString() => 'Article<$chineseTitle:$url>';
+
+  static DateTime convertTimestamp(Timestamp timestamp) {
+    return DateTime.fromMicrosecondsSinceEpoch(timestamp.microsecondsSinceEpoch);
+  }
 }

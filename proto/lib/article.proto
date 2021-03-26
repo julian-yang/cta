@@ -1,0 +1,33 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+package cta;
+
+message Articles {
+    repeated Article articles = 1;
+}
+
+message Article {
+    google.protobuf.Timestamp add_date = 1;
+    string chinese_body = 2;
+    string chinese_title = 3;
+    string url = 4;
+    google.protobuf.Timestamp publish_date = 5;
+    string author = 6;
+    // the first words of segmentation are the "chinese_title"
+    repeated string segmentation = 9;
+    Stats stats = 10;
+    bool favorite = 11;
+    repeated string tags = 12;
+    int32 chapter_num = 13;
+}
+
+message Stats {
+    // equivalent to running set(segmentation).size
+    int32 word_count = 1;
+    double average_word_difficulty = 2;
+    double mean_square_difficulty = 3;
+    double unique_known_ratio = 4;
+    double known_ratio = 5;
+    int32 known_word_count = 6;
+}

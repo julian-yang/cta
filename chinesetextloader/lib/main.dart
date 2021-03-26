@@ -1,11 +1,12 @@
 // Create an infinite scrolling lazily loaded list
+import 'package:chineseTextLoader/favorites_viewer.dart';
+import 'package:chineseTextLoader/known_word_uploader/known_word_uploader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'article_toolbar.dart';
-import 'article_viewer.dart';
-import 'article.dart';
+import 'article_table/article_table.dart';
 import 'add_article_form.dart';
 import 'add_article_wizard.dart';
+import 'known_word_uploader/refresh_section.dart';
 
 void main() => runApp(new MyApp());
 
@@ -13,6 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
+      theme: ThemeData.light(),
       title: 'Startup Name Generator',
       home: MyHomePage(),
     );
@@ -29,9 +31,11 @@ typedef Widget ContextToWidget(BuildContext context);
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
-  static const List<ContextToWidget> _tabs = <ContextToWidget>[
-    _MyHomePageState._buildArticleList,
-    _MyHomePageState._buildAddArticle
+  List<Widget> _tabs = <Widget>[
+    FavoritesViewer(),
+    ArticleTable(),
+//    AddArticleForm(),
+    RefreshSection(),
   ];
 
   void _onItemTapped(int index) {
@@ -46,80 +50,32 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: new AppBar(
         title: const Text('Chinese Text Loader'),
       ),
-      body: _tabs.elementAt(_selectedIndex)(context),
-      floatingActionButton: Builder(builder: (context) =>
-        FloatingActionButton(
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => AddArticleWizard()));
-            },
-            child: Icon(Icons.add),
-            backgroundColor: Colors.amber[800])
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _tabs),
+//      floatingActionButton: Builder(
+//          builder: (context) => FloatingActionButton(
+//              onPressed: () {
+//                Navigator.push(
+//                    context,
+//                    MaterialPageRoute(
+//                        builder: (context) => AddArticleWizard()));
+//              },
+//              child: Icon(Icons.add),
+//              backgroundColor: Colors.amber[800])),
       bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-                icon: Icon(Icons.library_books), title: Text('Articles')),
+                icon: Icon(Icons.favorite), title: Text('Favorites')),
             BottomNavigationBarItem(
-                icon: Icon(Icons.library_add), title: Text('Add Article'))
+                icon: Icon(Icons.library_books), title: Text('Articles')),
+//            BottomNavigationBarItem(
+//                icon: Icon(Icons.library_add), title: Text('Add Article')),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.sync), title: Text('Sync')),
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: Colors.amber[800],
           onTap: _onItemTapped),
     );
-  }
-
-  static Widget _buildAddArticle(BuildContext context) {
-    return AddArticleForm();
-  }
-
-  static Widget _buildArticleList(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance.collection('articles').snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return LinearProgressIndicator();
-        return _buildList(context, snapshot.data.documents);
-      },
-    );
-  }
-
-  static Widget _buildList(
-      BuildContext context, List<DocumentSnapshot> snapshot) {
-    List<Article> articles = snapshot
-        .map((data) => Article.fromSnapshot(data))
-        .toList()
-          ..sort((a, b) => a.addDate.compareTo(b.addDate));
-    return ListView(
-      padding: const EdgeInsets.only(top: 20.0),
-      children: articles.reversed
-          .map((data) => _buildListItem(context, data))
-          .toList(),
-    );
-  }
-
-  static Widget _buildListItem(BuildContext context, Article article) {
-    return Padding(
-        key: ValueKey(article.englishTitle),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: InkWell(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ArticleViewer(article: article)));
-            },
-            child: Card(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  ListTile(
-//                      leading: Icon(Icons.description),
-                      title: Text(article.chineseTitle),
-                      subtitle: Text(article.englishTitle)),
-                  ArticleToolbar(article: article)
-                ],
-              ),
-            )));
   }
 }
 
